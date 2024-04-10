@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RithmicTest", "RithmicTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robook.UnitTest", "Robook.UnitTest\Robook.UnitTest.csproj", "{96E9BF64-868D-4FB0-BC22-89625B54E6B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingJournal", "TradingJournal\TradingJournal.csproj", "{D16AA945-91E7-4F89-992D-BE8776BAC788}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{96E9BF64-868D-4FB0-BC22-89625B54E6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96E9BF64-868D-4FB0-BC22-89625B54E6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96E9BF64-868D-4FB0-BC22-89625B54E6B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D16AA945-91E7-4F89-992D-BE8776BAC788}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D16AA945-91E7-4F89-992D-BE8776BAC788}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D16AA945-91E7-4F89-992D-BE8776BAC788}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D16AA945-91E7-4F89-992D-BE8776BAC788}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
