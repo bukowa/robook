@@ -1,4 +1,5 @@
 ﻿using com.omnesys.rapi;
+using Rithmic;
 
 namespace Robook.OrderBookNS;
 
@@ -9,6 +10,8 @@ public interface IOrderBookColumn {
     void                       ProcessBid(int   i, BidInfo   v, OrderBook ob);
     void                       ProcessAsk(int   i, AskInfo   v, OrderBook ob);
     void                       ProcessTrade(int i, TradeInfo v, OrderBook ob);
+    void ProcessBestBid(int i, BestBidQuoteInfo v, OrderBook ob);
+    void ProcessBestAsk(int i, BestAskQuoteInfo v, OrderBook ob);
 }
 
 public class OrderBookDefaultColumn : IOrderBookColumn {
@@ -32,5 +35,35 @@ public class OrderBookDefaultColumn : IOrderBookColumn {
 
     public void ProcessTrade(int i, TradeInfo v, OrderBook ob) {
         ob[i, Name] = (ob[i, Name] as long? ?? 0) + v.Size;
+    }
+
+    public void ProcessBestBid(int i, BestBidQuoteInfo v, OrderBook ob) {
+        throw new NotImplementedException();
+    }
+
+    public void ProcessBestAsk(int i, BestAskQuoteInfo v, OrderBook ob) {
+        throw new NotImplementedException();
+    }
+}
+
+public class OrderBookTouchedTradeColumn : OrderBookDefaultColumn, IOrderBookColumn {
+    
+    public OrderBookTouchedTradeColumn(string name, OrderBookColumnDataType[] dataTypes, Type type) : base(name, dataTypes, type) {
+
+    }
+
+    public void ProcessTrade(int i, TradeInfo v, OrderBook ob) {
+        if (v.CallbackType == CallbackType.Image || v.CallbackType == CallbackType.History) {
+            return;
+        }
+        ob[i, Name]            = (ob[i, Name] as long? ?? 0) + v.Size;
+    }
+   
+    public void ProcessBestBid(int i, BestBidQuoteInfo v, OrderBook ob) {
+        ob[i, Name] = 0;
+    }
+    
+    public void ProcessBestAsk(int i, BestAskQuoteInfo v, OrderBook ob) {
+        ob[i, Name] = 0;
     }
 }

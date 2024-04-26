@@ -88,6 +88,19 @@ public partial class OrderBookForm : BaseForm {
             DataPropertyName = "BuyVolume",
             Name             = "BuyVolume",
         });
+        
+        OrderBook.AddColumn(new OrderBookTouchedTradeColumn("TouchedSell", new []{OrderBookColumnDataType.TradeSell, OrderBookColumnDataType.BestAsk}, typeof(long)));
+        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
+            DataPropertyName = "TouchedSell",
+            Name             = "TouchedSell",
+        });
+        
+        OrderBook.AddColumn(new OrderBookTouchedTradeColumn("TouchedBuy", new []{OrderBookColumnDataType.TradeBuy, OrderBookColumnDataType.BestBid, OrderBookColumnDataType.BestAsk}, typeof(long)));
+        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
+            DataPropertyName = "TouchedBuy",
+            Name             = "TouchedBuy",
+        });
+
         Invoke(() => {
             panelOrderBook.Controls.Add(OrderBookDataGridView);
             OrderBookDataGridView.Dock = DockStyle.Fill;
@@ -111,7 +124,12 @@ public partial class OrderBookForm : BaseForm {
         _client.RHandler.BidQuoteClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
         _client.RHandler.AskQuoteClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
         _client.RHandler.TradePrintClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
-        _client.Engine.replayTrades(_symbol.Exchange, _symbol.Name, 0, 0, ctx);
+        _client.RHandler.BestAskQuoteClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
+        _client.RHandler.BestBidQuoteClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
+        _client.RHandler.BestBidAskQuoteClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); Console.WriteLine(info.AskInfo.Price); });
+        _client.RHandler.HighBidPriceClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
+        _client.RHandler.LowAskPriceClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
+        // _client.Engine.replayTrades(_symbol.Exchange, _symbol.Name, 0, 0, ctx);
         _client.Engine.subscribe(_symbol.Exchange, _symbol.Name, SubscriptionFlags.All, ctx);
     }
 

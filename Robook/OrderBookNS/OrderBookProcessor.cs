@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using com.omnesys.rapi;
+using Rithmic;
 
 namespace Robook.OrderBookNS;
 
@@ -116,12 +117,25 @@ public class OrderBookProcessor {
 
                     case TradeInfo x when TryGetPriceIndex(x.Price, out i):
                         _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Trade].ForEach(column => column.ProcessTrade(i, x, _ob));
+                        
+                        if (x.AggressorSide == "B")
+                            _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.TradeBuy].ForEach(column => column.ProcessTrade(i, x, _ob));
+                        else
+                            _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.TradeSell].ForEach(column => column.ProcessTrade(i, x, _ob));
+                        break;
+                    
+                    case BestBidQuoteInfo x when TryGetPriceIndex(x.BidInfo.Price, out i):
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.BestBid].ForEach(column => column.ProcessBestBid(i, x, _ob));
+                        break;
+                    
+                    case BestAskQuoteInfo x when TryGetPriceIndex(x.AskInfo.Price, out i):
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.BestAsk].ForEach(column => column.ProcessBestAsk(i, x, _ob));
                         break;
                 }
             }
             // keeps the CPU usage low
             Thread.Sleep(1);
-            //Task.Delay(sleep, cancellationToken);
+            // Task.Delay(sleep, cancellationToken);
         }
         return Task.CompletedTask;
     }
