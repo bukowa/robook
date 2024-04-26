@@ -171,38 +171,10 @@ public class OrderBook {
     /// <param name="column">Column to add.</param>
     /// <exception cref="ExcOrderBookColumnAlreadyExists"></exception>
     /// <exception cref="ExcOrderBookUnhandledColumnType"></exception>
-    public void AddColumn<T>(
-        IOrderBookColumn<T> column
+    public void AddColumn(
+        IOrderBookColumn column
     ) {
-        
-        if (OBDT.Columns.Contains(column.Name)) {
-            throw new ExcOrderBookColumnAlreadyExists(column.Name);
-        }
-
-        switch (column) {
-            case IOrderBookColumn<AskInfo> askColumn:
-                OBCC.Add(askColumn);
-                break;
-
-            case IOrderBookColumn<BidInfo> bidColumn:
-                OBCC.Add(bidColumn);
-                break;
-
-            case IOrderBookColumn<TradeInfo> tradeColumn:
-                OBCC.Add(tradeColumn);
-                break;
-
-            case IOrderBookColumn<OpenPriceInfo> openPriceColumn:
-                OBCC.Add(openPriceColumn);
-                break;
-
-            case IOrderBookColumn<ClosePriceInfo> closePriceColumn:
-                OBCC.Add(closePriceColumn);
-                break;
-
-            default:
-                throw new ExcOrderBookUnhandledColumnType(typeof(T));
-        }
+        OBCC.Add(column);
         OBDT.Columns.Add(column.Name, column.Type);
     }
     
@@ -212,39 +184,10 @@ public class OrderBook {
     /// <param name="column">Column to remove.</param>
     /// <exception cref="ExcOrderBookUnhandledColumnType"></exception>
     /// <exception cref="ExcOrderBookColumnNotFound"></exception>
-    public void RemoveColumn<T>(
-        IOrderBookColumn<T> column
+    public void RemoveColumn(
+        IOrderBookColumn column
     ) {
-        switch (column) {
-            case IOrderBookColumn<AskInfo> askColumn:
-                OBCC.Remove(askColumn);
-                break;
-
-            case IOrderBookColumn<BidInfo> bidColumn:
-                OBCC.Remove(bidColumn);
-                break;
-
-            case IOrderBookColumn<TradeInfo> tradeColumn:
-                OBCC.Remove(tradeColumn);
-                break;
-
-            case IOrderBookColumn<OpenPriceInfo> openPriceColumn:
-                OBCC.Remove(openPriceColumn);
-                break;
-
-            case IOrderBookColumn<ClosePriceInfo> closePriceColumn:
-                OBCC.Remove(closePriceColumn);
-                break;
-
-            default:
-                throw new ExcOrderBookUnhandledColumnType(typeof(T));
-        }
-        try {
-            OBDT.Columns.Remove(column.Name);
-        }
-        catch (ArgumentException) {
-            throw new ExcOrderBookColumnNotFound(column.Name);
-        }
+        OBDT.Columns.Remove(column.Name);
     }
     
     /// <summary>

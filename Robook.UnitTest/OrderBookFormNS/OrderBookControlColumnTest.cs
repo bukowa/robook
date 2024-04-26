@@ -22,8 +22,8 @@ public class OrderBookControlColumnTest {
         obp = new OrderBookProcessor(ob, new ConcurrentQueue<object>());
         obc = new OrderBookDataGridControl(ob, dgv, obp);
 
-        ob.AddColumn(new OrderBookVolumeColumn() { Name     = "Volume" });
-        ob.AddColumn(new OrderBookSellVolumeColumn() { Name = "SellVolume" });
+        ob.AddColumn(new OrderBookDefaultColumn("Volume",     new[] { OrderBookColumnDataType.Trade }, typeof(int)));
+        ob.AddColumn(new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));
 
         initColCount = dgv.Columns.Count;
     }

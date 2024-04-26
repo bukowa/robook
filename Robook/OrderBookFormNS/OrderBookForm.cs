@@ -65,24 +65,25 @@ public partial class OrderBookForm : BaseForm {
             Name             = "Price",
         });
         
-        OrderBook.AddColumn(new OrderBookAskColumnLong());
+        OrderBook.AddColumn(new OrderBookDefaultColumn("Ask", new []{OrderBookColumnDataType.Ask}, typeof(long)));
         OrderBookDataGridControl.AddColumn(new HistogramColumn() {
             DataPropertyName = "Ask",
             Name             = "Ask",
         });
         
-        OrderBook.AddColumn(new OrderBookBidColumnLong());
+        OrderBook.AddColumn(new OrderBookDefaultColumn("Bid", new []{OrderBookColumnDataType.Bid}, typeof(long)));
         OrderBookDataGridControl.AddColumn(new HistogramColumn() {
             DataPropertyName = "Bid",
             Name             = "Bid",
         });
         
-        OrderBook.AddColumn(new OrderBookSellVolumeColumn());
+        OrderBook.AddColumn(new OrderBookDefaultColumn("SellVolume", new []{OrderBookColumnDataType.Trade}, typeof(long)));
         OrderBookDataGridControl.AddColumn(new HistogramColumn() {
             DataPropertyName = "SellVolume",
             Name             = "SellVolume",
         });
-        OrderBook.AddColumn(new OrderBookBuyVolumeColumn());
+        
+        OrderBook.AddColumn(new OrderBookDefaultColumn("BuyVolume", new []{OrderBookColumnDataType.Trade}, typeof(long)));
         OrderBookDataGridControl.AddColumn(new HistogramColumn() {
             DataPropertyName = "BuyVolume",
             Name             = "BuyVolume",
@@ -136,9 +137,7 @@ public partial class OrderBookForm : BaseForm {
     }
     
     private async void addToolStripMenuItem_Click(object sender, EventArgs e) {
-        var c = new OrderBookVolumeColumn() {
-            Name = "Volume",
-        };
+        var c = new OrderBookDefaultColumn("Volume", new []{OrderBookColumnDataType.Trade}, typeof(int));
         await OrderBookProcessor.DelayProcessingWith(() => {
             OrderBook.AddColumn(c);
         });

@@ -62,14 +62,14 @@ public class OrderBookProcessor {
     /// <summary>
     ///    Enqueues a column to be added to the <see cref="OrderBook"/>.
     /// </summary>
-    public void AddColumn<T>(IOrderBookColumn<T> column) {
+    public void AddColumn(IOrderBookColumn column) {
         DelayProcessingWith(() => _ob.AddColumn(column));
     }
     
     /// <summary>
     ///     Enqueues a column to be deleted from the <see cref="OrderBook"/>.
     /// </summary>
-    public void RemoveColumn<T>(IOrderBookColumn<T> column) {
+    public void RemoveColumn(IOrderBookColumn column) {
         DelayProcessingWith(() => _ob.RemoveColumn(column));
     }
     
@@ -94,15 +94,6 @@ public class OrderBookProcessor {
     }
 
     /// <summary>
-    ///     Processes the columns of the <see cref="OrderBookColumnCollection"/> based on the type of the item.
-    /// </summary>
-    private void ProcessColumns<T>(List<IOrderBookColumn<T>> columns, int index, T item) {
-        foreach (var column in columns) {
-            column.ProcessRealTimeAt(index, item, _ob);
-        }
-    }
-
-    /// <summary>
     ///     Processes the queue and dequeues the objects to be processed by the <see cref="IOrderBookColumn{T}"/>s.
     /// </summary>
     /// <param name="cancellationToken"> The cancellation token used to cancel the method. </param>
@@ -116,15 +107,15 @@ public class OrderBookProcessor {
                 int i;
                 switch (o) {
                     case AskInfo x when TryGetPriceIndex(x.Price, out i):
-                        ProcessColumns(_ob.OBCC.ColAskInfo, i, x);
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Ask].ForEach(column => column.ProcessAsk(i, x, _ob));
                         break;
 
                     case BidInfo x when TryGetPriceIndex(x.Price, out i):
-                        ProcessColumns(_ob.OBCC.ColBidInfo, i, x);
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Bid].ForEach(column => column.ProcessBid(i, x, _ob));
                         break;
 
                     case TradeInfo x when TryGetPriceIndex(x.Price, out i):
-                        ProcessColumns(_ob.OBCC.ColTradeInfo, i, x);
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Trade].ForEach(column => column.ProcessTrade(i, x, _ob));
                         break;
                 }
             }

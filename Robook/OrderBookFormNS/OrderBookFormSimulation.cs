@@ -29,12 +29,16 @@ public partial class OrderBookFormSimulation : Form {
 
         Task.Run(async () => {
             OrderBookProcessor.Start();
-
-            OrderBook.AddColumn(new OrderBookAskColumn());
-            OrderBook.AddColumn(new OrderBookBidColumn());
-            OrderBook.AddColumn(new OrderBookVolumeColumn());
-            OrderBook.AddColumn(new OrderBookBuyVolumeColumn());
-            OrderBook.AddColumn(new OrderBookSellVolumeColumn());
+            // Ask
+            OrderBook.AddColumn(new OrderBookDefaultColumn("Ask", new[] { OrderBookColumnDataType.Ask }, typeof(decimal)));
+            // Bid
+            OrderBook.AddColumn(new OrderBookDefaultColumn("Bid", new[] { OrderBookColumnDataType.Bid }, typeof(decimal)));
+            // Volume
+            OrderBook.AddColumn(new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));
+            // BuyVolume
+            OrderBook.AddColumn(new OrderBookDefaultColumn("BuyVolume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));
+            // SellVolume
+            OrderBook.AddColumn(new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));
         });
 
         var buyVolumeColumn = new BuyVolumeColumn() {
@@ -62,9 +66,7 @@ public partial class OrderBookFormSimulation : Form {
         OrderBookSimulator.SimulateOrders();
     }
 
-    private OrderBookVolumeColumn _colOb = new() {
-        Name = "Volume",
-    };
+    private OrderBookDefaultColumn _colOb = new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(int));
 
     private AbstractOrderBookColumn _colDgv = new HistogramColumn() {
         DataPropertyName = "Volume",

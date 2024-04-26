@@ -15,19 +15,19 @@ public class OrderBookColumnBuySellVolumeTest {
 
     [Test]
     public void ShouldCalculateMaxValueBasedOnTradeVolume() {
-        var orderBookColumn = new OrderBookVolumeColumn();
+        var orderBookColumn = new OrderBookDefaultColumn("Volume", new []{OrderBookColumnDataType.Trade}, typeof(int));
         var buyVolumeColumn = new BuyVolumeColumn() {
-            Name                        = "BuyVolume",
-            DataPropertyName            = "BuyVolume",
+            Name                        = "Volume",
+            DataPropertyName            = "Volume",
             CalculateBasedOnTradeVolume = true
         };
 
         ob.AddColumn(orderBookColumn);
 
-        orderBookColumn.ProcessRealTimeAt(ob.GetIndexOfPrice(100d), new TradeInfo() { Price = 100d, Size = 50 }, ob);
-        orderBookColumn.ProcessRealTimeAt(ob.GetIndexOfPrice(100d), new TradeInfo() { Price = 100d, Size = 50 }, ob);
-        orderBookColumn.ProcessRealTimeAt(ob.GetIndexOfPrice(120d), new TradeInfo() { Price = 120d, Size = 20 }, ob);
-        orderBookColumn.ProcessRealTimeAt(ob.GetIndexOfPrice(130d), new TradeInfo() { Price = 130d, Size = 10 }, ob);
+        orderBookColumn.ProcessTrade(ob.GetIndexOfPrice(100d), new TradeInfo() { Price = 100d, Size = 50 }, ob);
+        orderBookColumn.ProcessTrade(ob.GetIndexOfPrice(100d), new TradeInfo() { Price = 100d, Size = 50 }, ob);
+        orderBookColumn.ProcessTrade(ob.GetIndexOfPrice(120d), new TradeInfo() { Price = 120d, Size = 20 }, ob);
+        orderBookColumn.ProcessTrade(ob.GetIndexOfPrice(130d), new TradeInfo() { Price = 130d, Size = 10 }, ob);
 
         buyVolumeColumn.RecalculateMaxValueProperty(ob);
 
@@ -45,7 +45,7 @@ public class OrderBookColumnBuySellVolumeTest {
         var exc = Assert.Throws<InvalidOperationException>(() => buyVolumeColumn.RecalculateMaxValueProperty(ob));
         Assert.That(
             exc.Message, Does.Contain(
-                $"The OrderBook does not contain the specified {new OrderBookVolumeColumn().Name} column required for calculations."
+                $"The OrderBook does not contain the specified {new OrderBookDefaultColumn("1", new [] { OrderBookColumnDataType.Trade }, typeof(int)).Name} column required for calculations."
             ));
     }
 }
