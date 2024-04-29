@@ -144,10 +144,6 @@ public class OrderBookProcessor {
                         break;
                 }
             }
-
-            // keeps the CPU usage low
-            // Thread.Sleep(1);
-            // Task.Delay(sleep, cancellationToken);
             sw.SpinOnce();
         }
 
