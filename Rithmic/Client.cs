@@ -8,12 +8,13 @@ namespace Rithmic;
 /// Parameters for the Client login method.
 /// </summary>
 public class LoginParams {
-    public readonly CParams     CParams;
-    public          bool        PlugInMode;
-    public          Connection? PnlConnection;
-    public          Connection? MarketDataConnection;
-    public          Connection? HistoricalDataConnection;
-    public          Connection? TradingSystemConnection;
+    public CParams CParams;
+    public bool    PlugInMode;
+
+    public Connection? PnlConnection;
+    public Connection? MarketDataConnection;
+    public Connection? HistoricalDataConnection;
+    public Connection? TradingSystemConnection;
 
     public LoginParams(CParams cParams) {
         CParams = cParams;
@@ -45,6 +46,7 @@ public class Client : INotifyPropertyChanged {
     public readonly Application Application;
 
     #region PluginMode
+
     /// <summary>
     ///     Historical Data connection point when in PlugIn mode.
     /// </summary>
@@ -120,27 +122,7 @@ public class Client : INotifyPropertyChanged {
     ///     Establishes a connection to Rithmic.
     /// </summary>
     public void Login(LoginParams loginParams) {
-        
-        // if there are new CParams make sure to update the Engine
-        // and notify the subscribers that the Engine has changed
-        // meaning they have to re-subscribe to the new Engine
-        // we can subscribe to engine only after login complete event
-        // todo figure out how to handle this...
-        // todo probably the proper way to do it is to make others
-        // interact with the engine / rhandler only via this class
-        // meaning they can subscribe an action that we will save to the internal list
-        // and later when the engine is ready / client is logged in we will subscribe
-        // todo this needs proper way of handling when to exactly do this
-        // but to be realistic when engine loginparams change it means
-        // the client changed too so...
-        bool isNewEngineRequired = 
-            Params?.CParams.GatewayName != loginParams?.CParams.GatewayName || 
-            Params?.CParams.SystemName != loginParams?.CParams.SystemName ||
-            Params == null;
-        
-        var oldParams = Params;
         Params = loginParams;
-        
         try {
             if (TradingSystemConnection == null && PnlConnection != null) {
                 throw new Exception("PnL connection requires TradingSystem connection");
@@ -158,29 +140,27 @@ public class Client : INotifyPropertyChanged {
             var sPnlCnnctPt = PnlConnection == null
                 ? string.Empty
                 : CParams.sPnLCnnctPt;
-            
+
             var context = new Context();
             HistoricalDataConnection?.TrySubscribeRHandler(RHandler, context);
             TradingSystemConnection?.TrySubscribeRHandler(RHandler, context);
             MarketDataConnection?.TrySubscribeRHandler(RHandler, context);
             PnlConnection?.TrySubscribeRHandler(RHandler, context);
-            
-            if (isNewEngineRequired) {
-                Engine?.shutdown();
-                Engine = null;
-                Engine = new REngine(new REngineParams() {
-                    AdmCallbacks = AdmCallbacks,
-                    AppName      = Application.Name,
-                    AppVersion   = Application.Version,
-                    DomainName   = CParams.DomainName,
-                    LoggerAddr   = CParams.LoggerAddr,
-                    DmnSrvrAddr  = CParams.DmnSrvrAddr,
-                    LicSrvrAddr  = CParams.LicSrvrAddr,
-                    LocBrokAddr  = CParams.LocBrokAddr,
-                    LogFilePath  = CParams.LogFilePath,
-                });
-            }
-            
+
+            Engine?.shutdown();
+            Engine = null;
+            Engine = new REngine(new REngineParams() {
+                AdmCallbacks = AdmCallbacks,
+                AppName      = Application.Name,
+                AppVersion   = Application.Version,
+                DomainName   = CParams.DomainName,
+                LoggerAddr   = CParams.LoggerAddr,
+                DmnSrvrAddr  = CParams.DmnSrvrAddr,
+                LicSrvrAddr  = CParams.LicSrvrAddr,
+                LocBrokAddr  = CParams.LocBrokAddr,
+                LogFilePath  = CParams.LogFilePath,
+            });
+
             if (Params.PlugInMode) {
                 if (MarketDataConnection != null && HistoricalDataConnection != null) {
                     SetPlugInMode(Engine, Constants.DEFAULT_ENVIRONMENT_KEY);
@@ -208,7 +188,6 @@ public class Client : INotifyPropertyChanged {
             );
         }
         catch (Exception e) {
-            Params = oldParams;
             Engine?.shutdown();
             Engine = null;
             throw e;
@@ -225,7 +204,7 @@ public class Client : INotifyPropertyChanged {
 
 
         var actionLoginEvent = new Connection.AlertInfoHandler((c, a, dt) => { loginEvent?.Signal(); });
-        
+
         if (loginParams.MarketDataConnection != null) {
             loginParams.MarketDataConnection.OnLoginComplete += actionLoginEvent;
             loginParams.MarketDataConnection.OnLoginFailed   += actionLoginEvent;

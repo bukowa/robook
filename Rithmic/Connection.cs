@@ -13,6 +13,11 @@ public class ConnectionParams {
     public ConnectionId ConnectionId { get; set; }
 }
 
+public class ConnectionAlert {
+    public AlertInfo AlertInfo { get; set; }
+    public DateTime  Time      { get; set; }
+}
+
 /// <summary>
 /// Represents a connection to Rithmic.
 /// </summary>
@@ -70,33 +75,20 @@ public class Connection : INotifyPropertyChanged {
     /// <summary>
     ///     Indicates the last alert info for connection.
     /// </summary>
-    public AlertInfo? LastAlertInfo {
-        get => _lastAlertInfo;
+    public ConnectionAlert? LastConnectionAlert {
+        get => _connectionConnectionAlert;
         set {
-            _lastAlertInfo = value;
+            _connectionConnectionAlert = value;
             _notifyPropertyChanged();
         }
     }
 
-    private AlertInfo? _lastAlertInfo;
-
-    /// <summary>
-    ///     Indicates latest update time for this connection.
-    /// </summary>
-    public DateTime? LastAlertTime {
-        get => _lastAlertTime;
-        private set {
-            _lastAlertTime = value;
-            _notifyPropertyChanged();
-        }
-    }
-
-    private DateTime? _lastAlertTime;
+    private ConnectionAlert? _connectionConnectionAlert;
 
     /// <summary>
     /// Delegate for handling alerts for this connection.
     /// </summary>
-    public delegate void AlertInfoHandler(Connection sender, AlertInfo alertInfo, DateTime time);
+    public delegate void AlertInfoHandler(Connection sender, ConnectionAlert alert, DateTime time);
 
     /// <summary>
     /// <see cref="`OnAlertInfo`"/> is invoked before any modification to the connection
@@ -163,45 +155,46 @@ public class Connection : INotifyPropertyChanged {
         // we check the ConnectionId of the AlertInfo.
         if (info.ConnectionId != ConnectionId)
             return;
+        
+        // build the ConnectionAlert instance
+        var alert = new ConnectionAlert { AlertInfo = info, Time = now };
 
-        // global event invoked before any
-        // modification to the connection instance
-        OnAlertInfo?.Invoke(this, info, now);
+        // global event invoked before any specific events
+        OnAlertInfo?.Invoke(this, alert, now);
 
         // per alert type event
         switch (info.AlertType) {
             case AlertType.LoginFailed:
                 IsLoggedIn = false;
-                OnLoginFailed?.Invoke(this, info, now);
+                OnLoginFailed?.Invoke(this, alert, now);
                 break;
             case AlertType.ForcedLogout:
                 IsLoggedIn = false;
-                OnForcedLogout?.Invoke(this, info, now);
+                OnForcedLogout?.Invoke(this, alert, now);
                 break;
             case AlertType.LoginComplete:
                 IsLoggedIn = true;
-                OnLoginComplete?.Invoke(this, info, now);
+                OnLoginComplete?.Invoke(this, alert, now);
                 break;
             case AlertType.ShutdownSignal:
                 IsLoggedIn = false;
-                OnShutdownSignal?.Invoke(this, info, now);
+                OnShutdownSignal?.Invoke(this, alert, now);
                 break;
             case AlertType.ConnectionClosed:
                 IsLoggedIn = false;
-                OnConnectionClosed?.Invoke(this, info, now);
+                OnConnectionClosed?.Invoke(this, alert, now);
                 break;
             case AlertType.ConnectionOpened:
-                OnConnectionOpened?.Invoke(this, info, now);
+                OnConnectionOpened?.Invoke(this, alert, now);
                 break;
             case AlertType.ConnectionBroken:
                 IsLoggedIn = false;
-                OnConnectionBroken?.Invoke(this, info, now);
+                OnConnectionBroken?.Invoke(this, alert, now);
                 break;
         }
-
-        // set the latest update time and info
-        LastAlertTime = now;
-        LastAlertInfo = info;
+        
+        // set the last alert info only after all events have been invoked
+        LastConnectionAlert = alert;
     }
 
     /// <summary>

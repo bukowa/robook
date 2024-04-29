@@ -18,7 +18,7 @@ public class OrderBookSimulator {
         _concurrentQueue    = _orderBookProcessor._qu;
         _orderBook          = _orderBookProcessor._ob;
         _orderBookDataTable = _orderBook.OBDT;
-        _pricesArr          = _orderBook.PricesArray;
+        _pricesArr          = _orderBook.Prices;
 
         // Init with current price at middle index
         _currentPriceIndex = GetMiddleIndexOfArray(_pricesArr);

@@ -33,16 +33,16 @@ public class Account : INotifyPropertyChanged {
             _client = value;
             _client?.SubscribeToPropertyChangedEvent(nameof(Client.Params), (c, _) => {
                 c.Params?.TradingSystemConnection?.SubscribeToPropertyChangedEvent(
-                    nameof(Connection.LastAlertInfo),
+                    nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(TradingSystemConnectionStatus)); });
                 c.Params?.MarketDataConnection?.SubscribeToPropertyChangedEvent(
-                    nameof(Connection.LastAlertInfo),
+                    nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(MarketDataConnectionStatus)); });
                 c.Params?.PnlConnection?.SubscribeToPropertyChangedEvent(
-                    nameof(Connection.LastAlertInfo),
+                    nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(PnlConnectionStatus)); });
                 c.Params?.HistoricalDataConnection?.SubscribeToPropertyChangedEvent(
-                    nameof(Connection.LastAlertInfo),
+                    nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(HistoricalDataConnectionStatus)); });
             });
         }
@@ -141,19 +141,19 @@ public class Account : INotifyPropertyChanged {
 
     [DisplayName("PnlStatus")]
     public string? PnlConnectionStatus
-        => Client?.PnlConnection?.LastAlertInfo?.Message;
+        => Client?.PnlConnection?.LastConnectionAlert?.AlertInfo.Message;
 
     [DisplayName("MarketStatus")]
     public string? MarketDataConnectionStatus
-        => Client?.MarketDataConnection?.LastAlertInfo?.Message;
+        => Client?.MarketDataConnection?.LastConnectionAlert?.AlertInfo.Message;
 
     [DisplayName("TradeStatus")]
     public string? TradingSystemConnectionStatus
-        => Client?.TradingSystemConnection?.LastAlertInfo?.Message;
+        => Client?.TradingSystemConnection?.LastConnectionAlert?.AlertInfo.Message;
 
     [DisplayName("HistoryStatus")]
     public string? HistoricalDataConnectionStatus
-        => Client?.HistoricalDataConnection?.LastAlertInfo?.Message;
+        => Client?.HistoricalDataConnection?.LastConnectionAlert?.AlertInfo.Message;
 
     #endregion
 

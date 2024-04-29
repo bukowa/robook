@@ -23,7 +23,7 @@ public class AccountTest {
         // modify client properties
         var x = 0;
         account.PropertyChanged                              += (sender, args) => { x += 1; };
-        client.Params.HistoricalDataConnection.LastAlertInfo =  new AlertInfo() { Message = "test" };
+        client.Params.HistoricalDataConnection.LastConnectionAlert =  new ConnectionAlert(){AlertInfo = new AlertInfo() { Message = "test" }};
         Assert.That(x, Is.EqualTo(1));
     }
 }

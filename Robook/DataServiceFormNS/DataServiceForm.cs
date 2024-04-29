@@ -52,7 +52,7 @@ public partial class DataServiceForm : Form {
         end = DateTime.SpecifyKind(end, DateTimeKind.Utc);
         var acc       = accountsSelectControl1.SelectedAccount;
         
-        if (acc.Client?.HistoricalDataConnection?.LastAlertInfo?.AlertType != AlertType.LoginComplete) {
+        if (acc.Client?.HistoricalDataConnection?.LastConnectionAlert?.AlertInfo.AlertType != AlertType.LoginComplete) {
             MessageBox.Show("Please login first");
             return;
         }
