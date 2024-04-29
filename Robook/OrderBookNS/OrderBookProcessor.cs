@@ -100,6 +100,9 @@ public class OrderBookProcessor {
     /// <param name="cancellationToken"> The cancellation token used to cancel the method. </param>
     /// <returns> A <see cref="Task"/> that will be completed when the method is cancelled. </returns>
     private Task ProcessQueueAsync(CancellationToken cancellationToken, int sleep = 1) {
+        
+        SpinWait sw = new();
+        
         while (!cancellationToken.IsCancellationRequested) {
             while (_dq.TryDequeue(out var delayTask)) {
                 delayTask();
@@ -143,8 +146,9 @@ public class OrderBookProcessor {
             }
 
             // keeps the CPU usage low
-            Thread.Sleep(1);
+            // Thread.Sleep(1);
             // Task.Delay(sleep, cancellationToken);
+            sw.SpinOnce();
         }
 
         return Task.CompletedTask;
