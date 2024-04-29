@@ -39,6 +39,7 @@ partial class Main {
         orderBookToolStripMenuItem = new ToolStripMenuItem();
         orderBookSimulationToolStripMenuItem = new ToolStripMenuItem();
         dataToolStripMenuItem = new ToolStripMenuItem();
+        subscriptionsToolStripMenuItem = new ToolStripMenuItem();
         menuStrip3.SuspendLayout();
         SuspendLayout();
         // 
@@ -75,7 +76,7 @@ partial class Main {
         // 
         // menuStrip3
         // 
-        menuStrip3.Items.AddRange(new ToolStripItem[] { mainToolStripMenuItem, accountsToolStripMenuItem, orderBookToolStripMenuItem, orderBookSimulationToolStripMenuItem, dataToolStripMenuItem });
+        menuStrip3.Items.AddRange(new ToolStripItem[] { mainToolStripMenuItem, accountsToolStripMenuItem, orderBookToolStripMenuItem, orderBookSimulationToolStripMenuItem, dataToolStripMenuItem, subscriptionsToolStripMenuItem });
         menuStrip3.Location = new Point(0, 0);
         menuStrip3.Name = "menuStrip3";
         menuStrip3.Size = new Size(800, 24);
@@ -116,6 +117,13 @@ partial class Main {
         dataToolStripMenuItem.Text = "Data";
         dataToolStripMenuItem.Click += dataToolStripMenuItem_Click;
         // 
+        // subscriptionsToolStripMenuItem
+        // 
+        subscriptionsToolStripMenuItem.Name = "subscriptionsToolStripMenuItem";
+        subscriptionsToolStripMenuItem.Size = new Size(90, 20);
+        subscriptionsToolStripMenuItem.Text = "Subscriptions";
+        subscriptionsToolStripMenuItem.Click += subscriptionsToolStripMenuItem_Click;
+        // 
         // Main
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -146,4 +154,5 @@ partial class Main {
     private ToolStripMenuItem orderBookToolStripMenuItem;
     private ToolStripMenuItem orderBookSimulationToolStripMenuItem;
     private ToolStripMenuItem dataToolStripMenuItem;
+    private ToolStripMenuItem subscriptionsToolStripMenuItem;
 }

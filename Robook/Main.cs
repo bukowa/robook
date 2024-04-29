@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using Robook.Accounts;
+using Robook.Data;
 using Robook.DataServiceFormNS;
+using Robook.Forms;
 using Robook.OrderBookFormNS;
 
 namespace Robook;
@@ -60,18 +62,34 @@ public partial class Main : Form {
     #region DataServiceForm
 
     private DataServiceForm? _dataServiceForm;
+
     private void dataToolStripMenuItem_Click(object sender, EventArgs e) {
-        if (_dataServiceForm == null) {
-            _dataServiceForm = new DataServiceForm();
-            _dataServiceForm.Init(_state);
-            _dataServiceForm.FormClosing += (o, args) => {
-                args.Cancel = true;
-                _dataServiceForm.Hide();
-            };
-        }
-        _dataServiceForm.Show();
-        _dataServiceForm.Focus();
+        (_dataServiceForm ??= (DataServiceForm)
+                new FormBuilder(() => {
+                        var form = new DataServiceForm();
+                        form.Init(_state);
+                        return form;
+                    })
+                    .SetHiddenOnClose()
+                    .Build())
+            .Show()
+            .Focus();
     }
+
     #endregion
-    
+
+    #region SubscriptionsForm
+
+    private SubscriptionForm _subscriptionsForm;
+
+    private void subscriptionsToolStripMenuItem_Click(object sender, EventArgs e) {
+        (_subscriptionsForm ??= (SubscriptionForm)
+                new FormBuilder(new SubscriptionForm())
+                    .SetHiddenOnClose()
+                    .Build())
+            .Show()
+            .Focus();
+    }
+
+    #endregion
 }
