@@ -6,7 +6,7 @@ using Robook.SymbolNS;
 
 namespace Robook.DataServiceFormNS;
 
-public partial class DataServiceForm : Form {
+public partial class DataServiceForm : BaseForm {
 
     public DataServiceForm() {
         InitializeComponent();
