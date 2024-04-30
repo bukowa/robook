@@ -22,4 +22,9 @@ public partial class BaseForm : Form {
         base.Show();
         return this;
     }
+    
+    public Form Focus() {
+        base.Focus();
+        return this;
+    }
 }
