@@ -27,11 +27,31 @@ partial class SubscriptionForm {
     /// the contents of this method with the code editor.
     /// </summary>
     private void InitializeComponent() {
-        this.components    = new System.ComponentModel.Container();
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize    = new System.Drawing.Size(800, 450);
-        this.Text          = "SubscriiptionForm";
+        dataGridView1 = new DataGridView();
+        ((ISupportInitialize)dataGridView1).BeginInit();
+        SuspendLayout();
+        // 
+        // dataGridView1
+        // 
+        dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        dataGridView1.Location = new Point(28, 23);
+        dataGridView1.Name = "dataGridView1";
+        dataGridView1.Size = new Size(240, 150);
+        dataGridView1.TabIndex = 0;
+        // 
+        // SubscriptionForm
+        // 
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(800, 450);
+        Controls.Add(dataGridView1);
+        Name = "SubscriptionForm";
+        Text = "SubscriiptionForm";
+        ((ISupportInitialize)dataGridView1).EndInit();
+        ResumeLayout(false);
     }
 
     #endregion
+
+    private DataGridView dataGridView1;
 }

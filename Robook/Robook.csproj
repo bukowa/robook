@@ -40,6 +40,9 @@
         <Compile Update="Data\SubscriptionForm.cs">
           <SubType>Form</SubType>
         </Compile>
+        <Compile Update="Data\SymbolForm.cs">
+          <SubType>Form</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -54,10 +57,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Data.Analysis" Version="0.21.0"/>
         <PackageReference Include="Parquet.Net" Version="4.23.4" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Subscription\" />
     </ItemGroup>
 
 </Project>

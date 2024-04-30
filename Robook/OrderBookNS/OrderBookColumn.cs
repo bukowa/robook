@@ -54,7 +54,7 @@ public class OrderBookTouchedTradeColumn : OrderBookDefaultColumn, IOrderBookCol
     public OrderBookTouchedTradeColumn(string name, OrderBookColumnDataType[] dataTypes, Type type) : base(
         name, dataTypes, type) {
     }
-
+    
     private int[] bids;
     private int[] asks;
 

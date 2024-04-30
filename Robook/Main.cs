@@ -66,10 +66,10 @@ public partial class Main : Form {
     private void dataToolStripMenuItem_Click(object sender, EventArgs e) {
         (_dataServiceForm ??= (DataServiceForm)
                 new FormBuilder(() => {
-                        var form = new DataServiceForm();
-                        form.Init(_state);
-                        return form;
-                    })
+                    var form = new DataServiceForm();
+                    form.Init(_state);
+                    return form;
+                })
                     .SetHiddenOnClose()
                     .Build())
             .Show()
@@ -84,12 +84,27 @@ public partial class Main : Form {
 
     private void subscriptionsToolStripMenuItem_Click(object sender, EventArgs e) {
         (_subscriptionsForm ??= (SubscriptionForm)
-                new FormBuilder(new SubscriptionForm())
+                new FormBuilder(new SubscriptionForm(_state))
                     .SetHiddenOnClose()
                     .Build())
             .Show()
             .Focus();
     }
 
+    #endregion
+
+    #region SymbolForm
+
+    private SymbolForm _symbolForm;
+    private void symbolsToolStripMenuItem_Click(object sender, EventArgs e) {
+        _symbolForm ??= (SymbolForm)
+            new FormBuilder(new SymbolForm())
+                .SetHiddenOnClose()
+                .Build();
+        _symbolForm
+            .LoadSymbols(State.Storage.LocalSymbolsStorage)
+            .Show()
+            .Focus();
+    }
     #endregion
 }
