@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using com.omnesys.rapi;
 using Rithmic;
-using Robook.Accounts;
 
 namespace Robook.Data;
 
@@ -14,6 +13,11 @@ public class Subscriber {
 
 public class Subscription : INotifyPropertyChanged {
     [Browsable(false)] public Client Client { get; }
+
+    /// <summary>
+    /// Unique identifier for the subscription.
+    /// </summary>
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
     #region Connection
 
@@ -28,8 +32,9 @@ public class Subscription : INotifyPropertyChanged {
             OnPropertyChanged(nameof(ConnectionId));
         }
     }
-    
+
     private readonly string? _connectionId;
+
     public string? ConnectionId {
         // deserialization
         get => Connection?.Id ?? _connectionId;
@@ -52,7 +57,13 @@ public class Subscription : INotifyPropertyChanged {
         }
     }
 
-    public string? SymbolId => Symbol?.Id;
+    private readonly string? _symbolId;
+
+    public string? SymbolId {
+        // deserialization
+        get => Symbol?.Id ?? _symbolId;
+        init => _symbolId = value;
+    }
 
     #endregion
 

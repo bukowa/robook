@@ -12,13 +12,25 @@ namespace Robook.Data;
 /// Connection represents Rithmic connection.
 /// </summary>
 public class Connection : INotifyPropertyChanged {
-    public string DisplayName => $"{Login}:{Server}:{Gateway}";
+    /// <summary>
+    /// String representation of this connection.
+    /// </summary>
+    public string DisplayName =>
+        $"{Login}:{Server}:{Gateway}";
 
+    /// <summary>
+    /// Ability to reference this connection as "ValueMember".
+    /// </summary>
     [JsonIgnore]
     public Connection Self => this;
 
+    /// <summary>
+    /// Unique identifier for this connection.
+    /// </summary>
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    
+
+    # region CPARAMS
+
     [Browsable(false)] private CParamsSource CParamsSource => new(CParamsDirPath);
 
     [Browsable(false)]
@@ -44,6 +56,8 @@ public class Connection : INotifyPropertyChanged {
         TradingSystemConnection  = CreateConnection(TradingSystemConnection,  ConnectionId.TradingSystem),
     };
 
+    #endregion
+
     public Task LoginAsync() {
         return Task.Run(() => {
             Client ??= new Client();
@@ -59,8 +73,6 @@ public class Connection : INotifyPropertyChanged {
     /// Application used for this connection.
     /// </summary>
     [JsonIgnore] public static Application Application = new();
-
-    private Client? _client;
 
     /// <summary>
     /// Client for this account.
@@ -88,15 +100,10 @@ public class Connection : INotifyPropertyChanged {
         }
     }
 
+    private Client? _client;
+    
     /// <summary>
-    /// String representation of this account.
-    /// </summary>
-    public override string ToString() {
-        return Login + ":" + Server + ":" + Gateway;
-    }
-
-    /// <summary>
-    /// Properties that can be edited.
+    /// Properties that can be edited by the user.
     /// </summary>
 
     #region PropertyEditable

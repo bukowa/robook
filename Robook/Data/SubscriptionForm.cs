@@ -61,9 +61,6 @@ public partial class SubscriptionForm : BaseForm {
         dataGridView1.Dock = DockStyle.Fill;
         dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         dataGridView1.CellClick += categoryDataGridView_CellClick;
-
-        dataGridView1.CellValueChanged += (sender, e) => { Console.WriteLine(); };
-        dataGridView1.CellParsing += (sender, e) => { Console.WriteLine(); };
     }
 
     
