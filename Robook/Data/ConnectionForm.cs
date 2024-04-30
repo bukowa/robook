@@ -9,8 +9,10 @@ public partial class ConnectionForm : BaseForm {
     public BindingList<Connection> Connections {
         get => connections;
         set {
-            connections              = value;
-            dataGridView1.DataSource = connections;
+            connections                            = value;
+            dataGridView1.DataSource               = connections;
+            // in case columns are auto generated again
+            dataGridView1.Columns["Self"]!.Visible = false;
         }
     }
 
