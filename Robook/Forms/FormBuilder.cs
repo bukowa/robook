@@ -7,7 +7,7 @@ public class FormBuilder {
     private readonly Lazy<Form> _lazyForm;
     private readonly Form       _form;
     
-    public Form Form => _lazyForm.Value ?? _form;
+    public Form Form => _lazyForm?.Value ?? _form;
     
     /// <summary>
     /// Creates a new instance of the <see cref="FormBuilder"/> class.
