@@ -35,7 +35,7 @@ public class Connection : INotifyPropertyChanged {
     /// <summary>
     ///     ConnectionId for this connection.
     /// </summary>
-    public readonly ConnectionId ConnectionId;
+    public ConnectionId ConnectionId;
 
     /// <summary>
     /// Constructor.
@@ -57,6 +57,12 @@ public class Connection : INotifyPropertyChanged {
         Login        = connectionParams.Login;
         Password     = connectionParams.Password;
         ConnectionId = connectionParams.ConnectionId;
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    public Connection() {
     }
 
     /// <summary>
@@ -122,6 +128,10 @@ public class Connection : INotifyPropertyChanged {
         OnForcedLogout += action;
     }
 
+    public void SubscribeToOnLoginComplete(AlertInfoHandler action) {
+        OnLoginComplete += action;
+    }
+
     public void SubscribeToOnShutdownSignal(AlertInfoHandler action) {
         OnShutdownSignal += action;
     }
@@ -137,9 +147,37 @@ public class Connection : INotifyPropertyChanged {
     public void SubscribeToOnConnectionBroken(AlertInfoHandler action) {
         OnConnectionBroken += action;
     }
+ 
+    public void UnsubscribeFromOnAlertInfo(AlertInfoHandler action) {
+        OnAlertInfo -= action;
+    }
+    
+    public void UnsubscribeFromOnLoginFailed(AlertInfoHandler action) {
+        OnLoginFailed -= action;
+    }
+    
+    public void UnsubscribeFromOnForcedLogout(AlertInfoHandler action) {
+        OnForcedLogout -= action;
+    }
+        
+    public void UnsubscribeFromOnLoginComplete(AlertInfoHandler action) {
+        OnLoginComplete -= action;
+    }
 
-    public void SubscribeToOnLoginComplete(AlertInfoHandler action) {
-        OnLoginComplete += action;
+    public void UnsubscribeFromOnShutdownSignal(AlertInfoHandler action) {
+        OnShutdownSignal -= action;
+    }
+    
+    public void UnsubscribeFromOnConnectionOpened(AlertInfoHandler action) {
+        OnConnectionOpened -= action;
+    }
+    
+    public void UnsubscribeFromOnConnectionClosed(AlertInfoHandler action) {
+        OnConnectionClosed -= action;
+    }
+    
+    public void UnsubscribeFromOnConnectionBroken(AlertInfoHandler action) {
+        OnConnectionBroken -= action;
     }
 
     /// <summary>
@@ -155,12 +193,9 @@ public class Connection : INotifyPropertyChanged {
         // we check the ConnectionId of the AlertInfo.
         if (info.ConnectionId != ConnectionId)
             return;
-        
+
         // build the ConnectionAlert instance
         var alert = new ConnectionAlert { AlertInfo = info, Time = now };
-
-        // global event invoked before any specific events
-        OnAlertInfo?.Invoke(this, alert, now);
 
         // per alert type event
         switch (info.AlertType) {
@@ -192,7 +227,10 @@ public class Connection : INotifyPropertyChanged {
                 OnConnectionBroken?.Invoke(this, alert, now);
                 break;
         }
-        
+
+        // global event
+        OnAlertInfo?.Invoke(this, alert, now);
+
         // set the last alert info only after all events have been invoked
         LastConnectionAlert = alert;
     }

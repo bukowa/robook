@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using com.omnesys.rapi;
 using Rithmic;
-using Robook.SymbolNS;
+using Robook.Accounts;
 
 namespace Robook.Data;
 
@@ -11,27 +11,21 @@ public class Subscriber {
     public ConcurrentQueue<object> Queue { get; } = new();
 }
 
-public class Subscription: INotifyPropertyChanged {
+public class Subscription {
     [Browsable(false)] public Client Client { get; }
 
-    [Browsable(false)] public Symbol Symbol { get; }
-
+    public Symbol   Symbol  { get; set; }
+    public Account? Account { get; set; }
+    
     [Browsable(false)] public ConcurrentQueue<object> Queue { get; } = new();
 
-    [DisplayName("Symbol")]
-    public string? SymbolName => Symbol?.Name;
+    [Browsable(false)] public ConcurrentBag<Subscriber> Subscribers { get; } = new();
     
-    [DisplayName("Exchange")]
-    public string? Exchange => Symbol?.Exchange;
-    
-    [Browsable(false)]
-    public ConcurrentBag<Subscriber> Subscribers { get; } = new();
+    private IContext Context => new Context();
 
     public void Subscribe(Subscriber subscriber) {
         Subscribers.Add(subscriber);
     }
-
-    private IContext Context => new Context();
 
     private void _subscribeStream() {
         Client.Engine.subscribe(
@@ -56,16 +50,13 @@ public class Subscription: INotifyPropertyChanged {
         Client.SubscribeToPropertyChangedEvent(
             nameof(Client.MarketDataConnection),
             (client, args) => {
-                switch (client.MarketDataConnection) {
-                    case null:
-                        _unsubscribeStream();
-                        break;
-                    default:
-                        _subscribeStream();
-                        break;
-                }
+                client.MarketDataConnection?.SubscribeToOnLoginComplete((sender, alert, time) => {
+                    _subscribeStream();
+                });
             });
-        _subscribeStream();
+        if (Client.MarketDataConnection?.IsLoggedIn ?? false) {
+            _subscribeStream();
+        }
     }
 
     public Task StartAsync() {
@@ -77,22 +68,10 @@ public class Subscription: INotifyPropertyChanged {
                     subscriber.Queue.Enqueue(o);
                 }
             }
+
             sw.SpinOnce();
         }
 
         return Task.CompletedTask;
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null) {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

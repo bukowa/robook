@@ -4,23 +4,37 @@ using Robook.Accounts;
 namespace Robook.Data;
 
 public partial class SubscriptionForm : BaseForm {
-    
-    
-    public BindingList<Subscription> Subscriptions = new();
-    
-    private State.State State { get; }
+
+    public BindingList<Subscription> Subscriptions;
+
     public SubscriptionForm(State.State state) {
-        State = state;
         InitializeComponent();
-        // dataGridView1            = new DataGridView();
         dataGridView1.Dock       = DockStyle.Fill;
-        dataGridView1.DataSource = Subscriptions;
-        Subscriptions.AllowNew   = true;
-        Subscriptions.ListChanged += (_, _) => {
-            
+        var symbolColumn = new DataGridViewComboBoxColumn {
+            // Name             = "Symbol",
+            DataSource       = State.Storage.LocalSymbolsStorage.Load(), // Load the list of Symbols
+            // DisplayMember    = "Name", // The property of Symbol to display in the dropdown list
+            // ValueMember      = "Name", // The property of Symbol to use as the value
+            DataPropertyName = "Symbol", // The property of Subscription to bind to
+            HeaderText       = "Symbol",
+            AutoSizeMode     = DataGridViewAutoSizeColumnMode.Fill
         };
-        // accountsSelectControl1.Init(state.AccountsStore.Accounts);
-        Subscriptions.Add(new Subscription());
+        dataGridView1.DataError += (_, e) => {
+            Console.WriteLine();
+        };
+        dataGridView1.Columns.Add(symbolColumn);
+
+        var accountColumn = new DataGridViewComboBoxColumn {
+            DataSource = State.Storage.LocalSymbolsStorage
+        };
+    }
+    
+    public SubscriptionForm LoadSubscriptions(IDataHandler<Subscription> dataHandler) {
+        Subscriptions = dataHandler.Load();
+        Subscriptions.ListChanged += (sender, args) => dataHandler.Save(Subscriptions);
+        Subscriptions.AllowNew    = true;
+        dataGridView1.DataSource   = Subscriptions;
+        return this;
     }
     
     /// <summary>
@@ -39,5 +53,4 @@ public partial class SubscriptionForm : BaseForm {
         };
         dataGridView1.Columns.Add(c);
     }
-    
 }
