@@ -21,7 +21,14 @@ public class Connection : INotifyPropertyChanged {
     
     [Browsable(false)] private CParamsSource CParamsSource => new(CParamsDirPath);
 
-    [Browsable(false)] private CParams CParams => CParamsSource.GetCParams(Server, Gateway);
+    [Browsable(false)]
+    private CParams CParams {
+        get {
+            var x = CParamsSource.GetCParams(Server, Gateway);
+            x.LogFilePath = LogFilePath;
+            return x;
+        }
+    }
 
     [Browsable(false)]
     private Rithmic.Connection? CreateConnection(bool shouldCreate, ConnectionId id) {
