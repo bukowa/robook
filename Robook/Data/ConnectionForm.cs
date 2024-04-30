@@ -21,6 +21,10 @@ public partial class ConnectionForm : BaseForm {
         SetupDataGridView();
     }
 
+    private void button1_Click(object sender, EventArgs e) {
+        ConnectionsDataSaver.Save(Connections);
+    }
+    
     private void SetupDataGridView() {
         AddOnClickColumn(new DataGridViewButtonColumn() {
             Name = "Save"
@@ -77,7 +81,4 @@ public partial class ConnectionForm : BaseForm {
         dataGridView1.Columns.Add(c);
     }
 
-    private void button1_Click(object sender, EventArgs e) {
-        ConnectionsDataSaver.Save(Connections);
-    }
 }

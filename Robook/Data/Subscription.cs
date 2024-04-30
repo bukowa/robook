@@ -28,12 +28,33 @@ public class Subscription : INotifyPropertyChanged {
             OnPropertyChanged(nameof(ConnectionId));
         }
     }
-
-    public string? ConnectionId => Connection?.Id;
+    
+    private readonly string? _connectionId;
+    public string? ConnectionId {
+        // deserialization
+        get => Connection?.Id ?? _connectionId;
+        init => _connectionId = value;
+    }
 
     #endregion
 
-    public Symbol? Symbol { get; set; }
+    #region Symbol
+
+    private Symbol? _symbol;
+
+    [JsonIgnore]
+    public Symbol? Symbol {
+        get => _symbol;
+        set {
+            _symbol = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SymbolId));
+        }
+    }
+
+    public string? SymbolId => Symbol?.Id;
+
+    #endregion
 
     [Browsable(false)] public ConcurrentQueue<object> Queue { get; } = new();
 

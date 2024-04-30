@@ -93,6 +93,7 @@ public partial class Main : Form {
         _subscriptionsForm.Symbols       = State.Data.Symbols;
         _subscriptionsForm.Connections   = State.Data.Connections;
         _subscriptionsForm.Subscriptions = State.Data.Subscriptions;
+        _subscriptionsForm.SubscriptionsDataSaver = Storage.LocalSubscriptionsStorage;
         _subscriptionsForm
             .Show()
             .Focus();
@@ -110,6 +111,7 @@ public partial class Main : Form {
                 .SetHiddenOnClose()
                 .Build();
         _symbolForm.Symbols = State.Data.Symbols;
+        _symbolForm.SymbolsDataSaver = Storage.LocalSymbolsStorage;
         _symbolForm
             .Show()
             .Focus();

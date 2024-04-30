@@ -8,7 +8,7 @@ using Connection = Robook.Data.Connection;
 namespace Robook.State;
 
 public static class Config {
-    public static string StoreDirectory = @"C:\Users\buk\Documents\Robook";
+    public static readonly string StoreDirectory = @"C:\Users\buk\Documents\Robook";
 }
 
 public static class Storage {
@@ -35,6 +35,7 @@ public static class Data {
         Subscriptions         = Storage.LocalSubscriptionsStorage.Load();
         Subscriptions.ToList().ForEach(s => {
             s.Connection = Connections.FirstOrDefault(c => c.Id == s.ConnectionId);
+            s.Symbol     = Symbols.FirstOrDefault(c => c.Id == s.SymbolId);
         });
         Subscriptions.AllowEdit = true;
     }
