@@ -3,9 +3,17 @@
 namespace Robook.Data;
 
 public partial class SymbolForm : BaseForm {
+    private BindingList<Symbol> symbols;
+    
+    public BindingList<Symbol> Symbols {
+        get => symbols;
+        set {
+            symbols                  = value;
+            SymbolDataGridView.DataSource = symbols;
+        }
+    }
     
     public DataGridView        SymbolDataGridView { get; set; } = new();
-    public BindingList<Symbol> Symbols            { get; set; } = new();
     
     public SymbolForm() {
         InitializeComponent();
@@ -13,11 +21,4 @@ public partial class SymbolForm : BaseForm {
         Controls.Add(SymbolDataGridView);
     }
     
-    public SymbolForm LoadSymbols(IDataHandler<Symbol> dataHandler) {
-        Symbols                       =  dataHandler.Load();
-        Symbols.ListChanged           += (sender, args) => dataHandler.Save(Symbols);
-        Symbols.AllowNew              =  true;
-        SymbolDataGridView.DataSource =  Symbols;
-        return this;
-    }
 }

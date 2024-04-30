@@ -1,9 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using com.omnesys.rapi;
 using Rithmic;
-using Robook.SymbolNS;
+using Robook.Accounts;
 
 namespace Robook.Data;
 
@@ -11,27 +12,38 @@ public class Subscriber {
     public ConcurrentQueue<object> Queue { get; } = new();
 }
 
-public class Subscription: INotifyPropertyChanged {
+public class Subscription : INotifyPropertyChanged {
     [Browsable(false)] public Client Client { get; }
 
-    [Browsable(false)] public Symbol Symbol { get; }
+    #region Connection
+
+    private Connection? _connection;
+
+    [JsonIgnore]
+    public Connection? Connection {
+        get => _connection;
+        set {
+            _connection = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ConnectionId));
+        }
+    }
+
+    public string? ConnectionId => Connection?.Id;
+
+    #endregion
+
+    public Symbol? Symbol { get; set; }
 
     [Browsable(false)] public ConcurrentQueue<object> Queue { get; } = new();
 
-    [DisplayName("Symbol")]
-    public string? SymbolName => Symbol?.Name;
-    
-    [DisplayName("Exchange")]
-    public string? Exchange => Symbol?.Exchange;
-    
-    [Browsable(false)]
-    public ConcurrentBag<Subscriber> Subscribers { get; } = new();
+    [Browsable(false)] public ConcurrentBag<Subscriber> Subscribers { get; } = new();
+
+    private IContext Context => new Context();
 
     public void Subscribe(Subscriber subscriber) {
         Subscribers.Add(subscriber);
     }
-
-    private IContext Context => new Context();
 
     private void _subscribeStream() {
         Client.Engine.subscribe(
@@ -56,16 +68,12 @@ public class Subscription: INotifyPropertyChanged {
         Client.SubscribeToPropertyChangedEvent(
             nameof(Client.MarketDataConnection),
             (client, args) => {
-                switch (client.MarketDataConnection) {
-                    case null:
-                        _unsubscribeStream();
-                        break;
-                    default:
-                        _subscribeStream();
-                        break;
-                }
+                client.MarketDataConnection?.SubscribeToOnLoginComplete(
+                    (sender, alert, time) => { _subscribeStream(); });
             });
-        _subscribeStream();
+        if (Client.MarketDataConnection?.IsLoggedIn ?? false) {
+            _subscribeStream();
+        }
     }
 
     public Task StartAsync() {
@@ -77,6 +85,7 @@ public class Subscription: INotifyPropertyChanged {
                     subscriber.Queue.Enqueue(o);
                 }
             }
+
             sw.SpinOnce();
         }
 

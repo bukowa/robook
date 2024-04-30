@@ -5,6 +5,7 @@
         <TargetFramework>net8.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
+        <!-- <UseWPF>true</UseWPF> -->
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
@@ -42,6 +43,12 @@
         </Compile>
         <Compile Update="Data\SymbolForm.cs">
           <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="Data\ConnectionForm.cs">
+          <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="Data\ConnectionSelectControl.cs">
+          <SubType>UserControl</SubType>
         </Compile>
     </ItemGroup>
 

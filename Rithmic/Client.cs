@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using com.omnesys.omne.om;
 using com.omnesys.rapi;
 
 namespace Rithmic;
@@ -15,6 +16,27 @@ public class LoginParams {
     public Connection? MarketDataConnection;
     public Connection? HistoricalDataConnection;
     public Connection? TradingSystemConnection;
+
+
+    public IEnumerable<Connection> ConnectionsEnumerable {
+        get {
+            if (MarketDataConnection != null) {
+                yield return MarketDataConnection;
+            }
+
+            if (HistoricalDataConnection != null) {
+                yield return HistoricalDataConnection;
+            }
+
+            if (TradingSystemConnection != null) {
+                yield return TradingSystemConnection;
+            }
+
+            if (PnlConnection != null) {
+                yield return PnlConnection;
+            }
+        }
+    }
 
     public LoginParams(CParams cParams) {
         CParams = cParams;
@@ -73,15 +95,16 @@ public class Client : INotifyPropertyChanged {
             engine.setEnvironmentVariable(env, kv.Key, kv.Value);
         }
     }
+
     #endregion
 
     #region Connections
 
-    public Connection? PnlConnection            => Params.PnlConnection;
-    public Connection? MarketDataConnection     => Params.MarketDataConnection;
-    public Connection? TradingSystemConnection  => Params.TradingSystemConnection;
-    public Connection? HistoricalDataConnection => Params.HistoricalDataConnection;
-    public CParams?    CParams                  => Params.CParams;
+    public Connection? PnlConnection            => Params?.PnlConnection;
+    public Connection? MarketDataConnection     => Params?.MarketDataConnection;
+    public Connection? TradingSystemConnection  => Params?.TradingSystemConnection;
+    public Connection? HistoricalDataConnection => Params?.HistoricalDataConnection;
+    public CParams?    CParams                  => Params?.CParams;
 
     #endregion
 
@@ -97,7 +120,7 @@ public class Client : INotifyPropertyChanged {
         AdmCallbacks = ah ?? new AdmHandler();
         RHandler     = rh ?? new RHandler();
     }
-    
+
     /// <summary>
     ///     Parameters for the Client constructor.
     /// </summary>
@@ -117,7 +140,7 @@ public class Client : INotifyPropertyChanged {
     public void Logout() {
         Engine?.logout();
     }
-    
+
     /// <summary>
     ///     Establishes a connection to Rithmic.
     /// </summary>
@@ -194,72 +217,101 @@ public class Client : INotifyPropertyChanged {
         }
     }
 
+
+    private object _logoutLoginLock = new();
+
+    /// <summary>
+    /// Logout and todo: wait for all connections to be ready.
+    /// </summary>
+    public void LogoutAndWait() {
+        lock (_logoutLoginLock) {
+            _logoutAndWait();
+        }
+    }
+
+    private void _logoutAndWait() {
+        List<Connection> connections = Params.ConnectionsEnumerable.ToList();
+        int              eventsCount = 0;
+        CountdownEvent?  logoutEvent  = null;
+        
+        void ActionLogoutEvent(Connection c, ConnectionAlert a, DateTime dt) {
+            logoutEvent?.Signal();
+        }
+        
+        void SubscribeToLogoutEvents(Connection? connection) {
+            connection?.SubscribeToOnConnectionClosed(ActionLogoutEvent);
+            eventsCount++;
+        }
+        
+        void UnsubscribeFromLogoutEvents(Connection? connection) {
+            connection?.UnsubscribeFromOnConnectionClosed(ActionLogoutEvent);
+        }
+        
+        try {
+            connections.ForEach(SubscribeToLogoutEvents);
+            logoutEvent = new CountdownEvent(eventsCount);
+            Logout();
+            logoutEvent.Wait(15000);
+        }
+        finally {
+            connections.ForEach(UnsubscribeFromLogoutEvents);
+            logoutEvent?.Dispose();
+            logoutEvent = null;
+        }
+        
+    }
+
     /// <summary>
     /// Login and wait for all connections to be ready.
     /// </summary>
     /// <returns>True if all connections logged in successfully.</returns>
     public bool LoginAndWait(LoginParams loginParams, int timeout = 15000) {
-        CountdownEvent? loginEvent  = null;
-        var             eventsCount = 0;
+        lock (_logoutLoginLock) {
+            return _loginAndWait(loginParams, timeout);
+        }
+    }
 
+    private bool _loginAndWait(LoginParams loginParams, int timeout = 1500) {
+        List<Connection>            connections      = loginParams.ConnectionsEnumerable.ToList();
+        int                         eventsCount      = 0;
+        CountdownEvent?             loginEvent       = null;
 
-        var actionLoginEvent = new Connection.AlertInfoHandler((c, a, dt) => { loginEvent?.Signal(); });
-
-        if (loginParams.MarketDataConnection != null) {
-            loginParams.MarketDataConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.MarketDataConnection.OnLoginFailed   += actionLoginEvent;
+        void ActionLoginEvent(Connection c, ConnectionAlert a, DateTime dt) {
+            loginEvent?.Signal();
+        }
+        
+        void SubscribeToLoginEvents(Connection? connection) {
+            connection?.SubscribeToOnLoginComplete(ActionLoginEvent);
+            connection?.SubscribeToOnLoginFailed(ActionLoginEvent);
             eventsCount++;
         }
 
-        if (loginParams.HistoricalDataConnection != null) {
-            loginParams.HistoricalDataConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.HistoricalDataConnection.OnLoginFailed   += actionLoginEvent;
-            eventsCount++;
+        void UnsubscribeFromLoginEvents(Connection? connection) {
+            connection?.UnsubscribeFromOnLoginComplete(ActionLoginEvent);
+            connection?.UnsubscribeFromOnLoginFailed(ActionLoginEvent);
         }
 
-        if (loginParams.TradingSystemConnection != null) {
-            loginParams.TradingSystemConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.TradingSystemConnection.OnLoginFailed   += actionLoginEvent;
-            eventsCount++;
+        bool IsLoggedId(Connection? connection) {
+            return connection?.IsLoggedIn ?? false;
         }
 
-        if (loginParams.PnlConnection != null) {
-            loginParams.PnlConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.PnlConnection.OnLoginFailed   += actionLoginEvent;
-            eventsCount++;
+        try {
+            connections.ForEach(SubscribeToLoginEvents);
+            loginEvent = new CountdownEvent(eventsCount);
+            Login(loginParams);
+            loginEvent.Wait(timeout);
+        }
+        finally {
+            connections.ForEach(UnsubscribeFromLoginEvents);
+            loginEvent?.Dispose();
+            loginEvent = null;
         }
 
-        loginEvent = new CountdownEvent(eventsCount);
-        Login(loginParams);
-        loginEvent.Wait(timeout);
-
-        if (MarketDataConnection != null) {
-            MarketDataConnection.OnLoginComplete -= actionLoginEvent;
-            MarketDataConnection.OnLoginFailed   -= actionLoginEvent;
+        if (connections.All(IsLoggedId)) {
+            return true;
         }
 
-        if (HistoricalDataConnection != null) {
-            HistoricalDataConnection.OnLoginComplete -= actionLoginEvent;
-            HistoricalDataConnection.OnLoginFailed   -= actionLoginEvent;
-        }
-
-        if (TradingSystemConnection != null) {
-            TradingSystemConnection.OnLoginComplete -= actionLoginEvent;
-            TradingSystemConnection.OnLoginFailed   -= actionLoginEvent;
-        }
-
-        if (PnlConnection != null) {
-            PnlConnection.OnLoginComplete -= actionLoginEvent;
-            PnlConnection.OnLoginFailed   -= actionLoginEvent;
-        }
-
-        // return false if any connection failed to login
-        if (MarketDataConnection != null && !MarketDataConnection.IsLoggedIn) return false;
-        if (HistoricalDataConnection != null && !HistoricalDataConnection.IsLoggedIn) return false;
-        if (TradingSystemConnection != null && !TradingSystemConnection.IsLoggedIn) return false;
-        if (PnlConnection != null && !PnlConnection.IsLoggedIn) return false;
-
-        return true;
+        return false;
     }
 
     #region INotifyPropertyChanged

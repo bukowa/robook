@@ -3,41 +3,71 @@ using Robook.Accounts;
 
 namespace Robook.Data;
 
+// its very important to first bind the data source of the columns
+// and only then set the data source of the grid view
 public partial class SubscriptionForm : BaseForm {
-    
-    
-    public BindingList<Subscription> Subscriptions = new();
-    
-    private State.State State { get; }
-    public SubscriptionForm(State.State state) {
-        State = state;
+    private BindingList<Subscription> _subscriptions;
+
+    public BindingList<Subscription> Subscriptions {
+        get => _subscriptions;
+        set {
+            _subscriptions           = value;
+            dataGridView1.DataSource = Subscriptions;
+        }
+    }
+
+    private BindingList<Symbol> _symbols;
+
+    public BindingList<Symbol> Symbols {
+        get => _symbols;
+        set {
+            _symbols                 = value;
+            _symbolColumn.DataSource = Symbols;
+        }
+    }
+
+    private BindingList<Connection> _connections;
+
+    public BindingList<Connection> Connections {
+        get => _connections;
+        set {
+            _connections                 = value;
+            _connectionColumn.DataSource = Connections;
+        }
+    }
+
+    private readonly DataGridViewComboBoxColumn _symbolColumn;
+    private readonly DataGridViewComboBoxColumn _connectionColumn;
+
+    public SubscriptionForm() {
         InitializeComponent();
-        // dataGridView1            = new DataGridView();
-        dataGridView1.Dock       = DockStyle.Fill;
-        dataGridView1.DataSource = Subscriptions;
-        Subscriptions.AllowNew   = true;
-        Subscriptions.ListChanged += (_, _) => {
-            
+        _symbolColumn = new DataGridViewComboBoxColumn {
+            DataPropertyName = "Symbol",
+            ValueType        = typeof(Symbol),
+            DisplayMember    = "DisplayName",
+            ValueMember      = "Self",
+            AutoSizeMode     = DataGridViewAutoSizeColumnMode.Fill,
         };
-        // accountsSelectControl1.Init(state.AccountsStore.Accounts);
-        Subscriptions.Add(new Subscription());
-    }
-    
-    /// <summary>
-    /// A convenient method for adding a column with a OnClick event.
-    /// </summary>
-    public void AddOnClickColumn(DataGridViewColumn c, Action<DataGridViewCellEventArgs, int> e) {
-        dataGridView1.CellClick += (_, a) => {
-            if (a.ColumnIndex >= 0 && a.RowIndex >= 0) {
-                var col = dataGridView1.Columns[a.ColumnIndex];
-                if (col == c) {
-                    e(a, a.RowIndex);
-                    return;
-                }
-                return;
-            }
+        dataGridView1.Columns.Add(_symbolColumn);
+        _connectionColumn = new DataGridViewComboBoxColumn {
+            DataPropertyName = "Connection",
+            ValueType        = typeof(Connection),
+            DisplayMember    = "DisplayName",
+            ValueMember      = "Self",
+            AutoSizeMode     = DataGridViewAutoSizeColumnMode.Fill,
         };
-        dataGridView1.Columns.Add(c);
+        dataGridView1.Columns.Add(_connectionColumn);
+        dataGridView1.Dock      =  DockStyle.Fill;
+        dataGridView1.EditMode  =  DataGridViewEditMode.EditOnEnter;
+        dataGridView1.CellClick += categoryDataGridView_CellClick;
+
+        dataGridView1.CellValueChanged += (sender, e) => { Console.WriteLine(); };
+        dataGridView1.CellParsing      += (sender, e) => { Console.WriteLine(); };
     }
-    
+
+    private void categoryDataGridView_CellClick(object? sender, DataGridViewCellEventArgs e) {
+        // You can check for e.ColumnIndex to limit this to your specific column
+        if (this.dataGridView1.EditingControl is DataGridViewComboBoxEditingControl editingControl)
+            editingControl.DroppedDown = true;
+    }
 }
