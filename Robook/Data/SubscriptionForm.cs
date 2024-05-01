@@ -58,6 +58,25 @@ public partial class SubscriptionForm : BaseForm {
             AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
         };
         dataGridView1.Columns.Add(_connectionColumn);
+        AddOnClickColumn(new DataGridViewButtonColumn {
+            Name = "Subscribe"
+        }, (args, i) => {
+            var c = Subscriptions[i];
+            Task.Run(async () => {
+                try {
+                    if (c.TickSize == null && c.PointValue == null) {
+                        await c.PriceIncrInfoTask();
+                        await c.RefDataTask();   
+                    }
+                    c.StartStream();
+                    Task.Run(() => { c.Start(); });
+                }
+                catch (Exception e) {
+                    MessageBox.Show(e.Message);
+                }
+            });
+        });
+        
         dataGridView1.Dock = DockStyle.Fill;
         dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         dataGridView1.CellClick += categoryDataGridView_CellClick;
@@ -70,8 +89,23 @@ public partial class SubscriptionForm : BaseForm {
     
     private void categoryDataGridView_CellClick(object? sender, DataGridViewCellEventArgs e) {
         // You can check for e.ColumnIndex to limit this to your specific column
-        if (this.dataGridView1.EditingControl is DataGridViewComboBoxEditingControl editingControl)
+        if (dataGridView1.EditingControl is DataGridViewComboBoxEditingControl editingControl)
             editingControl.DroppedDown = true;
     }
-
+    
+    /// <summary>
+    /// A convenient method for adding a column with a OnClick event.
+    /// </summary>
+    public void AddOnClickColumn(DataGridViewColumn c, Action<DataGridViewCellEventArgs, int> e) {
+        dataGridView1.CellClick += (_, a) => {
+            if (a.ColumnIndex >= 0 && a.RowIndex >= 0) {
+                var col = dataGridView1.Columns[a.ColumnIndex];
+                if (col == c) {
+                    e(a, a.RowIndex);
+                }
+            }
+        };
+        dataGridView1.Columns.Add(c);
+    }
+    
 }

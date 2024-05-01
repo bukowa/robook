@@ -97,6 +97,7 @@ public class Connection : INotifyPropertyChanged {
                     nameof(Rithmic.Connection.LastConnectionAlert),
                     (_, _) => { NotifyPropertyChanged(nameof(HistoricalDataConnectionStatus)); });
             });
+            NotifyPropertyChanged();
         }
     }
 

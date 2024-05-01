@@ -28,7 +28,7 @@ public partial class OrderBookFormSimulation : Form {
         OrderBookDataGridView.Dock = DockStyle.Fill;
 
         Task.Run(async () => {
-            OrderBookProcessor.Start();
+            OrderBookProcessor.StartAsync();
             // Ask
             OrderBook.AddColumn(new OrderBookDefaultColumn("Ask", new[] { OrderBookColumnDataType.Ask }, typeof(decimal)));
             // Bid

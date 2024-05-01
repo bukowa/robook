@@ -118,7 +118,7 @@ public partial class OrderBookForm : BaseForm {
             panelOrderBook.Controls.Add(OrderBookDataGridView);
             OrderBookDataGridView.Dock = DockStyle.Fill;
         });
-        OrderBookProcessor.Start();
+        OrderBookProcessor.StartAsync();
 
         // todo orderbook needs to hold bid/ask data in separate container
         // and if the bid/ask columns are added to the orderbook,

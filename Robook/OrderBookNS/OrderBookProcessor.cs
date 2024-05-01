@@ -25,7 +25,7 @@ public class OrderBookProcessor {
     public readonly ConcurrentQueue<object> _qu;
 
     /// <summary>
-    ///     Cancellation token source used to cancel the <see cref="ProcessQueueAsync(CancellationToken)"/> method.
+    ///     Cancellation token source used to cancel the <see cref="ProcessQueue"/> method.
     /// </summary>
     private readonly CancellationTokenSource _ct = new();
 
@@ -47,14 +47,14 @@ public class OrderBookProcessor {
     }
 
     /// <summary>
-    ///     Starts the <see cref="ProcessQueueAsync(CancellationToken)"/> method in a new thread.
+    ///     Starts the <see cref="ProcessQueue"/> method in a new thread.
     /// </summary>
-    public void Start(int sleep = 1) {
-        Task.Run(() => ProcessQueueAsync(_ct.Token, sleep));
+    public void StartAsync(int sleep = 1) {
+        Task.Run(() => ProcessQueue(_ct.Token, sleep));
     }
 
     /// <summary>
-    ///     Cancels the <see cref="ProcessQueueAsync(CancellationToken)"/> method.
+    ///     Cancels the <see cref="ProcessQueue"/> method.
     /// </summary>
     public void Stop() {
         _ct.Cancel();
@@ -99,7 +99,7 @@ public class OrderBookProcessor {
     /// </summary>
     /// <param name="cancellationToken"> The cancellation token used to cancel the method. </param>
     /// <returns> A <see cref="Task"/> that will be completed when the method is cancelled. </returns>
-    private Task ProcessQueueAsync(CancellationToken cancellationToken, int sleep = 1) {
+    private Task ProcessQueue(CancellationToken cancellationToken, int sleep = 1) {
         
         SpinWait sw = new();
         
