@@ -32,16 +32,16 @@ public class Account : INotifyPropertyChanged {
         set {
             _client = value;
             _client?.ObservePropertyChange(nameof(Client.Params), (c, _) => {
-                c.Params?.TradingSystemConnection?.SubscribeToPropertyChangedEvent(
+                c.Params?.TradingSystemConnection?.ObservePropertyChange(
                     nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(TradingSystemConnectionStatus)); });
-                c.Params?.MarketDataConnection?.SubscribeToPropertyChangedEvent(
+                c.Params?.MarketDataConnection?.ObservePropertyChange(
                     nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(MarketDataConnectionStatus)); });
-                c.Params?.PnlConnection?.SubscribeToPropertyChangedEvent(
+                c.Params?.PnlConnection?.ObservePropertyChange(
                     nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(PnlConnectionStatus)); });
-                c.Params?.HistoricalDataConnection?.SubscribeToPropertyChangedEvent(
+                c.Params?.HistoricalDataConnection?.ObservePropertyChange(
                     nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(HistoricalDataConnectionStatus)); });
             });

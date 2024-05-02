@@ -235,18 +235,9 @@ public class Connection : INotifyPropertyChanged {
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
-    /// Subscribe to all PropertyChanged events for this connection.
-    /// </summary>
-    public void SubscribeToPropertyChangedEvent(
-        Action<Connection, PropertyChangedEventArgs> action
-    ) {
-        PropertyChanged += (sender, args) => { action(this, args); };
-    }
-
-    /// <summary>
     /// Subscribe to PropertyChanged events for a specific property.
     /// </summary>
-    public void SubscribeToPropertyChangedEvent(
+    public void ObservePropertyChange(
         string                                       propertyName,
         Action<Connection, PropertyChangedEventArgs> action
     ) {

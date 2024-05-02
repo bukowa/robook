@@ -92,16 +92,17 @@ public class Connection : INotifyPropertyChanged {
         set {
             _client = value;
             _client?.ObservePropertyChange(nameof(Client.Params), (c, _) => {
-                c.Params?.TradingSystemConnection?.SubscribeToPropertyChangedEvent(
+                // these should be invoked on main thread
+                c.Params?.TradingSystemConnection?.ObservePropertyChange(
                     nameof(Rithmic.Connection.LastConnectionAlert),
                     (_, _) => { NotifyPropertyChanged(nameof(TradingSystemConnectionStatus)); });
-                c.Params?.MarketDataConnection?.SubscribeToPropertyChangedEvent(
+                c.Params?.MarketDataConnection?.ObservePropertyChange(
                     nameof(Rithmic.Connection.LastConnectionAlert),
                     (_, _) => { NotifyPropertyChanged(nameof(MarketDataConnectionStatus)); });
-                c.Params?.PnlConnection?.SubscribeToPropertyChangedEvent(
+                c.Params?.PnlConnection?.ObservePropertyChange(
                     nameof(Rithmic.Connection.LastConnectionAlert),
                     (_, _) => { NotifyPropertyChanged(nameof(PnlConnectionStatus)); });
-                c.Params?.HistoricalDataConnection?.SubscribeToPropertyChangedEvent(
+                c.Params?.HistoricalDataConnection?.ObservePropertyChange(
                     nameof(Rithmic.Connection.LastConnectionAlert),
                     (_, _) => { NotifyPropertyChanged(nameof(HistoricalDataConnectionStatus)); });
             });
@@ -234,7 +235,7 @@ public class Connection : INotifyPropertyChanged {
         }
     }
 
-    private void NotifyPropertyChanged([CallerMemberName] String propertyName = "") {
+    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

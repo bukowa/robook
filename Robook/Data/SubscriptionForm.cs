@@ -64,10 +64,7 @@ public partial class SubscriptionForm : BaseForm {
             var c = Subscriptions[i];
             Task.Run(async () => {
                 try {
-                    if (c.TickSize == null && c.PointValue == null) {
-                        await c.PriceIncrInfoTask();
-                        await c.RefDataTask();   
-                    }
+                    await c.GatherDataAsync();
                     c.StartStream();
                     Task.Run(() => { c.Start(); });
                 }
