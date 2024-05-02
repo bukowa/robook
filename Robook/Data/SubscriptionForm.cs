@@ -76,7 +76,15 @@ public partial class SubscriptionForm : BaseForm {
                 }
             });
         });
-        
+        AddOnClickColumn(new DataGridViewButtonColumn {
+            Name = "Unsubscribe"
+        }, (args, i) => {
+            var c = Subscriptions[i];
+            Task.Run(() => {
+                c.StopStream();
+                c.Cts.Cancel();
+            });
+        });
         dataGridView1.Dock = DockStyle.Fill;
         dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         dataGridView1.CellClick += categoryDataGridView_CellClick;

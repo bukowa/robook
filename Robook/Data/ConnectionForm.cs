@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Rithmic;
 
 namespace Robook.Data;
 
@@ -37,6 +38,7 @@ public partial class ConnectionForm : BaseForm {
             Name = "Login"
         }, (args, i) => {
             var c = Connections[i];
+            c.Client ??= new Client();
             Task.Run(async () => {
                 try {
                     await c.LoginAsync();
@@ -56,7 +58,7 @@ public partial class ConnectionForm : BaseForm {
                     await c.LogoutAsync();
                 }
                 catch (Exception e) {
-                    MessageBox.Show(e.Message);
+                    Invoke(() => { MessageBox.Show(e.Message); });
                 }
             });
         });

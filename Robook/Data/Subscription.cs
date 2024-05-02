@@ -14,6 +14,7 @@ public class Subscriber {
 }
 
 public partial class Subscription : INotifyPropertyChanged {
+
     /// <summary>
     /// Unique identifier for the subscription.
     /// </summary>
@@ -83,11 +84,11 @@ public partial class Subscription : INotifyPropertyChanged {
 
         // Quotes
         H.AskQuoteClb.Subscribe(_subscriptionContext, (_, info) => {
-            // Console.WriteLine(info);
+            Console.WriteLine(info);
         });
         
         H.BidQuoteClb.Subscribe(_subscriptionContext, (_, info) => {
-            // Console.WriteLine(info);
+            Console.WriteLine(info);
         });
         H.EndQuoteClb.Subscribe(_subscriptionContext, (_, info) => {
             Console.WriteLine(info);
@@ -195,7 +196,6 @@ public partial class Subscription : INotifyPropertyChanged {
         H.ProjectedSettlementPriceClb.Subscribe(_subscriptionContext, (_, info) => {
             Console.WriteLine(info);
         });
-        
         E.subscribe(
             Symbol.Exchange, Symbol.Name,
             SubscriptionFlags.All, _subscriptionContext
@@ -203,7 +203,7 @@ public partial class Subscription : INotifyPropertyChanged {
     }
 
     private void _unsubscribeStream() {
-        Connection.Client.Engine.unsubscribe(
+        E.unsubscribe(
             Symbol.Exchange, Symbol.Name
         );
     }
@@ -212,7 +212,7 @@ public partial class Subscription : INotifyPropertyChanged {
         _unsubscribeStream();
     }
 
-    private CancellationTokenSource _cts = new();
+    public CancellationTokenSource Cts = new();
 
     private          bool   _isStreamStarted = false;
     private readonly object _streamLock      = new();
@@ -228,12 +228,13 @@ public partial class Subscription : INotifyPropertyChanged {
         
         lock (_startLock) {
             if (_isStarted) return;
+            Cts = new CancellationTokenSource();
             _isStarted = true;
         }
         
         SpinWait sw = new();
 
-        while (!_cts.Token.IsCancellationRequested) {
+        while (!Cts.Token.IsCancellationRequested) {
             while (Queue.TryDequeue(out var o)) {
                 foreach (var subscriber in Subscribers) {
                     subscriber.Queue.Enqueue(o);

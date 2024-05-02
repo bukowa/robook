@@ -4,15 +4,6 @@ using com.omnesys.rapi;
 
 namespace Rithmic;
 
-/// <summary>
-/// Parameters for <see cref="Connection"/> constructor.
-/// </summary>
-public class ConnectionParams {
-    public string       Login        { get; set; }
-    public string       Password     { get; set; }
-    public ConnectionId ConnectionId { get; set; }
-}
-
 public class ConnectionAlert {
     public AlertInfo AlertInfo { get; set; }
     public DateTime  Time      { get; set; }
@@ -51,21 +42,6 @@ public class Connection : INotifyPropertyChanged {
     }
 
     /// <summary>
-    /// Constructor.
-    /// </summary>
-    public Connection(ConnectionParams connectionParams) {
-        Login        = connectionParams.Login;
-        Password     = connectionParams.Password;
-        ConnectionId = connectionParams.ConnectionId;
-    }
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    public Connection() {
-    }
-
-    /// <summary>
     ///     Returns boolean indicating if the connection is logged in.
     /// </summary>
     public bool IsLoggedIn {
@@ -97,7 +73,7 @@ public class Connection : INotifyPropertyChanged {
     public delegate void AlertInfoHandler(Connection sender, ConnectionAlert alert, DateTime time);
 
     /// <summary>
-    /// <see cref="`OnAlertInfo`"/> is invoked before any modification to the connection
+    /// <see ref="`OnAlertInfo`"/> is invoked before any modification to the connection
     /// instance is made. It is an event for all alert types. Other alert type events
     /// are invoked after this event and after the instance attributes are modified.
     /// </summary>
@@ -184,7 +160,7 @@ public class Connection : INotifyPropertyChanged {
     /// Handles alerts for this connection.
     /// </summary>
     /// <param name="info"> </param>
-    public void HandleAlertInfo(IContext ctx, AlertInfo info) {
+    private void HandleAlertInfo(IContext ctx, AlertInfo info) {
         var now = DateTime.UtcNow;
 
         // AlertInfo as received from Rithmic does not pass any Context -

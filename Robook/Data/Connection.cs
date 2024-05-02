@@ -12,11 +12,20 @@ namespace Robook.Data;
 /// Connection represents Rithmic connection.
 /// </summary>
 public class Connection : INotifyPropertyChanged {
+
+    // used in `DataGridViewCell.SetValue`.
+    public override bool Equals(object? obj) {
+        if (obj is Connection c) {
+            return c.Id == Id;
+        }
+        return false;
+    }
+    
     /// <summary>
     /// String representation of this connection.
     /// </summary>
     public string DisplayName =>
-        $"{Login}:{Server}:{Gateway}";
+        $"{Login}:{Server}:{Gateway}:{Id}";
 
     /// <summary>
     /// Ability to reference this connection as "ValueMember".
@@ -60,7 +69,6 @@ public class Connection : INotifyPropertyChanged {
 
     public Task LoginAsync() {
         return Task.Run(() => {
-            Client ??= new Client();
             Client?.LoginAndWait(LoginParams);
         });
     }
@@ -83,7 +91,7 @@ public class Connection : INotifyPropertyChanged {
         get => _client;
         set {
             _client = value;
-            _client?.SubscribeToPropertyChangedEvent(nameof(Client.Params), (c, _) => {
+            _client?.ObservePropertyChange(nameof(Client.Params), (c, _) => {
                 c.Params?.TradingSystemConnection?.SubscribeToPropertyChangedEvent(
                     nameof(Rithmic.Connection.LastConnectionAlert),
                     (_, _) => { NotifyPropertyChanged(nameof(TradingSystemConnectionStatus)); });

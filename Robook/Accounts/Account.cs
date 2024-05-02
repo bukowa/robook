@@ -31,7 +31,7 @@ public class Account : INotifyPropertyChanged {
         get => _client;
         set {
             _client = value;
-            _client?.SubscribeToPropertyChangedEvent(nameof(Client.Params), (c, _) => {
+            _client?.ObservePropertyChange(nameof(Client.Params), (c, _) => {
                 c.Params?.TradingSystemConnection?.SubscribeToPropertyChangedEvent(
                     nameof(Connection.LastConnectionAlert),
                     (c, _) => { NotifyPropertyChanged(nameof(TradingSystemConnectionStatus)); });

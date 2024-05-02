@@ -128,11 +128,11 @@ public class Client : INotifyPropertyChanged {
         get => _loginParams;
         set {
             _loginParams = value;
-            notifyPropertyChanged();
+            NotifyPropertyChanged();
         }
     }
 
-    private LoginParams _loginParams;
+    private LoginParams? _loginParams;
 
     /// <summary>
     /// Logout from Rithmic.
@@ -191,7 +191,7 @@ public class Client : INotifyPropertyChanged {
                     sIhvCnnctPt = HistoricalDataConnection == null ? string.Empty : PluginIhCnnctPt;
                 }
             }
-
+            
             Engine.login
             (
                 RHandler,
@@ -316,29 +316,25 @@ public class Client : INotifyPropertyChanged {
 
     #region INotifyPropertyChanged
 
-    public void SubscribeToPropertyChangedEvent(Action<Client, PropertyChangedEventArgs> action) {
-        PropertyChanged += (sender, args) => { action(this, args); };
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "") {
+        if (!EqualityComparer<T>.Default.Equals(field, value)) {
+            field = value;
+            NotifyPropertyChanged(propertyName);
+        }
     }
 
-    public void SubscribeToPropertyChangedEvent(string property, Action<Client, PropertyChangedEventArgs> action) {
-        PropertyChanged += (sender, args) => {
+    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public void ObservePropertyChange(string property, Action<Client, PropertyChangedEventArgs> action) {
+        PropertyChanged += (_, args) => {
             if (args.PropertyName == property) {
                 action(this, args);
             }
         };
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void setProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "") {
-        if (!EqualityComparer<T>.Default.Equals(field, value)) {
-            field = value;
-            notifyPropertyChanged(propertyName);
-        }
-    }
-
-    private void notifyPropertyChanged([CallerMemberName] String propertyName = "") {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     #endregion
