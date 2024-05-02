@@ -46,7 +46,7 @@ public partial class DataServiceForm : BaseForm {
         var filePath  = Path.Join(textBox4.Text, $"{exchange}_{symbol}.parquet");
         
         var barType   = (BarType)comboBox1.SelectedItem;
-        var barPeriod = Int32.Parse(textBox3.Text);
+        var barPeriod = double.Parse(textBox3.Text);
         var start     = dateTimePicker1.Value;
         start = DateTime.SpecifyKind(start, DateTimeKind.Utc);
         var end       = dateTimePicker2.Value;
