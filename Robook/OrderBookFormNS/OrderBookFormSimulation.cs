@@ -69,6 +69,8 @@ public partial class OrderBookFormSimulation : Form {
 
         OrderBookSimulator.SetupBidAskOffers();
         OrderBookSimulator.SimulateOrders();
+
+        InitializeFontOptions();
     }
 
     private OrderBookDefaultColumn _colOb = new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(int));
@@ -87,5 +89,30 @@ public partial class OrderBookFormSimulation : Form {
     private async void removeButton_Click(object sender, EventArgs e) {
         await OrderBookProcessor.DelayProcessingWith(() => { OrderBook.RemoveColumn(_colOb); });
         Invoke(() => { OrderBookDataGridControl.RemoveColumn(_colDgv); });
+    }
+
+    private void InitializeFontOptions() {
+        fontFamilyComboBox.Items.AddRange(FontFamily.Families.Select(f => f.Name).ToArray());
+        fontFamilyComboBox.SelectedIndexChanged += ApplyFontStyle;
+
+        fontSizeNumericUpDown.Value        =  (decimal)DataGridView.DefaultFont.Size;
+        fontSizeNumericUpDown.ValueChanged += ApplyFontStyle;
+
+        boldCheckBox.CheckedChanged   += ApplyFontStyle;
+        italicCheckBox.CheckedChanged += ApplyFontStyle;
+    }
+
+    private void ApplyFontStyle(object sender, EventArgs e) {
+        FontStyle fontStyle                   = FontStyle.Regular;
+        if (boldCheckBox.Checked) fontStyle   |= FontStyle.Bold;
+        if (italicCheckBox.Checked) fontStyle |= FontStyle.Italic;
+
+        string fontFamily = (fontFamilyComboBox.SelectedItem ?? DataGridView.DefaultFont.FontFamily).ToString();
+        float  fontSize   = (float)fontSizeNumericUpDown.Value;
+
+        if (OrderBookDataGridView != null) {
+            OrderBookDataGridView.DefaultCellStyle.Font = new Font(fontFamily, fontSize, fontStyle);
+            OrderBookDataGridView.AutoResizeRows();
+        }
     }
 }
