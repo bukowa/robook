@@ -73,8 +73,6 @@ public partial class OrderBookFormSimulation : Form {
         InitializeFontOptions();
     }
 
-    private OrderBookDefaultColumn _colOb = new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(int));
-
     private AbstractOrderBookColumn _colDgv = new HistogramColumn() {
         DataPropertyName = "Volume",
         Name             = "Volume",
@@ -82,12 +80,10 @@ public partial class OrderBookFormSimulation : Form {
     };
 
     private async void addButton_Click(object sender, EventArgs e) {
-        await OrderBookProcessor.DelayProcessingWith(() => { OrderBook.AddColumn(_colOb); });
         Invoke(() => { OrderBookDataGridControl.AddColumn(_colDgv); });
     }
 
     private async void removeButton_Click(object sender, EventArgs e) {
-        await OrderBookProcessor.DelayProcessingWith(() => { OrderBook.RemoveColumn(_colOb); });
         Invoke(() => { OrderBookDataGridControl.RemoveColumn(_colDgv); });
     }
 
