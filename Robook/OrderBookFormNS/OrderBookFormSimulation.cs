@@ -30,15 +30,20 @@ public partial class OrderBookFormSimulation : Form {
         Task.Run(async () => {
             OrderBookProcessor.StartAsync();
             // Ask
-            OrderBook.AddColumn(new OrderBookDefaultColumn("Ask", new[] { OrderBookColumnDataType.Ask }, typeof(decimal)));
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("Ask", new[] { OrderBookColumnDataType.Ask }, typeof(decimal)));
             // Bid
-            OrderBook.AddColumn(new OrderBookDefaultColumn("Bid", new[] { OrderBookColumnDataType.Bid }, typeof(decimal)));
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("Bid", new[] { OrderBookColumnDataType.Bid }, typeof(decimal)));
             // Volume
-            OrderBook.AddColumn(new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
             // BuyVolume
-            OrderBook.AddColumn(new OrderBookDefaultColumn("BuyVolume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("BuyVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
             // SellVolume
-            OrderBook.AddColumn(new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
         });
 
         var buyVolumeColumn = new BuyVolumeColumn() {
