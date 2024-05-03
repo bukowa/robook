@@ -28,14 +28,23 @@ partial class OrderBookFormSimulation {
     /// </summary>
     private void InitializeComponent() {
         buttonsPanel = new Panel();
-        orderBookPanel = new Panel();
-        addButton = new Button();
+        fontSizeNumericUpDown = new NumericUpDown();
+        italicCheckBox = new CheckBox();
+        boldCheckBox = new CheckBox();
+        fontFamilyComboBox = new ComboBox();
         removeButton = new Button();
+        addButton = new Button();
+        orderBookPanel = new Panel();
         buttonsPanel.SuspendLayout();
+        ((ISupportInitialize)fontSizeNumericUpDown).BeginInit();
         SuspendLayout();
         // 
         // buttonsPanel
         // 
+        buttonsPanel.Controls.Add(fontSizeNumericUpDown);
+        buttonsPanel.Controls.Add(italicCheckBox);
+        buttonsPanel.Controls.Add(boldCheckBox);
+        buttonsPanel.Controls.Add(fontFamilyComboBox);
         buttonsPanel.Controls.Add(removeButton);
         buttonsPanel.Controls.Add(addButton);
         buttonsPanel.Dock = DockStyle.Top;
@@ -44,26 +53,47 @@ partial class OrderBookFormSimulation {
         buttonsPanel.Size = new Size(800, 61);
         buttonsPanel.TabIndex = 0;
         // 
-        // orderBookPanel
+        // fontSizeNumericUpDown
         // 
-        orderBookPanel.Dock = DockStyle.Fill;
-        orderBookPanel.Location = new Point(0, 61);
-        orderBookPanel.Name = "orderBookPanel";
-        orderBookPanel.Size = new Size(800, 389);
-        orderBookPanel.TabIndex = 1;
+        fontSizeNumericUpDown.Location = new Point(439, 18);
+        fontSizeNumericUpDown.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+        fontSizeNumericUpDown.Name = "fontSizeNumericUpDown";
+        fontSizeNumericUpDown.Size = new Size(64, 23);
+        fontSizeNumericUpDown.TabIndex = 8;
+        fontSizeNumericUpDown.Value = new decimal(new int[] { 1, 0, 0, 0 });
         // 
-        // addButton
+        // italicCheckBox
         // 
-        addButton.Location                =  new Point(30, 17);
-        addButton.Name                    =  "addButton";
-        addButton.Size                    =  new Size(116, 23);
-        addButton.TabIndex                =  2;
-        addButton.Text                    =  "Add column";
-        addButton.UseVisualStyleBackColor =  true;
-        addButton.Click                   += addButton_Click;
+        italicCheckBox.AutoSize = true;
+        italicCheckBox.Location = new Point(597, 20);
+        italicCheckBox.Name = "italicCheckBox";
+        italicCheckBox.Size = new Size(74, 19);
+        italicCheckBox.TabIndex = 7;
+        italicCheckBox.Text = "Italic text";
+        italicCheckBox.UseVisualStyleBackColor = true;
+        // 
+        // boldCheckBox
+        // 
+        boldCheckBox.AutoSize = true;
+        boldCheckBox.FlatStyle = FlatStyle.Flat;
+        boldCheckBox.Location = new Point(518, 21);
+        boldCheckBox.Name = "boldCheckBox";
+        boldCheckBox.Size = new Size(70, 19);
+        boldCheckBox.TabIndex = 6;
+        boldCheckBox.Text = "Bold text";
+        boldCheckBox.UseVisualStyleBackColor = true;
+        // 
+        // fontFamilyComboBox
+        // 
+        fontFamilyComboBox.Location = new Point(296, 17);
+        fontFamilyComboBox.Name = "fontFamilyComboBox";
+        fontFamilyComboBox.Size = new Size(121, 23);
+        fontFamilyComboBox.TabIndex = 4;
+        fontFamilyComboBox.Text = "Font family";
         // 
         // removeButton
         // 
+        removeButton.FlatStyle = FlatStyle.Popup;
         removeButton.Location = new Point(152, 17);
         removeButton.Name = "removeButton";
         removeButton.Size = new Size(129, 23);
@@ -71,6 +101,24 @@ partial class OrderBookFormSimulation {
         removeButton.Text = "Remove column";
         removeButton.UseVisualStyleBackColor = true;
         removeButton.Click += removeButton_Click;
+        // 
+        // addButton
+        // 
+        addButton.Location = new Point(30, 17);
+        addButton.Name = "addButton";
+        addButton.Size = new Size(116, 23);
+        addButton.TabIndex = 2;
+        addButton.Text = "Add column";
+        addButton.UseVisualStyleBackColor = true;
+        addButton.Click += addButton_Click;
+        // 
+        // orderBookPanel
+        // 
+        orderBookPanel.Dock = DockStyle.Fill;
+        orderBookPanel.Location = new Point(0, 61);
+        orderBookPanel.Name = "orderBookPanel";
+        orderBookPanel.Size = new Size(800, 389);
+        orderBookPanel.TabIndex = 1;
         // 
         // OrderBookFormSimulation
         // 
@@ -82,6 +130,8 @@ partial class OrderBookFormSimulation {
         Name = "OrderBookFormSimulation";
         Text = "OrderBookFormSimulation";
         buttonsPanel.ResumeLayout(false);
+        buttonsPanel.PerformLayout();
+        ((ISupportInitialize)fontSizeNumericUpDown).EndInit();
         ResumeLayout(false);
     }
 
@@ -91,4 +141,8 @@ partial class OrderBookFormSimulation {
     private Button addButton;
     private Panel orderBookPanel;
     private Button removeButton;
+    private ComboBox fontFamilyComboBox;
+    private CheckBox italicCheckBox;
+    private CheckBox boldCheckBox;
+    private NumericUpDown fontSizeNumericUpDown;
 }
