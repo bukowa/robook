@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using com.omnesys.rapi;
+using Rithmic;
 
 namespace Robook.OrderBookNS;
 
@@ -24,7 +25,7 @@ public class OrderBookProcessor {
     public readonly ConcurrentQueue<object> _qu;
 
     /// <summary>
-    ///     Cancellation token source used to cancel the <see cref="ProcessQueueAsync(CancellationToken)"/> method.
+    ///     Cancellation token source used to cancel the <see cref="ProcessQueue"/> method.
     /// </summary>
     private readonly CancellationTokenSource _ct = new();
 
@@ -41,38 +42,38 @@ public class OrderBookProcessor {
         OrderBook               orderBook,
         ConcurrentQueue<object> objectQueue
     ) {
-        _qu = objectQueue ?? throw new ArgumentNullException(nameof(objectQueue));
         _ob = orderBook ?? throw new ArgumentNullException(nameof(orderBook));
+        _qu = objectQueue ?? throw new ArgumentNullException(nameof(objectQueue));
     }
 
     /// <summary>
-    ///     Starts the <see cref="ProcessQueueAsync(CancellationToken)"/> method in a new thread.
+    ///     Starts the <see cref="ProcessQueue"/> method in a new thread.
     /// </summary>
-    public void Start(int sleep=1) {
-        Task.Run(() => ProcessQueueAsync(_ct.Token, sleep));
+    public void StartAsync(int sleep = 1) {
+        Task.Run(() => ProcessQueue(_ct.Token, sleep));
     }
 
     /// <summary>
-    ///     Cancels the <see cref="ProcessQueueAsync(CancellationToken)"/> method.
+    ///     Cancels the <see cref="ProcessQueue"/> method.
     /// </summary>
     public void Stop() {
         _ct.Cancel();
     }
-    
+
     /// <summary>
     ///    Enqueues a column to be added to the <see cref="OrderBook"/>.
     /// </summary>
-    public void AddColumn<T>(IOrderBookColumn<T> column) {
+    public void AddColumn(IOrderBookColumn column) {
         DelayProcessingWith(() => _ob.AddColumn(column));
     }
-    
+
     /// <summary>
     ///     Enqueues a column to be deleted from the <see cref="OrderBook"/>.
     /// </summary>
-    public void RemoveColumn<T>(IOrderBookColumn<T> column) {
+    public void RemoveColumn(IOrderBookColumn column) {
         DelayProcessingWith(() => _ob.RemoveColumn(column));
     }
-    
+
     /// <summary>
     ///     Enqueues an action to be executed after the queue is empty.
     /// </summary>
@@ -94,44 +95,58 @@ public class OrderBookProcessor {
     }
 
     /// <summary>
-    ///     Processes the columns of the <see cref="OrderBookColumnCollection"/> based on the type of the item.
-    /// </summary>
-    private void ProcessColumns<T>(List<IOrderBookColumn<T>> columns, int index, T item) {
-        foreach (var column in columns) {
-            column.ProcessRealTimeAt(index, item, _ob);
-        }
-    }
-
-    /// <summary>
     ///     Processes the queue and dequeues the objects to be processed by the <see cref="IOrderBookColumn{T}"/>s.
     /// </summary>
     /// <param name="cancellationToken"> The cancellation token used to cancel the method. </param>
     /// <returns> A <see cref="Task"/> that will be completed when the method is cancelled. </returns>
-    private Task ProcessQueueAsync(CancellationToken cancellationToken, int sleep=1) {
+    private Task ProcessQueue(CancellationToken cancellationToken, int sleep = 1) {
+        
+        SpinWait sw = new();
+        
         while (!cancellationToken.IsCancellationRequested) {
             while (_dq.TryDequeue(out var delayTask)) {
                 delayTask();
             }
+
             while (_qu.TryDequeue(out var o)) {
                 int i;
                 switch (o) {
                     case AskInfo x when TryGetPriceIndex(x.Price, out i):
-                        ProcessColumns(_ob.OBCC.ColAskInfo, i, x);
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Ask]
+                           .ForEach(column => column.ProcessAsk(i, x, _ob));
                         break;
 
                     case BidInfo x when TryGetPriceIndex(x.Price, out i):
-                        ProcessColumns(_ob.OBCC.ColBidInfo, i, x);
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Bid]
+                           .ForEach(column => column.ProcessBid(i, x, _ob));
                         break;
 
                     case TradeInfo x when TryGetPriceIndex(x.Price, out i):
-                        ProcessColumns(_ob.OBCC.ColTradeInfo, i, x);
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Trade]
+                           .ForEach(column => column.ProcessTrade(i, x, _ob));
+
+                        if (x.AggressorSide == "B")
+                            _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.TradeBuy]
+                               .ForEach(column => column.ProcessTrade(i, x, _ob));
+                        else
+                            _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.TradeSell]
+                               .ForEach(column => column.ProcessTrade(i, x, _ob));
+                        break;
+
+                    case BestBidQuoteInfo x when TryGetPriceIndex(x.BidInfo.Price, out i):
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.BestBid]
+                           .ForEach(column => column.ProcessBestBid(i, x, _ob));
+                        break;
+
+                    case BestAskQuoteInfo x when TryGetPriceIndex(x.AskInfo.Price, out i):
+                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.BestAsk]
+                           .ForEach(column => column.ProcessBestAsk(i, x, _ob));
                         break;
                 }
             }
-            // keeps the CPU usage low
-            Thread.Sleep(1);
-            //Task.Delay(sleep, cancellationToken);
+            sw.SpinOnce();
         }
+
         return Task.CompletedTask;
     }
 

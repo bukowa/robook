@@ -28,13 +28,22 @@ public partial class OrderBookFormSimulation : Form {
         OrderBookDataGridView.Dock = DockStyle.Fill;
 
         Task.Run(async () => {
-            OrderBookProcessor.Start();
-
-            OrderBook.AddColumn(new OrderBookAskColumn());
-            OrderBook.AddColumn(new OrderBookBidColumn());
-            OrderBook.AddColumn(new OrderBookVolumeColumn());
-            OrderBook.AddColumn(new OrderBookBuyVolumeColumn());
-            OrderBook.AddColumn(new OrderBookSellVolumeColumn());
+            OrderBookProcessor.StartAsync();
+            // Ask
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("Ask", new[] { OrderBookColumnDataType.Ask }, typeof(decimal)));
+            // Bid
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("Bid", new[] { OrderBookColumnDataType.Bid }, typeof(decimal)));
+            // Volume
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
+            // BuyVolume
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("BuyVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
+            // SellVolume
+            OrderBook.AddColumn(
+                new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
         });
 
         var buyVolumeColumn = new BuyVolumeColumn() {
@@ -60,11 +69,9 @@ public partial class OrderBookFormSimulation : Form {
 
         OrderBookSimulator.SetupBidAskOffers();
         OrderBookSimulator.SimulateOrders();
-    }
 
-    private OrderBookVolumeColumn _colOb = new() {
-        Name = "Volume",
-    };
+        InitializeFontOptions();
+    }
 
     private AbstractOrderBookColumn _colDgv = new HistogramColumn() {
         DataPropertyName = "Volume",
@@ -73,12 +80,35 @@ public partial class OrderBookFormSimulation : Form {
     };
 
     private async void addButton_Click(object sender, EventArgs e) {
-        await OrderBookProcessor.DelayProcessingWith(() => { OrderBook.AddColumn(_colOb); });
         Invoke(() => { OrderBookDataGridControl.AddColumn(_colDgv); });
     }
 
     private async void removeButton_Click(object sender, EventArgs e) {
-        await OrderBookProcessor.DelayProcessingWith(() => { OrderBook.RemoveColumn(_colOb); });
         Invoke(() => { OrderBookDataGridControl.RemoveColumn(_colDgv); });
+    }
+
+    private void InitializeFontOptions() {
+        fontFamilyComboBox.Items.AddRange(FontFamily.Families.Select(f => f.Name).ToArray());
+        fontFamilyComboBox.SelectedIndexChanged += ApplyFontStyle;
+
+        fontSizeNumericUpDown.Value        =  (decimal)DataGridView.DefaultFont.Size;
+        fontSizeNumericUpDown.ValueChanged += ApplyFontStyle;
+
+        boldCheckBox.CheckedChanged   += ApplyFontStyle;
+        italicCheckBox.CheckedChanged += ApplyFontStyle;
+    }
+
+    private void ApplyFontStyle(object sender, EventArgs e) {
+        FontStyle fontStyle                   = FontStyle.Regular;
+        if (boldCheckBox.Checked) fontStyle   |= FontStyle.Bold;
+        if (italicCheckBox.Checked) fontStyle |= FontStyle.Italic;
+
+        string fontFamily = (fontFamilyComboBox.SelectedItem ?? DataGridView.DefaultFont.FontFamily).ToString();
+        float  fontSize   = (float)fontSizeNumericUpDown.Value;
+
+        if (OrderBookDataGridView != null) {
+            OrderBookDataGridView.DefaultCellStyle.Font = new Font(fontFamily, fontSize, fontStyle);
+            OrderBookDataGridView.AutoResizeRows();
+        }
     }
 }

@@ -134,6 +134,28 @@ public class BestBidAskQuoteInfo {
 }
 
 /// <summary>
+///     Wraps Ask info to distinguish it from BestAskQuoteInfo.
+/// </summary>
+public class BestAskQuoteInfo {
+    public AskInfo AskInfo { get; }
+
+    public BestAskQuoteInfo(AskInfo askInfo) {
+        AskInfo = askInfo;
+    }
+}
+
+/// <summary>
+///     Wraps Bid info to distinguish it from BestBidQuoteInfo.
+/// </summary>
+public class BestBidQuoteInfo {
+    public BidInfo BidInfo { get; }
+
+    public BestBidQuoteInfo(BidInfo bidInfo) {
+        BidInfo = bidInfo;
+    }
+}
+
+/// <summary>
 ///     Implements a handler for AdmCallbacks events with support for dynamic event registration and invocation.
 /// </summary>
 public class AdmHandler : AdmCallbacks {
@@ -191,9 +213,9 @@ public partial class RHandler : RCallbacks {
     public CallbackManager<AggregatorInfo>               AggregatorClb                { get; } = new();
     public CallbackManager<AskInfo>                      AskQuoteClb                  { get; } = new();
     public CallbackManager<AuxRefDataInfo>               AuxRefDataClb                { get; } = new();
-    public CallbackManager<AskInfo>                      BestAskQuoteClb              { get; } = new();
+    public CallbackManager<BestAskQuoteInfo>             BestAskQuoteClb              { get; } = new();
     public CallbackManager<BestBidAskQuoteInfo>          BestBidAskQuoteClb           { get; } = new();
-    public CallbackManager<BidInfo>                      BestBidQuoteClb              { get; } = new();
+    public CallbackManager<BestBidQuoteInfo>             BestBidQuoteClb              { get; } = new();
     public CallbackManager<BidInfo>                      BidQuoteClb                  { get; } = new();
     public CallbackManager<BinaryContractListInfo>       BinaryContractListClb        { get; } = new();
     public CallbackManager<CloseMidPriceInfo>            CloseMidPriceClb             { get; } = new();
@@ -283,13 +305,13 @@ public partial class RHandler : RCallbacks {
         InvokeCallback(AuxRefDataClb, info.Context, info);
 
     public override void BestAskQuote(AskInfo info) =>
-        InvokeCallback(BestAskQuoteClb, info.Context, info);
+        InvokeCallback(BestAskQuoteClb, info.Context, new BestAskQuoteInfo(info));
 
     public override void BestBidAskQuote(BidInfo binfo, AskInfo ainfo) =>
         InvokeCallback(BestBidAskQuoteClb, binfo.Context, new BestBidAskQuoteInfo(ainfo, binfo));
 
     public override void BestBidQuote(BidInfo info) =>
-        InvokeCallback(BestBidQuoteClb, info.Context, info);
+        InvokeCallback(BestBidQuoteClb, info.Context, new BestBidQuoteInfo(info));
 
     public override void BidQuote(BidInfo info) =>
         InvokeCallback(BidQuoteClb, info.Context, info);

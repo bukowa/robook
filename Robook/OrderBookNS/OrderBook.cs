@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using com.omnesys.rapi;
 
 namespace Robook.OrderBookNS;
 
@@ -59,20 +58,20 @@ public class ExcOrderBookUnhandledColumnType : Exception {
 ///     This is a wrapper around the <see cref="DataTable"/> and <see cref="DataColumnCollection"/>.
 /// </summary>
 public class OrderBook {
+    public readonly int     Levels;
     public readonly decimal TickSize;
     public readonly decimal MidPrice;
-    public readonly int     Levels;
 
     public readonly DataTable                 OBDT = new();
     public readonly OrderBookColumnCollection OBCC = new();
-
-    public          decimal[]                PricesArray => _pricesArray;
-    private         decimal[]                _pricesArray;
-    public readonly Dictionary<decimal, int> PriceIndexMap = new();
-
+    
     public DataRow this[int     i] => OBDT.Rows[i];
     public DataRow this[decimal p] => OBDT.Rows[GetIndexOfPrice(p)];
     public DataRow this[double  p] => OBDT.Rows[GetIndexOfPrice(p)];
+    
+    public readonly decimal[] Prices;
+
+    public readonly Dictionary<decimal, int> PriceIndexMap = new();
 
     /// <summary>
     ///     Returns or sets the value of the cell at the specified index and column.
@@ -120,10 +119,10 @@ public class OrderBook {
         Levels   = levels;
 
         OBDT.Columns.Add("Price", typeof(decimal));
-        _pricesArray = NewPriceLevels(TickSize, MidPrice, Levels);
-        for (var i = 0; i < _pricesArray.Length; i++) {
-            PriceIndexMap[_pricesArray[i]] = i;
-            OBDT.Rows.Add(_pricesArray[i]);
+        Prices = NewPriceLevels(TickSize, MidPrice, Levels);
+        for (var i = 0; i < Prices.Length; i++) {
+            PriceIndexMap[Prices[i]] = i;
+            OBDT.Rows.Add(Prices[i]);
         }
     }
 
@@ -164,89 +163,32 @@ public class OrderBook {
     public IEnumerable<T?> GetColumnValues<T>(string columnName) where T : struct {
         return OBDT.AsEnumerable().Select(row => row.Field<T?>(columnName));
     }
-    
+
     /// <summary>
     ///     Adds a column to the order book.
     /// </summary>
     /// <param name="column">Column to add.</param>
     /// <exception cref="ExcOrderBookColumnAlreadyExists"></exception>
     /// <exception cref="ExcOrderBookUnhandledColumnType"></exception>
-    public void AddColumn<T>(
-        IOrderBookColumn<T> column
+    public void AddColumn(
+        IOrderBookColumn column
     ) {
-        
-        if (OBDT.Columns.Contains(column.Name)) {
-            throw new ExcOrderBookColumnAlreadyExists(column.Name);
-        }
-
-        switch (column) {
-            case IOrderBookColumn<AskInfo> askColumn:
-                OBCC.Add(askColumn);
-                break;
-
-            case IOrderBookColumn<BidInfo> bidColumn:
-                OBCC.Add(bidColumn);
-                break;
-
-            case IOrderBookColumn<TradeInfo> tradeColumn:
-                OBCC.Add(tradeColumn);
-                break;
-
-            case IOrderBookColumn<OpenPriceInfo> openPriceColumn:
-                OBCC.Add(openPriceColumn);
-                break;
-
-            case IOrderBookColumn<ClosePriceInfo> closePriceColumn:
-                OBCC.Add(closePriceColumn);
-                break;
-
-            default:
-                throw new ExcOrderBookUnhandledColumnType(typeof(T));
-        }
+        OBCC.Add(column);
         OBDT.Columns.Add(column.Name, column.Type);
     }
-    
+
     /// <summary>
     ///     Removes a column from the order book.
     /// </summary>
     /// <param name="column">Column to remove.</param>
     /// <exception cref="ExcOrderBookUnhandledColumnType"></exception>
     /// <exception cref="ExcOrderBookColumnNotFound"></exception>
-    public void RemoveColumn<T>(
-        IOrderBookColumn<T> column
+    public void RemoveColumn(
+        IOrderBookColumn column
     ) {
-        switch (column) {
-            case IOrderBookColumn<AskInfo> askColumn:
-                OBCC.Remove(askColumn);
-                break;
-
-            case IOrderBookColumn<BidInfo> bidColumn:
-                OBCC.Remove(bidColumn);
-                break;
-
-            case IOrderBookColumn<TradeInfo> tradeColumn:
-                OBCC.Remove(tradeColumn);
-                break;
-
-            case IOrderBookColumn<OpenPriceInfo> openPriceColumn:
-                OBCC.Remove(openPriceColumn);
-                break;
-
-            case IOrderBookColumn<ClosePriceInfo> closePriceColumn:
-                OBCC.Remove(closePriceColumn);
-                break;
-
-            default:
-                throw new ExcOrderBookUnhandledColumnType(typeof(T));
-        }
-        try {
-            OBDT.Columns.Remove(column.Name);
-        }
-        catch (ArgumentException) {
-            throw new ExcOrderBookColumnNotFound(column.Name);
-        }
+        OBDT.Columns.Remove(column.Name);
     }
-    
+
     /// <summary>
     ///     Returns the index of the specified price.
     /// </summary>
@@ -258,7 +200,7 @@ public class OrderBook {
             return index;
         throw new ExcOrderBookPriceNotFound(price);
     }
-    
+
     /// <summary>
     ///     Returns the index of the specified price.
     /// </summary>

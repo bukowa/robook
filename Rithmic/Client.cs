@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using com.omnesys.omne.om;
 using com.omnesys.rapi;
 
 namespace Rithmic;
@@ -8,12 +9,34 @@ namespace Rithmic;
 /// Parameters for the Client login method.
 /// </summary>
 public class LoginParams {
-    public readonly CParams     CParams;
-    public          bool        PlugInMode;
-    public          Connection? PnlConnection;
-    public          Connection? MarketDataConnection;
-    public          Connection? HistoricalDataConnection;
-    public          Connection? TradingSystemConnection;
+    public CParams CParams;
+    public bool    PlugInMode;
+
+    public Connection? PnlConnection;
+    public Connection? MarketDataConnection;
+    public Connection? HistoricalDataConnection;
+    public Connection? TradingSystemConnection;
+
+
+    public IEnumerable<Connection> ConnectionsEnumerable {
+        get {
+            if (MarketDataConnection != null) {
+                yield return MarketDataConnection;
+            }
+
+            if (HistoricalDataConnection != null) {
+                yield return HistoricalDataConnection;
+            }
+
+            if (TradingSystemConnection != null) {
+                yield return TradingSystemConnection;
+            }
+
+            if (PnlConnection != null) {
+                yield return PnlConnection;
+            }
+        }
+    }
 
     public LoginParams(CParams cParams) {
         CParams = cParams;
@@ -45,6 +68,7 @@ public class Client : INotifyPropertyChanged {
     public readonly Application Application;
 
     #region PluginMode
+
     /// <summary>
     ///     Historical Data connection point when in PlugIn mode.
     /// </summary>
@@ -71,15 +95,16 @@ public class Client : INotifyPropertyChanged {
             engine.setEnvironmentVariable(env, kv.Key, kv.Value);
         }
     }
+
     #endregion
 
     #region Connections
 
-    public Connection? PnlConnection            => Params.PnlConnection;
-    public Connection? MarketDataConnection     => Params.MarketDataConnection;
-    public Connection? TradingSystemConnection  => Params.TradingSystemConnection;
-    public Connection? HistoricalDataConnection => Params.HistoricalDataConnection;
-    public CParams?    CParams                  => Params.CParams;
+    public Connection? PnlConnection            => Params?.PnlConnection;
+    public Connection? MarketDataConnection     => Params?.MarketDataConnection;
+    public Connection? TradingSystemConnection  => Params?.TradingSystemConnection;
+    public Connection? HistoricalDataConnection => Params?.HistoricalDataConnection;
+    public CParams?    CParams                  => Params?.CParams;
 
     #endregion
 
@@ -95,7 +120,7 @@ public class Client : INotifyPropertyChanged {
         AdmCallbacks = ah ?? new AdmHandler();
         RHandler     = rh ?? new RHandler();
     }
-    
+
     /// <summary>
     ///     Parameters for the Client constructor.
     /// </summary>
@@ -103,11 +128,11 @@ public class Client : INotifyPropertyChanged {
         get => _loginParams;
         set {
             _loginParams = value;
-            notifyPropertyChanged();
+            NotifyPropertyChanged();
         }
     }
 
-    private LoginParams _loginParams;
+    private LoginParams? _loginParams;
 
     /// <summary>
     /// Logout from Rithmic.
@@ -115,32 +140,12 @@ public class Client : INotifyPropertyChanged {
     public void Logout() {
         Engine?.logout();
     }
-    
+
     /// <summary>
     ///     Establishes a connection to Rithmic.
     /// </summary>
     public void Login(LoginParams loginParams) {
-        
-        // if there are new CParams make sure to update the Engine
-        // and notify the subscribers that the Engine has changed
-        // meaning they have to re-subscribe to the new Engine
-        // we can subscribe to engine only after login complete event
-        // todo figure out how to handle this...
-        // todo probably the proper way to do it is to make others
-        // interact with the engine / rhandler only via this class
-        // meaning they can subscribe an action that we will save to the internal list
-        // and later when the engine is ready / client is logged in we will subscribe
-        // todo this needs proper way of handling when to exactly do this
-        // but to be realistic when engine loginparams change it means
-        // the client changed too so...
-        bool isNewEngineRequired = 
-            Params?.CParams.GatewayName != loginParams?.CParams.GatewayName || 
-            Params?.CParams.SystemName != loginParams?.CParams.SystemName ||
-            Params == null;
-        
-        var oldParams = Params;
         Params = loginParams;
-        
         try {
             if (TradingSystemConnection == null && PnlConnection != null) {
                 throw new Exception("PnL connection requires TradingSystem connection");
@@ -158,29 +163,27 @@ public class Client : INotifyPropertyChanged {
             var sPnlCnnctPt = PnlConnection == null
                 ? string.Empty
                 : CParams.sPnLCnnctPt;
-            
+
             var context = new Context();
             HistoricalDataConnection?.TrySubscribeRHandler(RHandler, context);
             TradingSystemConnection?.TrySubscribeRHandler(RHandler, context);
             MarketDataConnection?.TrySubscribeRHandler(RHandler, context);
             PnlConnection?.TrySubscribeRHandler(RHandler, context);
-            
-            if (isNewEngineRequired) {
-                Engine?.shutdown();
-                Engine = null;
-                Engine = new REngine(new REngineParams() {
-                    AdmCallbacks = AdmCallbacks,
-                    AppName      = Application.Name,
-                    AppVersion   = Application.Version,
-                    DomainName   = CParams.DomainName,
-                    LoggerAddr   = CParams.LoggerAddr,
-                    DmnSrvrAddr  = CParams.DmnSrvrAddr,
-                    LicSrvrAddr  = CParams.LicSrvrAddr,
-                    LocBrokAddr  = CParams.LocBrokAddr,
-                    LogFilePath  = CParams.LogFilePath,
-                });
-            }
-            
+
+            Engine?.shutdown();
+            Engine = null;
+            Engine = new REngine(new REngineParams() {
+                AdmCallbacks = AdmCallbacks,
+                AppName      = Application.Name,
+                AppVersion   = Application.Version,
+                DomainName   = CParams.DomainName,
+                LoggerAddr   = CParams.LoggerAddr,
+                DmnSrvrAddr  = CParams.DmnSrvrAddr,
+                LicSrvrAddr  = CParams.LicSrvrAddr,
+                LocBrokAddr  = CParams.LocBrokAddr,
+                LogFilePath  = CParams.LogFilePath,
+            });
+
             if (Params.PlugInMode) {
                 if (MarketDataConnection != null && HistoricalDataConnection != null) {
                     SetPlugInMode(Engine, Constants.DEFAULT_ENVIRONMENT_KEY);
@@ -188,7 +191,7 @@ public class Client : INotifyPropertyChanged {
                     sIhvCnnctPt = HistoricalDataConnection == null ? string.Empty : PluginIhCnnctPt;
                 }
             }
-
+            
             Engine.login
             (
                 RHandler,
@@ -208,11 +211,54 @@ public class Client : INotifyPropertyChanged {
             );
         }
         catch (Exception e) {
-            Params = oldParams;
             Engine?.shutdown();
             Engine = null;
             throw e;
         }
+    }
+
+
+    private object _logoutLoginLock = new();
+
+    /// <summary>
+    /// Logout and todo: wait for all connections to be ready.
+    /// </summary>
+    public void LogoutAndWait() {
+        lock (_logoutLoginLock) {
+            _logoutAndWait();
+        }
+    }
+
+    private void _logoutAndWait() {
+        List<Connection> connections = Params.ConnectionsEnumerable.ToList();
+        int              eventsCount = 0;
+        CountdownEvent?  logoutEvent  = null;
+        
+        void ActionLogoutEvent(Connection c, ConnectionAlert a, DateTime dt) {
+            logoutEvent?.Signal();
+        }
+        
+        void SubscribeToLogoutEvents(Connection? connection) {
+            connection?.SubscribeToOnConnectionClosed(ActionLogoutEvent);
+            eventsCount++;
+        }
+        
+        void UnsubscribeFromLogoutEvents(Connection? connection) {
+            connection?.UnsubscribeFromOnConnectionClosed(ActionLogoutEvent);
+        }
+        
+        try {
+            connections.ForEach(SubscribeToLogoutEvents);
+            logoutEvent = new CountdownEvent(eventsCount);
+            Logout();
+            logoutEvent.Wait(15000);
+        }
+        finally {
+            connections.ForEach(UnsubscribeFromLogoutEvents);
+            logoutEvent?.Dispose();
+            logoutEvent = null;
+        }
+        
     }
 
     /// <summary>
@@ -220,94 +266,75 @@ public class Client : INotifyPropertyChanged {
     /// </summary>
     /// <returns>True if all connections logged in successfully.</returns>
     public bool LoginAndWait(LoginParams loginParams, int timeout = 15000) {
-        CountdownEvent? loginEvent  = null;
-        var             eventsCount = 0;
+        lock (_logoutLoginLock) {
+            return _loginAndWait(loginParams, timeout);
+        }
+    }
 
+    private bool _loginAndWait(LoginParams loginParams, int timeout = 1500) {
+        List<Connection>            connections      = loginParams.ConnectionsEnumerable.ToList();
+        int                         eventsCount      = 0;
+        CountdownEvent?             loginEvent       = null;
 
-        var actionLoginEvent = new Connection.AlertInfoHandler((c, a, dt) => { loginEvent?.Signal(); });
+        void ActionLoginEvent(Connection c, ConnectionAlert a, DateTime dt) {
+            loginEvent?.Signal();
+        }
         
-        if (loginParams.MarketDataConnection != null) {
-            loginParams.MarketDataConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.MarketDataConnection.OnLoginFailed   += actionLoginEvent;
+        void SubscribeToLoginEvents(Connection? connection) {
+            connection?.SubscribeToOnLoginComplete(ActionLoginEvent);
+            connection?.SubscribeToOnLoginFailed(ActionLoginEvent);
             eventsCount++;
         }
 
-        if (loginParams.HistoricalDataConnection != null) {
-            loginParams.HistoricalDataConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.HistoricalDataConnection.OnLoginFailed   += actionLoginEvent;
-            eventsCount++;
+        void UnsubscribeFromLoginEvents(Connection? connection) {
+            connection?.UnsubscribeFromOnLoginComplete(ActionLoginEvent);
+            connection?.UnsubscribeFromOnLoginFailed(ActionLoginEvent);
         }
 
-        if (loginParams.TradingSystemConnection != null) {
-            loginParams.TradingSystemConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.TradingSystemConnection.OnLoginFailed   += actionLoginEvent;
-            eventsCount++;
+        bool IsLoggedId(Connection? connection) {
+            return connection?.IsLoggedIn ?? false;
         }
 
-        if (loginParams.PnlConnection != null) {
-            loginParams.PnlConnection.OnLoginComplete += actionLoginEvent;
-            loginParams.PnlConnection.OnLoginFailed   += actionLoginEvent;
-            eventsCount++;
+        try {
+            connections.ForEach(SubscribeToLoginEvents);
+            loginEvent = new CountdownEvent(eventsCount);
+            Login(loginParams);
+            loginEvent.Wait(timeout);
+        }
+        finally {
+            connections.ForEach(UnsubscribeFromLoginEvents);
+            loginEvent?.Dispose();
+            loginEvent = null;
         }
 
-        loginEvent = new CountdownEvent(eventsCount);
-        Login(loginParams);
-        loginEvent.Wait(timeout);
-
-        if (MarketDataConnection != null) {
-            MarketDataConnection.OnLoginComplete -= actionLoginEvent;
-            MarketDataConnection.OnLoginFailed   -= actionLoginEvent;
+        if (connections.All(IsLoggedId)) {
+            return true;
         }
 
-        if (HistoricalDataConnection != null) {
-            HistoricalDataConnection.OnLoginComplete -= actionLoginEvent;
-            HistoricalDataConnection.OnLoginFailed   -= actionLoginEvent;
-        }
-
-        if (TradingSystemConnection != null) {
-            TradingSystemConnection.OnLoginComplete -= actionLoginEvent;
-            TradingSystemConnection.OnLoginFailed   -= actionLoginEvent;
-        }
-
-        if (PnlConnection != null) {
-            PnlConnection.OnLoginComplete -= actionLoginEvent;
-            PnlConnection.OnLoginFailed   -= actionLoginEvent;
-        }
-
-        // return false if any connection failed to login
-        if (MarketDataConnection != null && !MarketDataConnection.IsLoggedIn) return false;
-        if (HistoricalDataConnection != null && !HistoricalDataConnection.IsLoggedIn) return false;
-        if (TradingSystemConnection != null && !TradingSystemConnection.IsLoggedIn) return false;
-        if (PnlConnection != null && !PnlConnection.IsLoggedIn) return false;
-
-        return true;
+        return false;
     }
 
     #region INotifyPropertyChanged
 
-    public void SubscribeToPropertyChangedEvent(Action<Client, PropertyChangedEventArgs> action) {
-        PropertyChanged += (sender, args) => { action(this, args); };
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "") {
+        if (!EqualityComparer<T>.Default.Equals(field, value)) {
+            field = value;
+            NotifyPropertyChanged(propertyName);
+        }
     }
 
-    public void SubscribeToPropertyChangedEvent(string property, Action<Client, PropertyChangedEventArgs> action) {
-        PropertyChanged += (sender, args) => {
+    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public void ObservePropertyChange(string property, Action<Client, PropertyChangedEventArgs> action) {
+        PropertyChanged += (_, args) => {
             if (args.PropertyName == property) {
                 action(this, args);
             }
         };
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void setProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "") {
-        if (!EqualityComparer<T>.Default.Equals(field, value)) {
-            field = value;
-            notifyPropertyChanged(propertyName);
-        }
-    }
-
-    private void notifyPropertyChanged([CallerMemberName] String propertyName = "") {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     #endregion

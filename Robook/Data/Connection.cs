@@ -6,22 +6,82 @@ using Rithmic;
 using Robook.Store;
 using Application = Rithmic.Application;
 
-namespace Robook.Accounts;
+namespace Robook.Data;
 
 /// <summary>
-/// Rithmic account.
+/// Connection represents Rithmic connection.
 /// </summary>
-public class Account : INotifyPropertyChanged {
-    public event PropertyChangedEventHandler? PropertyChanged;
+public class Connection : INotifyPropertyChanged {
+
+    // used in `DataGridViewCell.SetValue`.
+    public override bool Equals(object? obj) {
+        if (obj is Connection c) {
+            return c.Id == Id;
+        }
+        return false;
+    }
+    
+    /// <summary>
+    /// String representation of this connection.
+    /// </summary>
+    public string DisplayName =>
+        $"{Login}:{Server}:{Gateway}:{Id}";
 
     /// <summary>
-    /// Default application.
+    /// Ability to reference this connection as "ValueMember".
+    /// </summary>
+    [JsonIgnore]
+    public Connection Self => this;
+
+    /// <summary>
+    /// Unique identifier for this connection.
+    /// </summary>
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    # region CPARAMS
+
+    [Browsable(false)] private CParamsSource CParamsSource => new(CParamsDirPath);
+
+    [Browsable(false)]
+    private CParams CParams {
+        get {
+            var x = CParamsSource.GetCParams(Server, Gateway);
+            x.LogFilePath = LogFilePath;
+            return x;
+        }
+    }
+
+    [Browsable(false)]
+    private Rithmic.Connection? CreateConnection(bool shouldCreate, ConnectionId id) {
+        return shouldCreate ? new Rithmic.Connection(Login, Password.Decrypted(), id) : null;
+    }
+
+    [Browsable(false)]
+    private LoginParams LoginParams => new(CParams) {
+        PlugInMode               = PlugInMode,
+        PnlConnection            = CreateConnection(PnlConnection,            ConnectionId.PnL),
+        HistoricalDataConnection = CreateConnection(HistoricalDataConnection, ConnectionId.History),
+        MarketDataConnection     = CreateConnection(MarketDataConnection,     ConnectionId.MarketData),
+        TradingSystemConnection  = CreateConnection(TradingSystemConnection,  ConnectionId.TradingSystem),
+    };
+
+    #endregion
+
+    public Task LoginAsync() {
+        return Task.Run(() => {
+            Client?.LoginAndWait(LoginParams);
+        });
+    }
+
+    public Task LogoutAsync() {
+        return Task.Run(() => { Client?.LogoutAndWait(); });
+    }
+
+    /// <summary>
+    /// Application used for this connection.
     /// </summary>
     [JsonIgnore] public static Application Application = new();
 
-    
-    private Client? _client;
-    
     /// <summary>
     /// Client for this account.
     /// </summary>
@@ -32,32 +92,30 @@ public class Account : INotifyPropertyChanged {
         set {
             _client = value;
             _client?.ObservePropertyChange(nameof(Client.Params), (c, _) => {
+                // these should be invoked on main thread
                 c.Params?.TradingSystemConnection?.ObservePropertyChange(
-                    nameof(Connection.LastConnectionAlert),
-                    (c, _) => { NotifyPropertyChanged(nameof(TradingSystemConnectionStatus)); });
+                    nameof(Rithmic.Connection.LastConnectionAlert),
+                    (_, _) => { NotifyPropertyChanged(nameof(TradingSystemConnectionStatus)); });
                 c.Params?.MarketDataConnection?.ObservePropertyChange(
-                    nameof(Connection.LastConnectionAlert),
-                    (c, _) => { NotifyPropertyChanged(nameof(MarketDataConnectionStatus)); });
+                    nameof(Rithmic.Connection.LastConnectionAlert),
+                    (_, _) => { NotifyPropertyChanged(nameof(MarketDataConnectionStatus)); });
                 c.Params?.PnlConnection?.ObservePropertyChange(
-                    nameof(Connection.LastConnectionAlert),
-                    (c, _) => { NotifyPropertyChanged(nameof(PnlConnectionStatus)); });
+                    nameof(Rithmic.Connection.LastConnectionAlert),
+                    (_, _) => { NotifyPropertyChanged(nameof(PnlConnectionStatus)); });
                 c.Params?.HistoricalDataConnection?.ObservePropertyChange(
-                    nameof(Connection.LastConnectionAlert),
-                    (c, _) => { NotifyPropertyChanged(nameof(HistoricalDataConnectionStatus)); });
+                    nameof(Rithmic.Connection.LastConnectionAlert),
+                    (_, _) => { NotifyPropertyChanged(nameof(HistoricalDataConnectionStatus)); });
             });
+            NotifyPropertyChanged();
         }
     }
+
+    private Client? _client;
     
     /// <summary>
-    /// String representation of this account.
+    /// Properties that can be edited by the user.
     /// </summary>
-    public override string ToString() {
-        return Login + ":" + Server + ":" + Gateway;
-    }
 
-    /// <summary>
-    /// Properties that can be edited.
-    /// </summary>
     #region PropertyEditable
 
     private string _login = "";
@@ -102,6 +160,13 @@ public class Account : INotifyPropertyChanged {
         set => SetProperty(ref _logFilePath, value);
     }
 
+    private string? _cParamsDirPath;
+
+    public string CParamsDirPath {
+        get => _cParamsDirPath;
+        set => SetProperty(ref _cParamsDirPath, value);
+    }
+
     #endregion
 
     #region PropertyConnection
@@ -139,23 +204,29 @@ public class Account : INotifyPropertyChanged {
 
     #region PropertyStatus
 
+    [JsonIgnore]
     [DisplayName("PnlStatus")]
     public string? PnlConnectionStatus
         => Client?.PnlConnection?.LastConnectionAlert?.AlertInfo.Message;
 
+    [JsonIgnore]
     [DisplayName("MarketStatus")]
     public string? MarketDataConnectionStatus
         => Client?.MarketDataConnection?.LastConnectionAlert?.AlertInfo.Message;
 
+    [JsonIgnore]
     [DisplayName("TradeStatus")]
     public string? TradingSystemConnectionStatus
         => Client?.TradingSystemConnection?.LastConnectionAlert?.AlertInfo.Message;
 
+    [JsonIgnore]
     [DisplayName("HistoryStatus")]
     public string? HistoricalDataConnectionStatus
         => Client?.HistoricalDataConnection?.LastConnectionAlert?.AlertInfo.Message;
 
     #endregion
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "") {
         if (!EqualityComparer<T>.Default.Equals(field, value)) {
@@ -164,7 +235,7 @@ public class Account : INotifyPropertyChanged {
         }
     }
 
-    private void NotifyPropertyChanged([CallerMemberName] String propertyName = "") {
+    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

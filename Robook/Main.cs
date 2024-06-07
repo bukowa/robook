@@ -1,7 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using Robook.Accounts;
+using Robook.Data;
 using Robook.DataServiceFormNS;
+using Robook.Forms;
 using Robook.OrderBookFormNS;
+using Robook.State;
 
 namespace Robook;
 
@@ -60,18 +63,77 @@ public partial class Main : Form {
     #region DataServiceForm
 
     private DataServiceForm? _dataServiceForm;
+
     private void dataToolStripMenuItem_Click(object sender, EventArgs e) {
-        if (_dataServiceForm == null) {
-            _dataServiceForm = new DataServiceForm();
-            _dataServiceForm.Init(_state);
-            _dataServiceForm.FormClosing += (o, args) => {
-                args.Cancel = true;
-                _dataServiceForm.Hide();
-            };
-        }
-        _dataServiceForm.Show();
-        _dataServiceForm.Focus();
+        (_dataServiceForm ??= (DataServiceForm)
+                new FormBuilder(() => {
+                        var form = new DataServiceForm();
+                        form.Init(_state);
+                        return form;
+                    })
+                    .SetHiddenOnClose()
+                    .Build())
+            .Show()
+            .Focus();
     }
+
     #endregion
-    
+
+    #region SubscriptionsForm
+
+    private SubscriptionForm? _subscriptionsForm;
+
+    private void subscriptionsToolStripMenuItem_Click(object sender, EventArgs e) {
+        _subscriptionsForm ??= (SubscriptionForm)
+            new FormBuilder(new SubscriptionForm())
+                .SetHiddenOnClose()
+                .Build();
+        // order is very important
+        // https://stackoverflow.com/a/7666804/23075126
+        _subscriptionsForm.Symbols       = State.Data.Symbols;
+        _subscriptionsForm.Connections   = State.Data.Connections;
+        _subscriptionsForm.Subscriptions = State.Data.Subscriptions;
+        _subscriptionsForm.SubscriptionsDataSaver = Storage.LocalSubscriptionsStorage;
+        _subscriptionsForm
+            .Show()
+            .Focus();
+    }
+
+    #endregion
+
+    #region SymbolForm
+
+    private SymbolForm? _symbolForm;
+
+    private void symbolsToolStripMenuItem_Click(object sender, EventArgs e) {
+        _symbolForm ??= (SymbolForm)
+            new FormBuilder(new SymbolForm())
+                .SetHiddenOnClose()
+                .Build();
+        _symbolForm.Symbols = State.Data.Symbols;
+        _symbolForm.SymbolsDataSaver = Storage.LocalSymbolsStorage;
+        _symbolForm
+            .Show()
+            .Focus();
+    }
+
+    #endregion
+
+    #region ConnectionForm
+
+    private ConnectionForm? _connectionForm;
+
+    private void connectionsToolStripMenuItem_Click(object sender, EventArgs e) {
+        _connectionForm ??= (ConnectionForm)
+            new FormBuilder(new ConnectionForm())
+                .SetHiddenOnClose()
+                .Build();
+        _connectionForm.Connections = State.Data.Connections;
+        _connectionForm.ConnectionsDataSaver   = Storage.LocalConnectionsStorage;
+        _connectionForm
+            .Show()
+            .Focus();
+    }
+
+    #endregion
 }

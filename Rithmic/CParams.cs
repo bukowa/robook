@@ -4,11 +4,37 @@ using com.omnesys.rapi;
 namespace Rithmic;
 
 /// <summary>
-///     Exception thrown when the path does not exist.
+/// Base class for CParams exceptions.
 /// </summary>
-public class ExceptionCParamsSourcePathDoesNotExist : Exception {
+public class ExceptionCParams : Exception {
+    public ExceptionCParams(string message) : base(message) {
+    }
+}
+
+/// <summary>
+/// Exception thrown when the path does not exist.
+/// </summary>
+public class ExceptionCParamsSourcePathDoesNotExist : ExceptionCParams {
     public ExceptionCParamsSourcePathDoesNotExist(string path)
         : base($"CParams source path does not exist: {path}") {
+    }
+}
+
+/// <summary>
+/// Exception thrown when the CParams System does not exist.
+/// </summary>
+public class ExceptionCParamsSystemDoesNotExist : ExceptionCParams {
+    public ExceptionCParamsSystemDoesNotExist(string systemName)
+        : base($"CParams system does not exist: {systemName}") {
+    }
+}
+
+/// <summary>
+/// Exception thrown when the CParams Gateway does not exist.
+/// </summary>
+public class ExceptionCParamsGatewayDoesNotExist : ExceptionCParams {
+    public ExceptionCParamsGatewayDoesNotExist(string systemName, string gatewayName)
+        : base($"CParams gateway does not exist: {systemName} {gatewayName}") {
     }
 }
 
@@ -29,25 +55,25 @@ public class CParamsSource {
     ///     Example: CParamsBySystemName["Rithmic Paper Trading"]["Europe"]
     /// </summary>
     public Dictionary<string, Dictionary<string, CParams>> CParamsBySystemName { get; } = new();
-    
+
     /// <summary>
     ///   Gets the CParams instance for the given system name and gateway name.
     /// </summary>
     /// <param name="systemName"> System name like "Rithmic Paper Trading". </param>
     /// <param name="gatewayName"> Gateway name like "Europe". </param>
     /// <returns> CParams instance or null if not found. </returns>
-    public CParams? GetCParams(string systemName, string gatewayName) {
+    public CParams GetCParams(string systemName, string gatewayName) {
         if (!CParamsBySystemName.ContainsKey(systemName)) {
-            return null;
+            throw new ExceptionCParamsSystemDoesNotExist(systemName);
         }
 
         if (!CParamsBySystemName[systemName].ContainsKey(gatewayName)) {
-            return null;
+            throw new ExceptionCParamsGatewayDoesNotExist(systemName, gatewayName);
         }
 
         return CParamsBySystemName[systemName][gatewayName];
     }
-    
+
     /// <summary>
     ///     Creates a new instance of the Source class for the given path.
     /// </summary>
@@ -55,13 +81,13 @@ public class CParamsSource {
     /// 
     public CParamsSource(string path) {
         Path = path;
-        
+
         if (!Directory.Exists(path)) {
             throw new ExceptionCParamsSourcePathDoesNotExist(path);
         }
 
         var files = Directory.GetFiles(path, "*_connection_params.txt");
-        
+
         foreach (var file in files) {
             var cParams = Parse(file);
             CParamsBySystemName.TryAdd(cParams.SystemName, new Dictionary<string, CParams>());

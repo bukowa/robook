@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.IO;
 using com.omnesys.rapi;
 using Robook.DataServiceNS;
 using Robook.State;
@@ -6,7 +7,7 @@ using Robook.SymbolNS;
 
 namespace Robook.DataServiceFormNS;
 
-public partial class DataServiceForm : Form {
+public partial class DataServiceForm : BaseForm {
 
     public DataServiceForm() {
         InitializeComponent();
@@ -45,14 +46,14 @@ public partial class DataServiceForm : Form {
         var filePath  = Path.Join(textBox4.Text, $"{exchange}_{symbol}.parquet");
         
         var barType   = (BarType)comboBox1.SelectedItem;
-        var barPeriod = Int32.Parse(textBox3.Text);
+        var barPeriod = double.Parse(textBox3.Text);
         var start     = dateTimePicker1.Value;
         start = DateTime.SpecifyKind(start, DateTimeKind.Utc);
         var end       = dateTimePicker2.Value;
         end = DateTime.SpecifyKind(end, DateTimeKind.Utc);
         var acc       = accountsSelectControl1.SelectedAccount;
         
-        if (acc.Client?.HistoricalDataConnection?.LastAlertInfo?.AlertType != AlertType.LoginComplete) {
+        if (acc.Client?.HistoricalDataConnection?.LastConnectionAlert?.AlertInfo.AlertType != AlertType.LoginComplete) {
             MessageBox.Show("Please login first");
             return;
         }

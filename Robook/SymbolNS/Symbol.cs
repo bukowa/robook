@@ -32,7 +32,7 @@ public class Symbol : INotifyPropertyChanged {
     /// <summary>
     /// Client that is used to interact with the instrument.
     /// </summary>
-    public Client Client { get; private set; }
+    public Client? Client { get; private set; }
 
     /// <summary>
     /// Sets the client that is used to interact with the instrument.

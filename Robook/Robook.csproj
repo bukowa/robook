@@ -5,6 +5,7 @@
         <TargetFramework>net8.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
+        <!-- <UseWPF>true</UseWPF> -->
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
@@ -37,6 +38,18 @@
         <Compile Update="DataServiceFormNS\DataServiceForm.cs">
           <SubType>Form</SubType>
         </Compile>
+        <Compile Update="Data\SubscriptionForm.cs">
+          <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="Data\SymbolForm.cs">
+          <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="Data\ConnectionForm.cs">
+          <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="Forms\ScottPlay.cs">
+          <SubType>Form</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -51,6 +64,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Data.Analysis" Version="0.21.0"/>
         <PackageReference Include="Parquet.Net" Version="4.23.4" />
+        <PackageReference Include="ScottPlot.WinForms" Version="5.0.31" />
     </ItemGroup>
 
 </Project>

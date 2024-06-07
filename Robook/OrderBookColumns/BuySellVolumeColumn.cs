@@ -5,7 +5,7 @@ namespace Robook.OrderBookColumns;
 // Common base class for BuyVolumeColumn and SellVolumeColumn
 public abstract class BuySellVolumeColumnBase : HistogramColumn {
     public  bool   CalculateBasedOnTradeVolume { get; set; }
-    private string _volumeColumnName = new OrderBookVolumeColumn().Name;
+    private string _volumeColumnName = "Volume";
 
     protected BuySellVolumeColumnBase() : base() {
     }

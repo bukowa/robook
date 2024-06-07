@@ -4,13 +4,9 @@ using com.omnesys.rapi;
 
 namespace Rithmic;
 
-/// <summary>
-/// Parameters for <see cref="Connection"/> constructor.
-/// </summary>
-public class ConnectionParams {
-    public string       Login        { get; set; }
-    public string       Password     { get; set; }
-    public ConnectionId ConnectionId { get; set; }
+public class ConnectionAlert {
+    public AlertInfo AlertInfo { get; set; }
+    public DateTime  Time      { get; set; }
 }
 
 /// <summary>
@@ -30,7 +26,7 @@ public class Connection : INotifyPropertyChanged {
     /// <summary>
     ///     ConnectionId for this connection.
     /// </summary>
-    public readonly ConnectionId ConnectionId;
+    public ConnectionId ConnectionId;
 
     /// <summary>
     /// Constructor.
@@ -43,15 +39,6 @@ public class Connection : INotifyPropertyChanged {
         Login        = login;
         Password     = password;
         ConnectionId = connectionId;
-    }
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    public Connection(ConnectionParams connectionParams) {
-        Login        = connectionParams.Login;
-        Password     = connectionParams.Password;
-        ConnectionId = connectionParams.ConnectionId;
     }
 
     /// <summary>
@@ -70,36 +57,23 @@ public class Connection : INotifyPropertyChanged {
     /// <summary>
     ///     Indicates the last alert info for connection.
     /// </summary>
-    public AlertInfo? LastAlertInfo {
-        get => _lastAlertInfo;
+    public ConnectionAlert? LastConnectionAlert {
+        get => _connectionConnectionAlert;
         set {
-            _lastAlertInfo = value;
+            _connectionConnectionAlert = value;
             _notifyPropertyChanged();
         }
     }
 
-    private AlertInfo? _lastAlertInfo;
-
-    /// <summary>
-    ///     Indicates latest update time for this connection.
-    /// </summary>
-    public DateTime? LastAlertTime {
-        get => _lastAlertTime;
-        private set {
-            _lastAlertTime = value;
-            _notifyPropertyChanged();
-        }
-    }
-
-    private DateTime? _lastAlertTime;
+    private ConnectionAlert? _connectionConnectionAlert;
 
     /// <summary>
     /// Delegate for handling alerts for this connection.
     /// </summary>
-    public delegate void AlertInfoHandler(Connection sender, AlertInfo alertInfo, DateTime time);
+    public delegate void AlertInfoHandler(Connection sender, ConnectionAlert alert, DateTime time);
 
     /// <summary>
-    /// <see cref="`OnAlertInfo`"/> is invoked before any modification to the connection
+    /// <see ref="`OnAlertInfo`"/> is invoked before any modification to the connection
     /// instance is made. It is an event for all alert types. Other alert type events
     /// are invoked after this event and after the instance attributes are modified.
     /// </summary>
@@ -130,6 +104,10 @@ public class Connection : INotifyPropertyChanged {
         OnForcedLogout += action;
     }
 
+    public void SubscribeToOnLoginComplete(AlertInfoHandler action) {
+        OnLoginComplete += action;
+    }
+
     public void SubscribeToOnShutdownSignal(AlertInfoHandler action) {
         OnShutdownSignal += action;
     }
@@ -145,16 +123,44 @@ public class Connection : INotifyPropertyChanged {
     public void SubscribeToOnConnectionBroken(AlertInfoHandler action) {
         OnConnectionBroken += action;
     }
+ 
+    public void UnsubscribeFromOnAlertInfo(AlertInfoHandler action) {
+        OnAlertInfo -= action;
+    }
+    
+    public void UnsubscribeFromOnLoginFailed(AlertInfoHandler action) {
+        OnLoginFailed -= action;
+    }
+    
+    public void UnsubscribeFromOnForcedLogout(AlertInfoHandler action) {
+        OnForcedLogout -= action;
+    }
+        
+    public void UnsubscribeFromOnLoginComplete(AlertInfoHandler action) {
+        OnLoginComplete -= action;
+    }
 
-    public void SubscribeToOnLoginComplete(AlertInfoHandler action) {
-        OnLoginComplete += action;
+    public void UnsubscribeFromOnShutdownSignal(AlertInfoHandler action) {
+        OnShutdownSignal -= action;
+    }
+    
+    public void UnsubscribeFromOnConnectionOpened(AlertInfoHandler action) {
+        OnConnectionOpened -= action;
+    }
+    
+    public void UnsubscribeFromOnConnectionClosed(AlertInfoHandler action) {
+        OnConnectionClosed -= action;
+    }
+    
+    public void UnsubscribeFromOnConnectionBroken(AlertInfoHandler action) {
+        OnConnectionBroken -= action;
     }
 
     /// <summary>
     /// Handles alerts for this connection.
     /// </summary>
     /// <param name="info"> </param>
-    public void HandleAlertInfo(IContext ctx, AlertInfo info) {
+    private void HandleAlertInfo(IContext ctx, AlertInfo info) {
         var now = DateTime.UtcNow;
 
         // AlertInfo as received from Rithmic does not pass any Context -
@@ -164,44 +170,45 @@ public class Connection : INotifyPropertyChanged {
         if (info.ConnectionId != ConnectionId)
             return;
 
-        // global event invoked before any
-        // modification to the connection instance
-        OnAlertInfo?.Invoke(this, info, now);
+        // build the ConnectionAlert instance
+        var alert = new ConnectionAlert { AlertInfo = info, Time = now };
 
         // per alert type event
         switch (info.AlertType) {
             case AlertType.LoginFailed:
                 IsLoggedIn = false;
-                OnLoginFailed?.Invoke(this, info, now);
+                OnLoginFailed?.Invoke(this, alert, now);
                 break;
             case AlertType.ForcedLogout:
                 IsLoggedIn = false;
-                OnForcedLogout?.Invoke(this, info, now);
+                OnForcedLogout?.Invoke(this, alert, now);
                 break;
             case AlertType.LoginComplete:
                 IsLoggedIn = true;
-                OnLoginComplete?.Invoke(this, info, now);
+                OnLoginComplete?.Invoke(this, alert, now);
                 break;
             case AlertType.ShutdownSignal:
                 IsLoggedIn = false;
-                OnShutdownSignal?.Invoke(this, info, now);
+                OnShutdownSignal?.Invoke(this, alert, now);
                 break;
             case AlertType.ConnectionClosed:
                 IsLoggedIn = false;
-                OnConnectionClosed?.Invoke(this, info, now);
+                OnConnectionClosed?.Invoke(this, alert, now);
                 break;
             case AlertType.ConnectionOpened:
-                OnConnectionOpened?.Invoke(this, info, now);
+                OnConnectionOpened?.Invoke(this, alert, now);
                 break;
             case AlertType.ConnectionBroken:
                 IsLoggedIn = false;
-                OnConnectionBroken?.Invoke(this, info, now);
+                OnConnectionBroken?.Invoke(this, alert, now);
                 break;
         }
 
-        // set the latest update time and info
-        LastAlertTime = now;
-        LastAlertInfo = info;
+        // global event
+        OnAlertInfo?.Invoke(this, alert, now);
+
+        // set the last alert info only after all events have been invoked
+        LastConnectionAlert = alert;
     }
 
     /// <summary>
@@ -228,18 +235,9 @@ public class Connection : INotifyPropertyChanged {
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
-    /// Subscribe to all PropertyChanged events for this connection.
-    /// </summary>
-    public void SubscribeToPropertyChangedEvent(
-        Action<Connection, PropertyChangedEventArgs> action
-    ) {
-        PropertyChanged += (sender, args) => { action(this, args); };
-    }
-
-    /// <summary>
     /// Subscribe to PropertyChanged events for a specific property.
     /// </summary>
-    public void SubscribeToPropertyChangedEvent(
+    public void ObservePropertyChange(
         string                                       propertyName,
         Action<Connection, PropertyChangedEventArgs> action
     ) {

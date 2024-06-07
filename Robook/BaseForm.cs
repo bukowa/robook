@@ -17,4 +17,14 @@ public partial class BaseForm : Form {
             this,
             new object[] { value });
     }
+
+    public Form Show() {
+        base.Show();
+        return this;
+    }
+    
+    public Form Focus() {
+        base.Focus();
+        return this;
+    }
 }
