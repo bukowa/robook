@@ -51,11 +51,11 @@ public class CParamsSource {
     /// <param name="gatewayName"> Gateway name like "Europe". </param>
     /// <returns> CParams instance or null if not found. </returns>
     public CParams GetCParams(string systemName, string gatewayName) {
-        if (!CParamsBySystemName.ContainsKey(systemName)) {
+        if (!CParamsBySystemName.TryGetValue(systemName, out var value)) {
             throw new ExceptionCParamsSystemDoesNotExist(systemName);
         }
 
-        if (!CParamsBySystemName[systemName].ContainsKey(gatewayName)) {
+        if (!value.ContainsKey(gatewayName)) {
             throw new ExceptionCParamsGatewayDoesNotExist(systemName, gatewayName);
         }
 
