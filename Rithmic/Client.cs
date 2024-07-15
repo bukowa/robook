@@ -234,7 +234,7 @@ public class Client : INotifyPropertyChanged {
         int              eventsCount = 0;
         CountdownEvent?  logoutEvent  = null;
         
-        void ActionLogoutEvent(Connection c, ConnectionAlert a, DateTime dt) {
+        void ActionLogoutEvent(Connection c, ConnectionAlert a) {
             logoutEvent?.Signal();
         }
         
@@ -276,13 +276,13 @@ public class Client : INotifyPropertyChanged {
         int                         eventsCount      = 0;
         CountdownEvent?             loginEvent       = null;
 
-        void ActionLoginEvent(Connection c, ConnectionAlert a, DateTime dt) {
+        void ActionLoginEvent(Connection c, ConnectionAlert a) {
             loginEvent?.Signal();
         }
         
         void SubscribeToLoginEvents(Connection? connection) {
             connection?.SubscribeToOnLoginComplete(ActionLoginEvent);
-            connection?.SubscribeToOnLoginFailed(ActionLoginEvent);
+            connection?.SubscribeToLoginFailed(ActionLoginEvent);
             eventsCount++;
         }
 

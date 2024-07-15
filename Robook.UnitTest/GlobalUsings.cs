@@ -49,9 +49,9 @@ public class TestConnection {
         cp.TradingSystemConnection =
             new Connection(Login, Password, ConnectionId.TradingSystem);
         cp.PnlConnection = new Connection(Login, Password, ConnectionId.PnL);
-        var client = new Client();
-        var ce     = new CountdownEvent(4);
-        var sub    = new Connection.AlertInfoHandler((c, a, dt) => { ce.Signal(); });
+        var                          client = new Client();
+        var                          ce     = new CountdownEvent(4);
+        var sub    = new Connection.AlertInfoHandler((c, a) => { ce.Signal(); });
         cp.MarketDataConnection.OnLoginComplete     += sub;
         cp.HistoricalDataConnection.OnLoginComplete += sub;
         cp.TradingSystemConnection.OnLoginComplete  += sub;
