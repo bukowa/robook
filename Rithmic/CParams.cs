@@ -36,7 +36,7 @@ public class CParamsSource {
     /// <summary>
     ///     Path to the connection files.
     /// </summary>
-    public string Path { get; }
+    public string DirPath { get; }
 
     /// <summary>
     ///     Holds the CParams instances by system name and gateway name.
@@ -65,16 +65,16 @@ public class CParamsSource {
     /// <summary>
     ///     Creates a new instance of the Source class for the given path.
     /// </summary>
-    /// <param name="path">Path to the connection files.</param>
+    /// <param name="dirPath">Path to the connection files.</param>
     /// 
-    public CParamsSource(string path) {
-        Path = path;
+    public CParamsSource(string dirPath) {
+        DirPath = dirPath;
 
-        if (!Directory.Exists(path)) {
-            throw new ExceptionCParamsSourcePathDoesNotExist(path);
+        if (!Directory.Exists(dirPath)) {
+            throw new ExceptionCParamsSourcePathDoesNotExist(dirPath);
         }
 
-        var files = Directory.GetFiles(path, "*_connection_params.txt");
+        var files = Directory.GetFiles(dirPath, "*_connection_params.txt");
 
         foreach (var file in files) {
             var cParams = Parse(file);
