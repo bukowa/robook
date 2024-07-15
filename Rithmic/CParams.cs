@@ -6,37 +6,25 @@ namespace Rithmic;
 /// <summary>
 /// Base class for CParams exceptions.
 /// </summary>
-public class ExceptionCParams : Exception {
-    public ExceptionCParams(string message) : base(message) {
-    }
-}
+public class ExceptionCParams(string message) : Exception(message);
 
 /// <summary>
 /// Exception thrown when the path does not exist.
 /// </summary>
-public class ExceptionCParamsSourcePathDoesNotExist : ExceptionCParams {
-    public ExceptionCParamsSourcePathDoesNotExist(string path)
-        : base($"CParams source path does not exist: {path}") {
-    }
-}
+public class ExceptionCParamsSourcePathDoesNotExist(string path)
+    : ExceptionCParams($"CParams source path does not exist: {path}");
 
 /// <summary>
 /// Exception thrown when the CParams System does not exist.
 /// </summary>
-public class ExceptionCParamsSystemDoesNotExist : ExceptionCParams {
-    public ExceptionCParamsSystemDoesNotExist(string systemName)
-        : base($"CParams system does not exist: {systemName}") {
-    }
-}
+public class ExceptionCParamsSystemDoesNotExist(string systemName)
+    : ExceptionCParams($"CParams system does not exist: {systemName}");
 
 /// <summary>
 /// Exception thrown when the CParams Gateway does not exist.
 /// </summary>
-public class ExceptionCParamsGatewayDoesNotExist : ExceptionCParams {
-    public ExceptionCParamsGatewayDoesNotExist(string systemName, string gatewayName)
-        : base($"CParams gateway does not exist: {systemName} {gatewayName}") {
-    }
-}
+public class ExceptionCParamsGatewayDoesNotExist(string systemName, string gatewayName)
+    : ExceptionCParams($"CParams gateway does not exist: {systemName} {gatewayName}");
 
 ///
 /// <summary>
