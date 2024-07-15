@@ -153,16 +153,16 @@ public class Client : INotifyPropertyChanged {
 
             var mdCnnctPt = MarketDataConnection == null
                 ? string.Empty
-                : CParams.sMdCnnctPt;
+                : CParams.SMdCnnctPt;
             var sIhvCnnctPt = HistoricalDataConnection == null
                 ? string.Empty
-                : CParams.sIhCnnctPt;
+                : CParams.SIhCnnctPt;
             var sTsCnnctPt = TradingSystemConnection == null
                 ? string.Empty
-                : CParams.sTsCnnctPt;
+                : CParams.STsCnnctPt;
             var sPnlCnnctPt = PnlConnection == null
                 ? string.Empty
-                : CParams.sPnLCnnctPt;
+                : CParams.SPnLCnnctPt;
 
             var context = new Context();
             HistoricalDataConnection?.TrySubscribeRHandler(RHandler, context);

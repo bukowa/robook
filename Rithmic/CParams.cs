@@ -89,11 +89,11 @@ public class CParamsSource {
             SystemName  = SystemNameRegex.Match(content).Groups[1].Value,
             GatewayName = GatewayNameRegex.Match(content).Groups[1].Value,
             AdmCnnctPt  = AdmCnnctPtRegex.Match(content).Groups[1].Value,
-            sCnnctPt    = SCnnctPtRegex.Match(content).Groups[1].Value,
-            sMdCnnctPt  = SMdCnnctPtRegex.Match(content).Groups[1].Value,
-            sIhCnnctPt  = SIhCnnctPtRegex.Match(content).Groups[1].Value,
-            sTsCnnctPt  = STsCnnctPtRegex.Match(content).Groups[1].Value,
-            sPnLCnnctPt = SPnLCnnctPtRegex.Match(content).Groups[1].Value,
+            SCnnctPt    = SCnnctPtRegex.Match(content).Groups[1].Value,
+            SMdCnnctPt  = SMdCnnctPtRegex.Match(content).Groups[1].Value,
+            SIhCnnctPt  = SIhCnnctPtRegex.Match(content).Groups[1].Value,
+            STsCnnctPt  = STsCnnctPtRegex.Match(content).Groups[1].Value,
+            SPnLCnnctPt = SPnLCnnctPtRegex.Match(content).Groups[1].Value,
             DomainName  = DomainNameRegex.Match(content).Groups[1].Value,
             LoggerAddr  = LoggerAddrRegex.Match(content).Groups[1].Value,
             DmnSrvrAddr = DmnSrvrAddrRegex.Match(content).Groups[1].Value,
@@ -141,25 +141,25 @@ public class CParams : REngineParams {
     /// <summary>
     ///     Gets or sets the connection point for login repository.
     /// </summary>
-    public required string sCnnctPt { get; init; }
+    public required string SCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the market data connection point.
     /// </summary>
-    public required string sMdCnnctPt { get; init; }
+    public required string SMdCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the historical data connection point.
     /// </summary>
-    public required string sIhCnnctPt { get; init; }
+    public required string SIhCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the trading system connection point.
     /// </summary>
-    public required string sTsCnnctPt { get; init; }
+    public required string STsCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the PnL connection point.
     /// </summary>
-    public required string sPnLCnnctPt { get; init; }
+    public required string SPnLCnnctPt { get; init; }
 }

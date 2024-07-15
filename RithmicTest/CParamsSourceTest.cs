@@ -16,11 +16,11 @@ public class CParamsSourceTest {
         Assert.That(cParams.GatewayName, Is.EqualTo("Europe"));
         Assert.Multiple(() => {
             Assert.That(cParams.AdmCnnctPt,  !Is.EqualTo(""));
-            Assert.That(cParams.sCnnctPt,    !Is.EqualTo(""));
-            Assert.That(cParams.sMdCnnctPt,  !Is.EqualTo(""));
-            Assert.That(cParams.sIhCnnctPt,  !Is.EqualTo(""));
-            Assert.That(cParams.sTsCnnctPt,  !Is.EqualTo(""));
-            Assert.That(cParams.sPnLCnnctPt, !Is.EqualTo(""));
+            Assert.That(cParams.SCnnctPt,    !Is.EqualTo(""));
+            Assert.That(cParams.SMdCnnctPt,  !Is.EqualTo(""));
+            Assert.That(cParams.SIhCnnctPt,  !Is.EqualTo(""));
+            Assert.That(cParams.STsCnnctPt,  !Is.EqualTo(""));
+            Assert.That(cParams.SPnLCnnctPt, !Is.EqualTo(""));
             Assert.That(cParams.DomainName,  !Is.EqualTo(""));
             Assert.That(cParams.LoggerAddr,  !Is.EqualTo(""));
             Assert.That(cParams.DmnSrvrAddr, !Is.EqualTo(""));
