@@ -210,10 +210,10 @@ public class Client : INotifyPropertyChanged {
                 sPnlCnnctPt: sPnlCnnctPt
             );
         }
-        catch (Exception e) {
+        catch (Exception) {
             Engine?.shutdown();
             Engine = null;
-            throw e;
+            throw;
         }
     }
 
