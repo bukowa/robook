@@ -23,7 +23,7 @@ public class TestConnection {
 
     public CParams GetCParams() {
         var s = new CParamsSource(cParamsSourcePath);
-        return s.CParamsBySystemName[Server][Gateway];
+        return s.CParamsDict[Server][Gateway];
     }
 
     public Client NewPaperReadyClient() {

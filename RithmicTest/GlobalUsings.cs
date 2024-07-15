@@ -102,7 +102,7 @@ public class BaseConnection {
 
     public CParams GetCParams() {
         var s = new CParamsSource(CParamsSourcePath);
-        return s.CParamsBySystemName[Server][Gateway];
+        return s.CParamsDict[Server][Gateway];
     }
 
     public LoginParams GetClientParams() {

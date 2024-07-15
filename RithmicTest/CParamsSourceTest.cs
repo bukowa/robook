@@ -3,16 +3,15 @@
 [TestFixture, Order(0)]
 [TestOf(typeof(CParamsSource))]
 public class CParamsSourceTest {
-    public static string ConnectionFilesPath = Config.RApiConfigPath;
 
     [Test]
     [Category("CParamsTest")]
     public void TestCParamsSource() {
-        var source = new CParamsSource(ConnectionFilesPath);
-        Assert.That(source.CParamsBySystemName.Count,                            Is.GreaterThan(10));
-        Assert.That(source.CParamsBySystemName.Select(v => v.Value.Count).Sum(), Is.GreaterThan(100));
+        var source = new CParamsSource(Config.RApiConfigPath);
+        Assert.That(source.CParamsDict.Count,                            Is.GreaterThan(10));
+        Assert.That(source.CParamsDict.Select(v => v.Value.Count).Sum(), Is.GreaterThan(100));
 
-        var cParams = source.CParamsBySystemName["Rithmic Paper Trading"]["Europe"];
+        var cParams = source.CParamsDict["Rithmic Paper Trading"]["Europe"];
         Assert.That(cParams.SystemName,  Is.EqualTo("Rithmic Paper Trading"));
         Assert.That(cParams.GatewayName, Is.EqualTo("Europe"));
         Assert.Multiple(() => {
@@ -32,7 +31,7 @@ public class CParamsSourceTest {
 
     [Test]
     public void GetCParams() {
-        var source = new CParamsSource(ConnectionFilesPath);
+        var source = new CParamsSource(Config.RApiConfigPath);
         var cParams = source.GetCParams("Rithmic Paper Trading", "Europe");
         Assert.That(cParams, Is.Not.Null);
         Assert.That(cParams.SystemName,  Is.EqualTo("Rithmic Paper Trading"));

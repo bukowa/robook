@@ -34,15 +34,30 @@ public class ExceptionCParamsGatewayDoesNotExist(string systemName, string gatew
 ///
 public class CParamsSource {
     /// <summary>
-    ///     Path to the connection files.
-    /// </summary>
-    public string DirPath { get; }
-
-    /// <summary>
     ///     Holds the CParams instances by system name and gateway name.
     ///     Example: CParamsBySystemName["Rithmic Paper Trading"]["Europe"]
     /// </summary>
-    public Dictionary<string, Dictionary<string, CParams>> CParamsBySystemName { get; } = new();
+    public Dictionary<string, Dictionary<string, CParams>> CParamsDict { get; } = new();
+
+    /// <summary>
+    ///     Creates a new instance of the Source class for the given path.
+    /// </summary>
+    /// <param name="dirPath">Path to the connection files (directory). </param>
+    /// <param name="searchPattern">Search pattern for the connection files.</param>
+    /// 
+    public CParamsSource(string dirPath, string searchPattern = "*_connection_params.txt") {
+        if (!Directory.Exists(dirPath)) {
+            throw new ExceptionCParamsSourcePathDoesNotExist(dirPath);
+        }
+
+        var files = Directory.GetFiles(dirPath, searchPattern);
+
+        foreach (var file in files) {
+            var cParams = Parse(file);
+            CParamsDict.TryAdd(cParams.SystemName, new Dictionary<string, CParams>());
+            CParamsDict[cParams.SystemName].Add(cParams.GatewayName, cParams);
+        }
+    }
 
     /// <summary>
     ///   Gets the CParams instance for the given system name and gateway name.
@@ -51,7 +66,7 @@ public class CParamsSource {
     /// <param name="gatewayName"> Gateway name like "Europe". </param>
     /// <returns> CParams instance or null if not found. </returns>
     public CParams GetCParams(string systemName, string gatewayName) {
-        if (!CParamsBySystemName.TryGetValue(systemName, out var value)) {
+        if (!CParamsDict.TryGetValue(systemName, out var value)) {
             throw new ExceptionCParamsSystemDoesNotExist(systemName);
         }
 
@@ -59,67 +74,48 @@ public class CParamsSource {
             throw new ExceptionCParamsGatewayDoesNotExist(systemName, gatewayName);
         }
 
-        return CParamsBySystemName[systemName][gatewayName];
-    }
-
-    /// <summary>
-    ///     Creates a new instance of the Source class for the given path.
-    /// </summary>
-    /// <param name="dirPath">Path to the connection files.</param>
-    /// 
-    public CParamsSource(string dirPath) {
-        DirPath = dirPath;
-
-        if (!Directory.Exists(dirPath)) {
-            throw new ExceptionCParamsSourcePathDoesNotExist(dirPath);
-        }
-
-        var files = Directory.GetFiles(dirPath, "*_connection_params.txt");
-
-        foreach (var file in files) {
-            var cParams = Parse(file);
-            CParamsBySystemName.TryAdd(cParams.SystemName, new Dictionary<string, CParams>());
-            CParamsBySystemName[cParams.SystemName].Add(cParams.GatewayName, cParams);
-        }
+        return CParamsDict[systemName][gatewayName];
     }
 
     /// <summary>
     ///     Parses the given file and returns the CParams instance.
     /// </summary>
-    /// <param name="path">Path to the connection file.</param>
+    /// <param name="filePath">Path to the connection file.</param>
     /// <returns></returns>
-    public CParams Parse(string path) {
-        var content = File.ReadAllText(path);
-        var cParams = new CParams();
-        cParams.SystemName  = systemNameRegex.Match(content).Groups[1].Value;
-        cParams.GatewayName = gatewayNameRegex.Match(content).Groups[1].Value;
-        cParams.AdmCnnctPt  = admCnnctPtRegex.Match(content).Groups[1].Value;
-        cParams.sCnnctPt    = sCnnctPtRegex.Match(content).Groups[1].Value;
-        cParams.sMdCnnctPt  = sMdCnnctPtRegex.Match(content).Groups[1].Value;
-        cParams.sIhCnnctPt  = sIhCnnctPtRegex.Match(content).Groups[1].Value;
-        cParams.sTsCnnctPt  = sTsCnnctPtRegex.Match(content).Groups[1].Value;
-        cParams.sPnLCnnctPt = sPnLCnnctPtRegex.Match(content).Groups[1].Value;
-        cParams.DomainName  = domainNameRegex.Match(content).Groups[1].Value;
-        cParams.LoggerAddr  = loggerAddrRegex.Match(content).Groups[1].Value;
-        cParams.DmnSrvrAddr = dmnSrvrAddrRegex.Match(content).Groups[1].Value;
-        cParams.LicSrvrAddr = licSrvrAddrRegex.Match(content).Groups[1].Value;
-        cParams.LocBrokAddr = locBrokAddrRegex.Match(content).Groups[1].Value;
+    // ReSharper disable once MemberCanBePrivate.Global
+    public static CParams Parse(string filePath) {
+        var content = File.ReadAllText(filePath);
+        var cParams = new CParams {
+            SystemName  = SystemNameRegex.Match(content).Groups[1].Value,
+            GatewayName = GatewayNameRegex.Match(content).Groups[1].Value,
+            AdmCnnctPt  = AdmCnnctPtRegex.Match(content).Groups[1].Value,
+            sCnnctPt    = SCnnctPtRegex.Match(content).Groups[1].Value,
+            sMdCnnctPt  = SMdCnnctPtRegex.Match(content).Groups[1].Value,
+            sIhCnnctPt  = SIhCnnctPtRegex.Match(content).Groups[1].Value,
+            sTsCnnctPt  = STsCnnctPtRegex.Match(content).Groups[1].Value,
+            sPnLCnnctPt = SPnLCnnctPtRegex.Match(content).Groups[1].Value,
+            DomainName  = DomainNameRegex.Match(content).Groups[1].Value,
+            LoggerAddr  = LoggerAddrRegex.Match(content).Groups[1].Value,
+            DmnSrvrAddr = DmnSrvrAddrRegex.Match(content).Groups[1].Value,
+            LicSrvrAddr = LicSrvrAddrRegex.Match(content).Groups[1].Value,
+            LocBrokAddr = LocBrokAddrRegex.Match(content).Groups[1].Value
+        };
         return cParams;
     }
 
-    private static Regex systemNameRegex  = new Regex(@"\s*System\s*Name\s*:\s*(\S.*)");
-    private static Regex gatewayNameRegex = new Regex(@"\s*Gateway\s*Name\s*:\s*(\S.*)");
-    private static Regex sCnnctPtRegex    = new Regex(@"\s*sCnnctPt\s*:\s*(\S+)");
-    private static Regex sMdCnnctPtRegex  = new Regex(@"\s*sMdCnnctPt\s*:\s*(\S+)");
-    private static Regex sIhCnnctPtRegex  = new Regex(@"\s*sIhCnnctPt\s*:\s*(\S+)");
-    private static Regex sTsCnnctPtRegex  = new Regex(@"\s*sTsCnnctPt\s*:\s*(\S+)");
-    private static Regex sPnLCnnctPtRegex = new Regex(@"\s*sPnLCnnctPt\s*:\s*(\S+)");
-    private static Regex admCnnctPtRegex  = new Regex(@"\s*REngineParams\.AdmCnnctPt\s*:\s*(\S+)");
-    private static Regex domainNameRegex  = new Regex(@"\s*REngineParams\.DomainName\s*:\s*(\S+)");
-    private static Regex loggerAddrRegex  = new Regex(@"\s*REngineParams\.LoggerAddr\s*:\s*(\S+)");
-    private static Regex dmnSrvrAddrRegex = new Regex(@"\s*REngineParams\.DmnSrvrAddr\s*:\s*(\S+)");
-    private static Regex locBrokAddrRegex = new Regex(@"\s*REngineParams\.LocBrokAddr\s*:\s*(\S+)");
-    private static Regex licSrvrAddrRegex = new Regex(@"\s*REngineParams\.LicSrvrAddr\s*:\s*(\S+)");
+    private static readonly Regex SystemNameRegex  = new(@"\s*System\s*Name\s*:\s*(\S.*)");
+    private static readonly Regex GatewayNameRegex = new(@"\s*Gateway\s*Name\s*:\s*(\S.*)");
+    private static readonly Regex SCnnctPtRegex    = new(@"\s*sCnnctPt\s*:\s*(\S+)");
+    private static readonly Regex SMdCnnctPtRegex  = new(@"\s*sMdCnnctPt\s*:\s*(\S+)");
+    private static readonly Regex SIhCnnctPtRegex  = new(@"\s*sIhCnnctPt\s*:\s*(\S+)");
+    private static readonly Regex STsCnnctPtRegex  = new(@"\s*sTsCnnctPt\s*:\s*(\S+)");
+    private static readonly Regex SPnLCnnctPtRegex = new(@"\s*sPnLCnnctPt\s*:\s*(\S+)");
+    private static readonly Regex AdmCnnctPtRegex  = new(@"\s*REngineParams\.AdmCnnctPt\s*:\s*(\S+)");
+    private static readonly Regex DomainNameRegex  = new(@"\s*REngineParams\.DomainName\s*:\s*(\S+)");
+    private static readonly Regex LoggerAddrRegex  = new(@"\s*REngineParams\.LoggerAddr\s*:\s*(\S+)");
+    private static readonly Regex DmnSrvrAddrRegex = new(@"\s*REngineParams\.DmnSrvrAddr\s*:\s*(\S+)");
+    private static readonly Regex LocBrokAddrRegex = new(@"\s*REngineParams\.LocBrokAddr\s*:\s*(\S+)");
+    private static readonly Regex LicSrvrAddrRegex = new(@"\s*REngineParams\.LicSrvrAddr\s*:\s*(\S+)");
 }
 
 /// <summary>
@@ -130,40 +126,40 @@ public class CParams : REngineParams {
     /// <summary>
     ///     System name like "Rithmic Paper Trading".
     /// </summary>
-    public string SystemName { get; set; }
+    public required string SystemName { get; init; }
 
     /// <summary>
     ///     Gateway name like "Europe".
     /// </summary>
-    public string GatewayName { get; set; }
+    public required string GatewayName { get; init; }
 
     /// <summary>
     ///     Gets or sets the administrative connection point.
     /// </summary>
-    public string AdmCnnctPt { get; set; }
+    public required string AdmCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the connection point for login repository.
     /// </summary>
-    public string sCnnctPt { get; set; }
+    public required string sCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the market data connection point.
     /// </summary>
-    public string sMdCnnctPt { get; set; }
+    public required string sMdCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the historical data connection point.
     /// </summary>
-    public string sIhCnnctPt { get; set; }
+    public required string sIhCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the trading system connection point.
     /// </summary>
-    public string sTsCnnctPt { get; set; }
+    public required string sTsCnnctPt { get; init; }
 
     /// <summary>
     ///     Gets or sets the PnL connection point.
     /// </summary>
-    public string sPnLCnnctPt { get; set; }
+    public required string sPnLCnnctPt { get; init; }
 }
