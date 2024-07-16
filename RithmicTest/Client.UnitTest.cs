@@ -50,7 +50,7 @@ public class ClientUnitTest {
         if (connectionIds.Contains(ConnectionId.PnL))
             Assert.That(client.PnlConnection.IsLoggedIn, Is.True);
 
-        client.Engine.shutdown();
+        client.REngine.shutdown();
         return r;
     }
 
@@ -102,7 +102,7 @@ public class ClientUnitTest {
             Console.WriteLine($"[{symbol}] {bar}");
             barTimers.Add(symbol.EndSsboe);
         });
-        client.Engine.replayBars(new ReplayBarParams() {
+        client.REngine.replayBars(new ReplayBarParams() {
             Exchange       = "CME",
             Symbol         = "NQH4",
             Type           = BarType.Tick,
@@ -115,6 +115,6 @@ public class ClientUnitTest {
         });
         await tcs.Task;
         Assert.That(barTimers.Count, Is.GreaterThan(0));
-        client.Engine.shutdown();
+        client.REngine.shutdown();
     }
 }

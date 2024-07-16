@@ -19,8 +19,8 @@ public class ClientInfraTest {
         Assert.That(client.LoginAndWait(clientParams), Is.True);
         client.Logout();
         Assert.Throws<OMException>(() => {
-            client.Engine.subscribe(tc.Exchange, tc.Symbol, SubscriptionFlags.All, null);
+            client.REngine.subscribe(tc.Exchange, tc.Symbol, SubscriptionFlags.All, null);
         });
-        client.Engine.shutdown();
+        client.REngine.shutdown();
     }
 }

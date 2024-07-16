@@ -122,7 +122,8 @@ public class CParamsSource {
 ///     Represents a set of parameters used for configuring
 ///     connections and logins in the Rithmic system.
 /// </summary>
-public class CParams : REngineParams {
+// ReSharper disable once RedundantNameQualifier
+public class CParams : com.omnesys.rapi.REngineParams {
     /// <summary>
     ///     System name like "Rithmic Paper Trading".
     /// </summary>

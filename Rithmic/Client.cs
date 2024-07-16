@@ -1,22 +1,37 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using com.omnesys.omne.om;
 using com.omnesys.rapi;
 
 namespace Rithmic;
 
+[SuppressMessage("ReSharper", "RedundantNameQualifier")]
+public interface IClient : INotifyPropertyChanged {
+    public Task LoginAsync(LoginParams  loginParams);
+    public Task LogoutAsync(LoginParams loginParams);
+
+    public RHandler                  RHandler   { get; }
+    public AdmHandler                AdmHandler { get; }
+    public com.omnesys.rapi.REngine? REngine    { get; }
+
+    public Connection? PnlConnection            { get; }
+    public Connection? MarketDataConnection     { get; }
+    public Connection? TradingSystemConnection  { get; }
+    public Connection? HistoricalDataConnection { get; }
+}
+
 /// <summary>
 /// Parameters for the Client login method.
 /// </summary>
-public class LoginParams {
-    public CParams CParams;
-    public bool    PlugInMode;
+public class LoginParams(CParams cParams) {
+    public readonly CParams CParams = cParams;
 
     public Connection? PnlConnection;
     public Connection? MarketDataConnection;
     public Connection? HistoricalDataConnection;
     public Connection? TradingSystemConnection;
 
+    public bool PlugInMode;
 
     public IEnumerable<Connection> ConnectionsEnumerable {
         get {
@@ -37,52 +52,70 @@ public class LoginParams {
             }
         }
     }
-
-    public LoginParams(CParams cParams) {
-        CParams = cParams;
-    }
 }
 
 /// <summary>
 ///     Client class.
 /// </summary>
-public class Client : INotifyPropertyChanged {
+public class Client : IClient {
+    /// <summary>
+    ///     Creates a new instance of the Client class.
+    /// </summary>
+    public Client() {
+    }
+
     /// <summary>
     ///     REngine instance.
     /// </summary>
-    public REngine? Engine { get; private set; }
+    // ReSharper disable once RedundantNameQualifier
+    public com.omnesys.rapi.REngine? REngine { get; private set; }
+
+    public Task LoginAsync(LoginParams loginParams) {
+        throw new NotImplementedException();
+    }
+
+    public Task LogoutAsync(LoginParams loginParams) {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     ///     RCallbacks instance.
     /// </summary>
-    public readonly RHandler RHandler;
+    public RHandler RHandler { get; } = new();
 
     /// <summary>
     ///     AdmCallbacks instance.
     /// </summary>
-    public readonly AdmHandler AdmCallbacks;
+    // ReSharper disable once MemberCanBePrivate.Global
+    public AdmHandler AdmHandler { get; } = new();
 
     /// <summary>
     ///     Application instance.
     /// </summary>
-    public readonly Application Application;
+    // ReSharper disable once MemberCanBePrivate.Global
+    // ReSharper disable once FieldCanBeMadeReadOnly.Global
+    public Application Application = new();
 
     #region PluginMode
 
     /// <summary>
     ///     Historical Data connection point when in PlugIn mode.
     /// </summary>
+    // ReSharper disable once MemberCanBePrivate.Global
+    // ReSharper disable once FieldCanBeMadeReadOnly.Global
     public static string PluginIhCnnctPt = "127.0.0.1:3012";
 
     /// <summary>
     ///     Market Data connection point when in PlugIn mode.
     /// </summary>
+    // ReSharper disable once MemberCanBePrivate.Global
+    // ReSharper disable once FieldCanBeMadeReadOnly.Global
     public static string PluginMdCnnctPt = "127.0.0.1:3010";
 
     /// <summary>
     ///     Required environment variables when in PlugIn mode.
     /// </summary>
-    public static Dictionary<string, string> PluginEnv = new() {
+    private static readonly Dictionary<string, string> PluginEnv = new() {
         { "RAPI_MD_ENCODING", "4" },
         { "RAPI_IH_ENCODING", "4" }
     };
@@ -90,7 +123,7 @@ public class Client : INotifyPropertyChanged {
     /// <summary>
     ///     Sets the required environment variables when in PlugIn mode.
     /// </summary>
-    public static void SetPlugInMode(REngine engine, string env) {
+    private static void SetPlugInMode(REngine engine, string env) {
         foreach (var kv in PluginEnv) {
             engine.setEnvironmentVariable(env, kv.Key, kv.Value);
         }
@@ -109,19 +142,6 @@ public class Client : INotifyPropertyChanged {
     #endregion
 
     /// <summary>
-    ///     Creates a new instance of the Client class.
-    /// </summary>
-    public Client(
-        RHandler    rh = null,
-        AdmHandler  ah = null,
-        Application ap = null
-    ) {
-        Application  = ap ?? new Application();
-        AdmCallbacks = ah ?? new AdmHandler();
-        RHandler     = rh ?? new RHandler();
-    }
-
-    /// <summary>
     ///     Parameters for the Client constructor.
     /// </summary>
     public LoginParams? Params {
@@ -138,7 +158,7 @@ public class Client : INotifyPropertyChanged {
     /// Logout from Rithmic.
     /// </summary>
     public void Logout() {
-        Engine?.logout();
+        REngine?.logout();
     }
 
     /// <summary>
@@ -170,10 +190,10 @@ public class Client : INotifyPropertyChanged {
             MarketDataConnection?.TrySubscribeRHandler(RHandler, context);
             PnlConnection?.TrySubscribeRHandler(RHandler, context);
 
-            Engine?.shutdown();
-            Engine = null;
-            Engine = new REngine(new REngineParams() {
-                AdmCallbacks = AdmCallbacks,
+            REngine?.shutdown();
+            REngine = null;
+            REngine = new REngine(new REngineParams() {
+                AdmCallbacks = AdmHandler,
                 AppName      = Application.Name,
                 AppVersion   = Application.Version,
                 DomainName   = CParams.DomainName,
@@ -186,13 +206,13 @@ public class Client : INotifyPropertyChanged {
 
             if (Params.PlugInMode) {
                 if (MarketDataConnection != null && HistoricalDataConnection != null) {
-                    SetPlugInMode(Engine, Constants.DEFAULT_ENVIRONMENT_KEY);
+                    SetPlugInMode(REngine, Constants.DEFAULT_ENVIRONMENT_KEY);
                     mdCnnctPt   = MarketDataConnection == null ? string.Empty : PluginMdCnnctPt;
                     sIhvCnnctPt = HistoricalDataConnection == null ? string.Empty : PluginIhCnnctPt;
                 }
             }
-            
-            Engine.login
+
+            REngine.login
             (
                 RHandler,
                 sMdEnvKey: Constants.DEFAULT_ENVIRONMENT_KEY,
@@ -211,8 +231,8 @@ public class Client : INotifyPropertyChanged {
             );
         }
         catch (Exception) {
-            Engine?.shutdown();
-            Engine = null;
+            REngine?.shutdown();
+            REngine = null;
             throw;
         }
     }
@@ -232,21 +252,21 @@ public class Client : INotifyPropertyChanged {
     private void _logoutAndWait() {
         List<Connection> connections = Params.ConnectionsEnumerable.ToList();
         int              eventsCount = 0;
-        CountdownEvent?  logoutEvent  = null;
-        
+        CountdownEvent?  logoutEvent = null;
+
         void ActionLogoutEvent(Connection c, ConnectionAlert a) {
             logoutEvent?.Signal();
         }
-        
+
         void SubscribeToLogoutEvents(Connection? connection) {
             connection?.SubscribeToOnConnectionClosed(ActionLogoutEvent);
             eventsCount++;
         }
-        
+
         void UnsubscribeFromLogoutEvents(Connection? connection) {
             connection?.UnsubscribeFromOnConnectionClosed(ActionLogoutEvent);
         }
-        
+
         try {
             connections.ForEach(SubscribeToLogoutEvents);
             logoutEvent = new CountdownEvent(eventsCount);
@@ -258,7 +278,6 @@ public class Client : INotifyPropertyChanged {
             logoutEvent?.Dispose();
             logoutEvent = null;
         }
-        
     }
 
     /// <summary>
@@ -272,14 +291,14 @@ public class Client : INotifyPropertyChanged {
     }
 
     private bool _loginAndWait(LoginParams loginParams, int timeout = 1500) {
-        List<Connection>            connections      = loginParams.ConnectionsEnumerable.ToList();
-        int                         eventsCount      = 0;
-        CountdownEvent?             loginEvent       = null;
+        List<Connection> connections = loginParams.ConnectionsEnumerable.ToList();
+        int              eventsCount = 0;
+        CountdownEvent?  loginEvent  = null;
 
         void ActionLoginEvent(Connection c, ConnectionAlert a) {
             loginEvent?.Signal();
         }
-        
+
         void SubscribeToLoginEvents(Connection? connection) {
             connection?.SubscribeToOnLoginComplete(ActionLoginEvent);
             connection?.SubscribeToLoginFailed(ActionLoginEvent);

@@ -19,7 +19,7 @@ public class SymbolTest {
 
         [OneTimeTearDown]
         public void OneTimeTearDown() {
-            client.Engine.shutdown();
+            client.REngine.shutdown();
         }
     }
 
@@ -72,6 +72,6 @@ public class SymbolTest {
         s.SetClient(paperClient);
         s.SubscribeToUpdates();
         await Task.Delay(10000);
-        paperClient.Engine.shutdown();
+        paperClient.REngine.shutdown();
     }
 }

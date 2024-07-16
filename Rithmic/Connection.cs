@@ -20,39 +20,68 @@ public class ConnectionAlert(com.omnesys.rapi.AlertInfo alertInfo) {
 /// Represents a connection to Rithmic.
 /// </summary>
 [SuppressMessage("ReSharper", "RedundantNameQualifier")]
-public sealed class Connection : INotifyPropertyChanged {
+public class Connection : INotifyPropertyChanged {
     /// <summary>
     /// Constructor.
     /// </summary>
     public Connection(
-        string       login,
-        string       password,
-        ConnectionId connectionId
+        string                        login,
+        string                        password,
+        com.omnesys.rapi.ConnectionId connectionId
     ) {
         Login        = login;
         Password     = password;
-        ConnectionId = connectionId;
+        _connectionId = connectionId;
+    }
+
+    public Connection MarketDataConnection(
+        string login,
+        string password
+    ) {
+        return new Connection(login, password, com.omnesys.rapi.ConnectionId.MarketData);
+    }
+
+    public Connection TradingSystemConnection(
+        string login,
+        string password
+    ) {
+        return new Connection(login, password, com.omnesys.rapi.ConnectionId.TradingSystem);
+    }
+
+    public Connection HistoryConnection(
+        string login,
+        string password
+    ) {
+        return new Connection(login, password, com.omnesys.rapi.ConnectionId.History);
+    }
+
+    public Connection PnLConnection(
+        string login,
+        string password
+    ) {
+        return new Connection(login, password, com.omnesys.rapi.ConnectionId.PnL);
     }
 
     /// <summary>
     /// Unique identifier for this connection.
     /// </summary>
+    // ReSharper disable once MemberCanBePrivate.Global
     public Guid Guid { get; } = Guid.NewGuid();
 
     /// <summary>
     ///     Login for this connection.
     /// </summary>
-    public string Login { get; set; }
+    public string Login { get; }
 
     /// <summary>
     ///     Password for this connection.
     /// </summary>
-    public string Password { get; set; }
+    public string Password { get; }
 
     /// <summary>
     ///     ConnectionId for this connection.
     /// </summary>
-    public com.omnesys.rapi.ConnectionId ConnectionId;
+    private readonly com.omnesys.rapi.ConnectionId _connectionId;
 
     /// <summary>
     ///     Returns boolean indicating if the connection is logged in.
@@ -180,7 +209,7 @@ public sealed class Connection : INotifyPropertyChanged {
         // so we cannot route it to the correct connection based on the Context.
         // to make sure that the AlertInfo is for this connection,
         // we check the ConnectionId of the AlertInfo.
-        if (alertInfo.ConnectionId != ConnectionId)
+        if (alertInfo.ConnectionId != _connectionId)
             return;
 
         // log

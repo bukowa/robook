@@ -93,7 +93,7 @@ public class Symbol : INotifyPropertyChanged {
             : null;
 
     public RHandler? H => Client.RHandler;
-    public REngine?  E => Client.Engine;
+    public REngine?  E => Client.REngine;
 
     public Task<PriceIncrInfo> GetPriceIncrInfoAsync() {
         var ctx = new ContextOnce();
@@ -308,7 +308,7 @@ public class Symbol : INotifyPropertyChanged {
             Console.WriteLine(info);
         });
         
-        Client?.Engine.subscribe(Exchange, Name, SubscriptionFlags.All, SubscriptionContext);
+        Client?.REngine.subscribe(Exchange, Name, SubscriptionFlags.All, SubscriptionContext);
     }
 
     #region INotifyPropertyChanged

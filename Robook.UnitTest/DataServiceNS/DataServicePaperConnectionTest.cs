@@ -32,7 +32,7 @@ public class DataServicePaperConnectionTest {
     /// </summary>
     [OneTimeTearDown]
     public void OneTimeTearDown() {
-        client.Engine.shutdown();
+        client.REngine.shutdown();
     }
     
     [Test]

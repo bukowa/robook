@@ -147,7 +147,7 @@ public partial class OrderBookForm : BaseForm {
         _client.RHandler.HighBidPriceClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
         _client.RHandler.LowAskPriceClb.Subscribe(ctx, (_,  info) => { ConcurrentQueue.Enqueue(info); });
         // _client.Engine.replayTrades(_symbol.Exchange, _symbol.Name, 0, 0, ctx);
-        _client.Engine.subscribe(_symbol.Exchange, _symbol.Name, SubscriptionFlags.All, ctx);
+        _client.REngine.subscribe(_symbol.Exchange, _symbol.Name, SubscriptionFlags.All, ctx);
     }
 
     private void columnsToolStripMenuItem_Click(object sender, EventArgs e) {

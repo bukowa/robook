@@ -258,7 +258,7 @@ public partial class Subscription : INotifyPropertyChanged {
     }
 
     private RHandler H => Connection.Client.RHandler;
-    private REngine  E => Connection.Client.Engine;
+    private REngine  E => Connection.Client.REngine;
 
     // /// <summary>
     // /// Tick size of the instrument.

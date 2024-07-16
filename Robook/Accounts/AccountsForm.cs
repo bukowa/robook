@@ -82,7 +82,7 @@ public partial class AccountsForm : Form {
         AddOnClickColumn(c3, (args, i) => {
             var acc = ACCS[i];
             try {
-                acc.Client?.Engine?.logout();
+                acc.Client?.REngine?.logout();
             } catch (Exception e) {
                 MessageBox.Show(e.Message);
             }
