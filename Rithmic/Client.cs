@@ -291,7 +291,7 @@ public class Client : INotifyPropertyChanged {
             connection?.UnsubscribeFromOnLoginFailed(ActionLoginEvent);
         }
 
-        bool IsLoggedId(Connection? connection) {
+        bool IsLoggedIn(Connection? connection) {
             return connection?.IsLoggedIn ?? false;
         }
 
@@ -307,7 +307,7 @@ public class Client : INotifyPropertyChanged {
             loginEvent = null;
         }
 
-        if (connections.All(IsLoggedId)) {
+        if (connections.All(IsLoggedIn)) {
             return true;
         }
 

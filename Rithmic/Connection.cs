@@ -22,6 +22,19 @@ public class ConnectionAlert(com.omnesys.rapi.AlertInfo alertInfo) {
 [SuppressMessage("ReSharper", "RedundantNameQualifier")]
 public sealed class Connection : INotifyPropertyChanged {
     /// <summary>
+    /// Constructor.
+    /// </summary>
+    public Connection(
+        string       login,
+        string       password,
+        ConnectionId connectionId
+    ) {
+        Login        = login;
+        Password     = password;
+        ConnectionId = connectionId;
+    }
+
+    /// <summary>
     /// Unique identifier for this connection.
     /// </summary>
     public Guid Guid { get; } = Guid.NewGuid();
@@ -40,19 +53,6 @@ public sealed class Connection : INotifyPropertyChanged {
     ///     ConnectionId for this connection.
     /// </summary>
     public com.omnesys.rapi.ConnectionId ConnectionId;
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    public Connection(
-        string       login,
-        string       password,
-        ConnectionId connectionId
-    ) {
-        Login        = login;
-        Password     = password;
-        ConnectionId = connectionId;
-    }
 
     /// <summary>
     ///     Returns boolean indicating if the connection is logged in.
@@ -193,7 +193,7 @@ public sealed class Connection : INotifyPropertyChanged {
             alert.AlertInfo.Message,
             alert.Time
         );
-        
+
         // global event
         OnAlertInfo?.Invoke(this, alert);
 
