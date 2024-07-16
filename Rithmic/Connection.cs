@@ -2,6 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using com.omnesys.rapi;
+using Microsoft.Extensions.Logging;
+using static Rithmic.LoggingService;
 
 namespace Rithmic;
 
@@ -19,6 +21,11 @@ public class ConnectionAlert(com.omnesys.rapi.AlertInfo alertInfo) {
 /// </summary>
 [SuppressMessage("ReSharper", "RedundantNameQualifier")]
 public sealed class Connection : INotifyPropertyChanged {
+    /// <summary>
+    /// Unique identifier for this connection.
+    /// </summary>
+    public Guid Guid { get; } = Guid.NewGuid();
+
     /// <summary>
     ///     Login for this connection.
     /// </summary>
@@ -166,7 +173,9 @@ public sealed class Connection : INotifyPropertyChanged {
     /// Handles alerts for this connection.
     /// </summary>
     private void DispatchAlertInfo(IContext ctx, com.omnesys.rapi.AlertInfo alertInfo) {
-        
+        // build the ConnectionAlert instance
+        var alert = new ConnectionAlert(alertInfo);
+
         // AlertInfo as received from Rithmic does not pass any Context -
         // so we cannot route it to the correct connection based on the Context.
         // to make sure that the AlertInfo is for this connection,
@@ -174,9 +183,17 @@ public sealed class Connection : INotifyPropertyChanged {
         if (alertInfo.ConnectionId != ConnectionId)
             return;
 
-        // build the ConnectionAlert instance
-        var alert = new ConnectionAlert(alertInfo);
-
+        // log
+        Logger?.LogInformation(
+            "Connection: {@Guid} {@ConnectionId} {@AlertType} {@RpCode} {@AlertMessage} {@Time}",
+            Guid,
+            alert.AlertInfo.ConnectionId,
+            alert.AlertInfo.AlertType,
+            alert.AlertInfo.RpCode,
+            alert.AlertInfo.Message,
+            alert.Time
+        );
+        
         // global event
         OnAlertInfo?.Invoke(this, alert);
 
