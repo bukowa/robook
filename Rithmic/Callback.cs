@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using com.omnesys.rapi;
 using Microsoft.Extensions.Logging;
+using static Rithmic.LoggingService;
 
 namespace Rithmic;
 
@@ -178,26 +179,6 @@ public class AdmHandler : AdmCallbacks {
 /// </summary>
 /// public class Handler : RCallbacks
 public partial class RHandler : RCallbacks {
-    public ILogger? Logger;
-
-    public RHandler(ILogger? logger = null) {
-        if (logger == null)
-            logger = LoggerFactory.Create(builder => {
-                builder.AddSimpleConsole();
-                builder.AddDebug();
-                builder.SetMinimumLevel(LogLevel.Information);
-            }).CreateLogger("RHandler");
-        this.Logger = logger;
-    }
-
-    [LoggerMessage(
-        EventId = 1,
-        Level = LogLevel.Error,
-        Message = "Callback `{callbackName}` received null context with `{info}`",
-        EventName = "CallbackNullContext")]
-    public partial void CallbackNullContext(string callbackName, object? info);
-
-
     private void InvokeCallback<T>(CallbackManager<T> clb, T info) => clb.Invoke(info);
 
     private void InvokeCallback<T>(CallbackManager<T> clb, object context, T info) {
@@ -205,7 +186,7 @@ public partial class RHandler : RCallbacks {
             clb.Invoke(ctx, info);
         }
         else {
-            CallbackNullContext(clb.ToString() ?? string.Empty, info);
+            Logger?.LogError("Callback {callbackName} received null context with {info}", clb, info);
         }
     }
 
