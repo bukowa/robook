@@ -34,4 +34,24 @@ public class Tests {
         Assert.That(loadedData.Name, Is.EqualTo(data.Name));
         Assert.That(loadedData.Age,  Is.EqualTo(data.Age));
     }
+    
+    [Test]
+    public void TestJsonFileStorage() {
+        // path to which we serialize
+        var filePath = NewFilePath;
+
+        // data to serialize
+        var data = new Data { Name = "John", Age = 30 };
+
+        // save
+        var storage = new JsonFileStorage<Data>(filePath);
+        storage.Save(data);
+
+        // load
+        var loadedData = storage.Load();
+
+        // assert
+        Assert.That(loadedData.Name, Is.EqualTo(data.Name));
+        Assert.That(loadedData.Age,  Is.EqualTo(data.Age));
+    }
 }
