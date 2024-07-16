@@ -1,0 +1,1 @@
+﻿global using rapi = com.omnesys.rapi;

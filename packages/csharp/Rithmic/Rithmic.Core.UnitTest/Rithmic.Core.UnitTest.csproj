@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <RootNamespace>Rithmic.Core.UnitTest</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Data.Analysis" Version="0.21.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
+        <PackageReference Include="NUnit" Version="4.0.1"/>
+        <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+        <PackageReference Include="NUnit.Analyzers" Version="4.2.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Parquet.Net" Version="4.23.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="connections\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Remove="connections\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="connections\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Rithmic.Core\Rithmic.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="rapiplus">
+        <HintPath>..\..\..\..\libraries\csharp\rapiplus.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>
