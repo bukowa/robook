@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using com.omnesys.rapi;
 using Microsoft.Extensions.Logging;
 using static Rithmic.LoggingService;
@@ -124,41 +125,29 @@ public class CallbackManager<T> : ConcurrentDictionary<IContext, List<Action<ICo
 /// <summary>
 ///     Wraps Ask and Bid info into a single object.
 /// </summary>
-public class BestBidAskQuoteInfo {
-    public AskInfo AskInfo { get; }
-    public BidInfo BidInfo { get; }
-
-    public BestBidAskQuoteInfo(AskInfo askInfo, BidInfo bidInfo) {
-        AskInfo = askInfo;
-        BidInfo = bidInfo;
-    }
+public class BestBidAskQuoteInfo(AskInfo askInfo, BidInfo bidInfo) {
+    public AskInfo AskInfo { get; } = askInfo;
+    public BidInfo BidInfo { get; } = bidInfo;
 }
 
 /// <summary>
 ///     Wraps Ask info to distinguish it from BestAskQuoteInfo.
 /// </summary>
-public class BestAskQuoteInfo {
-    public AskInfo AskInfo { get; }
-
-    public BestAskQuoteInfo(AskInfo askInfo) {
-        AskInfo = askInfo;
-    }
+public class BestAskQuoteInfo(AskInfo askInfo) {
+    public AskInfo AskInfo { get; } = askInfo;
 }
 
 /// <summary>
 ///     Wraps Bid info to distinguish it from BestBidQuoteInfo.
 /// </summary>
-public class BestBidQuoteInfo {
-    public BidInfo BidInfo { get; }
-
-    public BestBidQuoteInfo(BidInfo bidInfo) {
-        BidInfo = bidInfo;
-    }
+public class BestBidQuoteInfo(BidInfo bidInfo) {
+    public BidInfo BidInfo { get; } = bidInfo;
 }
 
 /// <summary>
 ///     Implements a handler for AdmCallbacks events with support for dynamic event registration and invocation.
 /// </summary>
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class AdmHandler : AdmCallbacks {
     public CallbackManager<AlertInfo>           AlertClb           { get; } = new();
     public CallbackManager<EnvironmentListInfo> EnvironmentListClb { get; } = new();
@@ -167,10 +156,10 @@ public class AdmHandler : AdmCallbacks {
     public override void Alert(AlertInfo info) =>
         AlertClb.Invoke(info);
 
-    public virtual void EnvironmentList(EnvironmentListInfo info) =>
+    public override void EnvironmentList(EnvironmentListInfo info) =>
         EnvironmentListClb.Invoke(info);
 
-    public virtual void Environment(EnvironmentInfo oInfo) =>
+    public override void Environment(EnvironmentInfo oInfo) =>
         EnvironmentClb.Invoke(oInfo);
 }
 
@@ -178,7 +167,8 @@ public class AdmHandler : AdmCallbacks {
 ///     Represents a handler for Rithmic events with support for dynamic event registration and invocation.
 /// </summary>
 /// public class Handler : RCallbacks
-public partial class RHandler : RCallbacks {
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+public class RHandler : RCallbacks {
     private void InvokeCallback<T>(CallbackManager<T> clb, T info) => clb.Invoke(info);
 
     private void InvokeCallback<T>(CallbackManager<T> clb, object context, T info) {
