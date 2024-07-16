@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RithmicTest", "RithmicTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robook.UnitTest", "Robook.UnitTest\Robook.UnitTest.csproj", "{96E9BF64-868D-4FB0-BC22-89625B54E6B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store", "Store\Store.csproj", "{EAA208FA-28B8-4C81-A824-ED74B4330E8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.UnitTest", "Store.UnitTest\Store.UnitTest.csproj", "{995E69C4-51F1-44AA-9FBB-FF625477AEFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{96E9BF64-868D-4FB0-BC22-89625B54E6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96E9BF64-868D-4FB0-BC22-89625B54E6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96E9BF64-868D-4FB0-BC22-89625B54E6B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAA208FA-28B8-4C81-A824-ED74B4330E8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAA208FA-28B8-4C81-A824-ED74B4330E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAA208FA-28B8-4C81-A824-ED74B4330E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAA208FA-28B8-4C81-A824-ED74B4330E8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{995E69C4-51F1-44AA-9FBB-FF625477AEFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{995E69C4-51F1-44AA-9FBB-FF625477AEFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{995E69C4-51F1-44AA-9FBB-FF625477AEFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{995E69C4-51F1-44AA-9FBB-FF625477AEFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
