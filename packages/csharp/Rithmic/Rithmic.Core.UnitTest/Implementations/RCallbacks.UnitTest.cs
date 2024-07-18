@@ -3,12 +3,12 @@
 namespace Rithmic.Core.UnitTest.Implementations;
 
 [TestFixture]
-[TestOf(typeof(RCallbacks))]
+[TestOf(typeof(RCallbacksFacade))]
 public class RCallbacksUnitTest {
         
         [Test]
         public async Task TestAlert() {
-            var rclb = new RCallbacks();
+            var rclb = new RCallbacksFacade();
             var tsc  = new TaskCompletionSource<bool>();
             rclb.AlertDispatcher.RegisterHandler(new Context(), (context, info) => {
                 Assert.That(context, Is.Not.Null);

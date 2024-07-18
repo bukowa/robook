@@ -6,70 +6,62 @@ namespace Rithmic.Core;
 /// Rithmic Auth.
 /// </summary>
 public class RithmicAuth : IRithmicAuth {
-    public ILParams LParams { get; }
-    public CParams  CParams { get; }
+    public required ILParams LParams { get; set; }
+    public required CParams  CParams { get; set; }
+}
 
-    // ReSharper disable once ConvertToPrimaryConstructor
-    public RithmicAuth(ILParams lParams, CParams cParams) {
-        LParams = lParams;
-        CParams = cParams;
+public class RithmicService : IRithmicService {
+    public IREngineOperations? REngineOperations      { get; set; }
+    public IRCallbacksFacade   RCallbacksFacade   { get; set; }
+    public IAdmCallbacksFacade AdmCallbacksFacade { get; set; }
+
+    public RithmicService() {
     }
 }
 
 /// <summary>
 /// Client implementation.
 /// </summary>
-public class RithmicClient<TRCallback, TAdmCallback> : IRithmicClient
-    where TRCallback : IRCallbacks, new()
-    where TAdmCallback : IAdmCallbacks, new() {
+public class RithmicClient
+<
+    TRCallbacksFacade, TAdmCallbacksFacade, TRithmicService, TREngineOperationsFactory
+> : IRithmicClient
+    where TRCallbacksFacade : IRCallbacksFacade, new()
+    where TAdmCallbacksFacade : IAdmCallbacksFacade, new()
+    where TRithmicService : IRithmicService, new()
+    where TREngineOperationsFactory : IREngineOperationsFactory {
     /// <summary>
     /// Creates a new instance of the Client class.
     /// </summary>
-    public RithmicClient(
-    ) {
-        RCallbacks   = new TRCallback();
-        AdmCallbacks = new TAdmCallback();
+    public RithmicClient() {
+        RithmicService = new TRithmicService {
+            RCallbacksFacade = new TRCallbacksFacade(), AdmCallbacksFacade = new TAdmCallbacksFacade(),
+        };
     }
 
     /// <summary>
-    /// REngine instance.
+    /// Rithmic Auth.
     /// </summary>
-    public rapi.REngine? REngine { get; private set; }
+    public IRithmicAuth RithmicAuth { get; private set; }
 
     /// <summary>
-    ///     RCallbacks instance.
+    /// Rithmic Service.
     /// </summary>
-    public IRCallbacks RCallbacks { get; private set; }
-
-    /// <summary>
-    ///     AdmCallbacks instance.
-    /// </summary>
-    // ReSharper disable once MemberCanBePrivate.Global
-    public IAdmCallbacks AdmCallbacks { get; private set; }
+    public IRithmicService RithmicService { get; }
 
     /// <summary>
     /// Login to the Rithmic system.
     /// </summary>
-    public Task LoginAsync(IRithmicAuth auth, int timeout=5000) {
+    public Task LoginAsync(IRithmicAuth auth, int timeout = 5000) {
         return LoginAndWait(auth, timeout);
     }
 
     /// <summary>
     /// Logout from the Rithmic system.
     /// </summary>
-    public Task LogoutAsync(int timeout=5000) {
+    public Task LogoutAsync(int timeout = 5000) {
         return LogoutAndWait(timeout);
     }
-
-    /// <summary>
-    /// LParams instance.
-    /// </summary>
-    public ILParams? LParams { get; private set; }
-
-    /// <summary>
-    /// CParams instance.
-    /// </summary>
-    public CParams? CParams { get; private set; }
 
     /// <summary>
     ///     Application instance.
@@ -97,10 +89,7 @@ public class RithmicClient<TRCallback, TAdmCallback> : IRithmicClient
     /// <summary>
     ///     Required environment variables when in PlugIn mode.
     /// </summary>
-    private readonly Dictionary<string, string> _pluginEnv = new() {
-        { "RAPI_MD_ENCODING", "4" },
-        { "RAPI_IH_ENCODING", "4" }
-    };
+    private readonly Dictionary<string, string> _pluginEnv = new() { { "RAPI_MD_ENCODING", "4" }, { "RAPI_IH_ENCODING", "4" } };
 
     /// <summary>
     ///     Sets the required environment variables when in PlugIn mode.
@@ -119,90 +108,96 @@ public class RithmicClient<TRCallback, TAdmCallback> : IRithmicClient
     // ReSharper disable once MemberCanBePrivate.Global
     public void ResetClientState() {
         try {
-            REngine?.logout();
+            RithmicService.REngineOperations?.REngine.logout();
         }
         catch (Exception) {
             // ignored
         }
 
-        RCallbacks = new TRCallback();
+        RithmicService.RCallbacksFacade = new TRCallbacksFacade();
         try {
-            REngine?.shutdown();
+            RithmicService.REngineOperations?.REngine.shutdown();
         }
         catch (Exception) {
             // ignored
         }
 
-        REngine      = null;
-        AdmCallbacks = new TAdmCallback();
+        RithmicService.REngineOperations      = null;
+        RithmicService.AdmCallbacksFacade = new TAdmCallbacksFacade();
     }
 
     private object _lock = new();
 
     private void Login(IRithmicAuth auth) {
-        CParams = auth.CParams;
-        LParams = auth.LParams;
+        RithmicAuth = auth;
+        var lParams = auth.LParams;
+        var cParams = auth.CParams;
 
         ResetClientState();
         try {
-            if (LParams.TradingSystemConnection == null && LParams.PnlConnection != null) {
+            if (lParams.TradingSystemConnection == null && lParams.PnlConnection != null) {
                 throw new Exception("PnL connection requires TradingSystem connection");
             }
 
-            var mdCnnctPt = LParams.MarketDataConnection == null
+            var mdCnnctPt = lParams.MarketDataConnection == null
                 ? string.Empty
-                : CParams.SMdCnnctPt;
-            var sIhvCnnctPt = LParams.HistoricalDataConnection == null
+                : cParams.SMdCnnctPt;
+            var sIhvCnnctPt = lParams.HistoricalDataConnection == null
                 ? string.Empty
-                : CParams.SIhCnnctPt;
-            var sTsCnnctPt = LParams.TradingSystemConnection == null
+                : cParams.SIhCnnctPt;
+            var sTsCnnctPt = lParams.TradingSystemConnection == null
                 ? string.Empty
-                : CParams.STsCnnctPt;
-            var sPnlCnnctPt = LParams.PnlConnection == null
+                : cParams.STsCnnctPt;
+            var sPnlCnnctPt = lParams.PnlConnection == null
                 ? string.Empty
-                : CParams.SPnLCnnctPt;
+                : cParams.SPnLCnnctPt;
 
             var context = new Context();
-            LParams.HistoricalDataConnection?.RegisterRCallbackAlertHandler(context, RCallbacks);
-            LParams.TradingSystemConnection?.RegisterRCallbackAlertHandler(context, RCallbacks);
-            LParams.MarketDataConnection?.RegisterRCallbackAlertHandler(context, RCallbacks);
-            LParams.PnlConnection?.RegisterRCallbackAlertHandler(context, RCallbacks);
+            lParams.HistoricalDataConnection?.RegisterRCallbackAlertHandler(context, RithmicService.RCallbacksFacade);
+            lParams.TradingSystemConnection?.RegisterRCallbackAlertHandler(context, RithmicService.RCallbacksFacade);
+            lParams.MarketDataConnection?.RegisterRCallbackAlertHandler(context, RithmicService.RCallbacksFacade);
+            lParams.PnlConnection?.RegisterRCallbackAlertHandler(context, RithmicService.RCallbacksFacade);
 
-            REngine = new rapi.REngine(new rapi.REngineParams() {
-                AdmCallbacks = AdmCallbacks.GetAdmCallbacks(),
-                AppName      = Application.Name,
-                AppVersion   = Application.Version,
-                DomainName   = CParams.DomainName,
-                LoggerAddr   = CParams.LoggerAddr,
-                DmnSrvrAddr  = CParams.DmnSrvrAddr,
-                LicSrvrAddr  = CParams.LicSrvrAddr,
-                LocBrokAddr  = CParams.LocBrokAddr,
-                LogFilePath  = CParams.LogFilePath,
-            });
+            var rEngine = new rapi.REngine
+            (
+                new rapi.REngineParams {
+                    AdmCallbacks = RithmicService.AdmCallbacksFacade.GetAdmCallbacks(),
+                    AppName      = Application.Name,
+                    AppVersion   = Application.Version,
+                    DomainName   = cParams.DomainName,
+                    LoggerAddr   = cParams.LoggerAddr,
+                    DmnSrvrAddr  = cParams.DmnSrvrAddr,
+                    LicSrvrAddr  = cParams.LicSrvrAddr,
+                    LocBrokAddr  = cParams.LocBrokAddr,
+                    LogFilePath  = cParams.LogFilePath,
+                }
+            );
 
-            if (LParams.PlugInMode) {
-                if (LParams is { MarketDataConnection: not null, HistoricalDataConnection: not null }) {
-                    SetPlugInMode(REngine, rapi.Constants.DEFAULT_ENVIRONMENT_KEY);
-                    mdCnnctPt   = LParams.MarketDataConnection == null ? string.Empty : _pluginMdCnnctPt;
-                    sIhvCnnctPt = LParams.HistoricalDataConnection == null ? string.Empty : _pluginIhCnnctPt;
+            RithmicService.REngineOperations = TREngineOperationsFactory.Create(rEngine);
+
+            if (lParams.PlugInMode) {
+                if (lParams is { MarketDataConnection: not null, HistoricalDataConnection: not null }) {
+                    SetPlugInMode(rEngine, rapi.Constants.DEFAULT_ENVIRONMENT_KEY);
+                    mdCnnctPt   = lParams.MarketDataConnection == null ? string.Empty : _pluginMdCnnctPt;
+                    sIhvCnnctPt = lParams.HistoricalDataConnection == null ? string.Empty : _pluginIhCnnctPt;
                 }
             }
 
-            REngine.login
+            rEngine.login
             (
-                RCallbacks.GetRCallbacks(),
+                RithmicService.RCallbacksFacade.GetRCallbacks(),
                 sMdEnvKey: rapi.Constants.DEFAULT_ENVIRONMENT_KEY,
                 sTsEnvKey: rapi.Constants.DEFAULT_ENVIRONMENT_KEY,
                 sIhEnvKey: rapi.Constants.DEFAULT_ENVIRONMENT_KEY,
                 sMdCnnctPt: mdCnnctPt,
-                sMdUser: LParams.MarketDataConnection?.Login ?? string.Empty,
-                sMdPassword: LParams.MarketDataConnection?.Password ?? string.Empty,
+                sMdUser: lParams.MarketDataConnection?.Login ?? string.Empty,
+                sMdPassword: lParams.MarketDataConnection?.Password ?? string.Empty,
                 sIhCnnctPt: sIhvCnnctPt,
-                sIhUser: LParams.HistoricalDataConnection?.Login ?? string.Empty,
-                sIhPassword: LParams.HistoricalDataConnection?.Password ?? string.Empty,
+                sIhUser: lParams.HistoricalDataConnection?.Login ?? string.Empty,
+                sIhPassword: lParams.HistoricalDataConnection?.Password ?? string.Empty,
                 sTsCnnctPt: sTsCnnctPt,
-                sTsUser: LParams.TradingSystemConnection?.Login ?? string.Empty,
-                sTsPassword: LParams.TradingSystemConnection?.Password ?? string.Empty,
+                sTsUser: lParams.TradingSystemConnection?.Login ?? string.Empty,
+                sTsPassword: lParams.TradingSystemConnection?.Password ?? string.Empty,
                 sPnlCnnctPt: sPnlCnnctPt
             );
         }
@@ -253,11 +248,8 @@ public class RithmicClient<TRCallback, TAdmCallback> : IRithmicClient
     [SuppressMessage("ReSharper", "SuggestVarOrType_BuiltInTypes")]
     [SuppressMessage("ReSharper", "SuggestVarOrType_Elsewhere")]
     private Task LogoutAndWait(int timeout) {
-        if (LParams == null) {
-            return Task.CompletedTask;
-        }
         lock (_lock) {
-            List<IConnection> connections = LParams.ConnectionsEnumerable.ToList();
+            List<IConnection> connections = RithmicAuth.LParams.ConnectionsEnumerable.ToList();
             CountdownEvent?   logoutEvent = null;
 
             void LogoutHandler(IConnection c, IConnectionAlert _) {

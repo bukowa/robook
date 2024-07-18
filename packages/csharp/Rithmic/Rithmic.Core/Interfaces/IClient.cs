@@ -1,6 +1,22 @@
-﻿using System.ComponentModel;
+﻿namespace Rithmic.Core;
 
-namespace Rithmic.Core;
+public interface IRithmicService {
+
+    /// <summary>
+    /// Wrapper around <see cref="rapi.RCallbacks"/> for easier event handling.
+    /// </summary>
+    IRCallbacksFacade RCallbacksFacade { get; set; }
+
+    /// <summary>
+    /// Wrapper around <see cref="rapi.AdmCallbacks"/> for easier event handling.
+    /// </summary>
+    IAdmCallbacksFacade AdmCallbacksFacade { get; set; }
+
+    /// <summary>
+    /// Main entrypoint for the Rithmic API.
+    /// </summary>
+    IREngineOperations? REngineOperations { get; set; }
+}
 
 public interface IRithmicAuth {
     /// <summary>
@@ -14,27 +30,20 @@ public interface IRithmicAuth {
     CParams CParams { get; }
 }
 
-public interface IRithmicService {
-    /// <summary>
-    /// Main entrypoint for the Rithmic API.
-    /// </summary>
-    rapi.REngine? REngine { get; }
-
-    /// <summary>
-    /// Wrapper around <see cref="rapi.RCallbacks"/> for easier event handling.
-    /// </summary>
-    IRCallbacks RCallbacks { get; }
-
-    /// <summary>
-    /// Wrapper around <see cref="rapi.AdmCallbacks"/> for easier event handling.
-    /// </summary>
-    IAdmCallbacks AdmCallbacks { get; }
-}
-
 /// <summary>
 /// Rithmic client interface.
 /// </summary>
-public interface IRithmicClient : IRithmicService {
+public interface IRithmicClient {
+    /// <summary>
+    /// Rithmic API auth.
+    /// </summary>
+    IRithmicAuth? RithmicAuth { get; }
+
+    /// <summary>
+    /// Rithmic API service.
+    /// </summary>
+    IRithmicService RithmicService { get; }
+
     /// <summary>
     /// Logs in to the Rithmic API.
     /// </summary>

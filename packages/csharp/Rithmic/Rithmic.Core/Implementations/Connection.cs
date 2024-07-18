@@ -75,8 +75,8 @@ public class Connection : IConnection {
     /// <summary>
     /// Make sure to actually receive the alerts.
     /// </summary>
-    public void RegisterRCallbackAlertHandler(IContext ctx, IRCallbacks callback) {
-        callback.AlertDispatcher.RegisterHandler(new Context(), DispatchAlertInfo);
+    public void RegisterRCallbackAlertHandler(IContext ctx, IRCallbacksFacade callbackFacade) {
+        callbackFacade.AlertDispatcher.RegisterHandler(new Context(), DispatchAlertInfo);
     }
 
     /// <summary>

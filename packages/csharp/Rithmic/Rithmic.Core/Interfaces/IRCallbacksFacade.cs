@@ -1,6 +1,6 @@
 ﻿namespace Rithmic.Core;
 
-public interface IRCallbacks {
+public interface IRCallbacksFacade {
     rapi.RCallbacks GetRCallbacks();
 
     IEventDispatcher<rapi.AlertInfo>                    AlertDispatcher                    { get; }

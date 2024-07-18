@@ -3,12 +3,11 @@
 namespace Rithmic.Core.UnitTest.Implementations;
 
 [TestFixture]
-[TestOf(typeof(RithmicClient<RCallbacks, AdmCallbacks>))]
 public class ClientIntegrationTest {
     [Test]
     public async Task TestLoginLogoutAsync() {
         var testCnt = new TestServerConnection();
-        var client  = new RithmicClient<RCallbacks, AdmCallbacks>();
+        var client  = new RithmicClient<RCallbacksFacade, AdmCallbacksFacade, RithmicService, RengineOperationsFactory>();
         var cParams = testCnt.GetCParams();
         var lParams = new LParams(
             plugInMode: false,
@@ -17,7 +16,7 @@ public class ClientIntegrationTest {
             historicalDataConnection: new Connection(testCnt.Login, testCnt.Password, rapi.ConnectionId.History),
             tradingSystemConnection: new Connection(testCnt.Login,  testCnt.Password, rapi.ConnectionId.TradingSystem)
         );
-        var authParams = new RithmicAuth(lParams, cParams);
+        var authParams = new RithmicAuth { CParams = cParams, LParams = lParams };
         await client.LoginAsync(authParams);
         Assert.That(lParams.ConnectionsEnumerable.All(c => c.IsLoggedIn));
         await client.LogoutAsync();

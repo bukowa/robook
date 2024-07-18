@@ -8,7 +8,7 @@ public class ConnectionUnitTest {
     [Test]
     public async Task TestRegisterRCallbackHandler() {
         var cnt  = new Connection("login", "password", rapi.ConnectionId.History);
-        var rclb = new RCallbacks();
+        var rclb = new RCallbacksFacade();
         var ctx  = new Context();
         cnt.RegisterRCallbackAlertHandler(ctx, rclb);
 

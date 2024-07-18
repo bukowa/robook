@@ -3,11 +3,11 @@
 namespace Rithmic.Core.UnitTest.Implementations;
 
 [TestFixture]
-[TestOf(typeof(AdmCallbacks))]
+[TestOf(typeof(AdmCallbacksFacade))]
 public class AdmCallbacksUnitTest {
     [Test]
     public async Task TestAlert() {
-        var aclb = new AdmCallbacks();
+        var aclb = new AdmCallbacksFacade();
         var tsc  = new TaskCompletionSource<bool>();
         aclb.AlertDispatcher.RegisterHandler(new Context(), (_, _) => { tsc.SetResult(true); });
         aclb.Alert(new rapi.AlertInfo());

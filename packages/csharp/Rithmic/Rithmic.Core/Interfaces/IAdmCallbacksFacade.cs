@@ -2,7 +2,7 @@
 
 namespace Rithmic.Core;
 
-public interface IAdmCallbacks {
+public interface IAdmCallbacksFacade {
     rapi.AdmCallbacks                          GetAdmCallbacks();
     IEventDispatcher<rapi.AlertInfo>           AlertDispatcher           { get; }
     IEventDispatcher<rapi.EnvironmentInfo>     EnvironmentDispatcher     { get; }

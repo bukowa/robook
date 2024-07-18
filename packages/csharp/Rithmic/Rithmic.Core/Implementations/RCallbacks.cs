@@ -5,20 +5,26 @@ using com.omnesys.rapi;
 namespace Rithmic.Core;
 
 // ReSharper disable once RedundantNameQualifier
-public class RCallbacks : rapi.RCallbacks, IRCallbacks {
-    private void InvokeCallback<T>(IEventDispatcher<T> dispatcher, T info) => dispatcher.Dispatch(info);
+public class RCallbacksFacade : rapi.RCallbacks, IRCallbacksFacade
+{
 
-    private void InvokeCallback<T>(IEventDispatcher<T> dispatcher, object context, T info) {
-        if (context is IContext ctx) {
-            dispatcher.Dispatch(ctx, info);
-        }
-        else {
-            Logger?.LogError("Callback {callbackName} received null context with {info}", dispatcher, info);
-        }
+    public rapi.RCallbacks GetRCallbacks()
+    {
+        return this;
     }
 
-    public rapi.RCallbacks GetRCallbacks() {
-        return this;
+    private void InvokeCallback<T>(IEventDispatcher<T> dispatcher, T info) => dispatcher.Dispatch(info);
+
+    private void InvokeCallback<T>(IEventDispatcher<T> dispatcher, object context, T info)
+    {
+        if (context is IContext ctx)
+        {
+            dispatcher.Dispatch(ctx, info);
+        }
+        else
+        {
+            Logger?.LogError("Callback {callbackName} received null context with {info}", dispatcher, info);
+        }
     }
 
     public IEventDispatcher<AlertInfo> AlertDispatcher { get; } =

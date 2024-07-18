@@ -26,7 +26,7 @@ public interface IConnectionAlertHandler {
     /// <summary>
     /// Register to receive alerts from the specific IRCallback.
     /// </summary>
-    void RegisterRCallbackAlertHandler(IContext ctx, IRCallbacks callback);
+    void RegisterRCallbackAlertHandler(IContext ctx, IRCallbacksFacade callbackFacade);
 
     /// <summary>
     /// Registers an alert handler for a specific alert type.

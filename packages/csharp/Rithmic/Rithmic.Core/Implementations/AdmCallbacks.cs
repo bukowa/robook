@@ -1,6 +1,6 @@
 ﻿namespace Rithmic.Core;
 
-public class AdmCallbacks : rapi.AdmCallbacks, IAdmCallbacks {
+public class AdmCallbacksFacade : rapi.AdmCallbacks, IAdmCallbacksFacade {
     
     public rapi.AdmCallbacks GetAdmCallbacks() {
         return this;

@@ -3,7 +3,8 @@
 /// <summary>
 /// Login parameters.
 /// </summary>
-public interface ILParams {
+public interface ILParams
+{
     /// <summary>
     /// Determines whether the client is in plug-in mode.
     /// </summary>
@@ -12,14 +13,10 @@ public interface ILParams {
     /// <summary>
     /// Connections to the Rithmic trading platform.
     /// </summary>
-    #region IConnection
-    
-    IConnection? PnlConnection            { get; }
+    IConnection? PnlConnection { get; }
     IConnection? MarketDataConnection     { get; }
-    IConnection? HistoricalDataConnection { get; }
     IConnection? TradingSystemConnection  { get; }
-
-    #endregion
+    IConnection? HistoricalDataConnection { get; }
 
     /// <summary>
     /// Enumerates all connections.

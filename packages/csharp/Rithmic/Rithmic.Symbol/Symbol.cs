@@ -97,7 +97,7 @@ public class Symbol : INotifyPropertyChanged {
     public Task<PriceIncrInfo> GetPriceIncrInfoAsync(IRithmicService service) {
         var ctx = new ContextOnce();
         var tcs = new TaskCompletionSource<PriceIncrInfo>();
-        service.RCallbacks.PriceIncrUpdateDispatcher.RegisterHandler(ctx, (_, info) => {
+        service.RCallbacksFacade.PriceIncrUpdateDispatcher.RegisterHandler(ctx, (_, info) => {
             switch (info.RpCode) {
                 case 0:
                     if (info.Rows.Count > 0) {
@@ -111,14 +111,14 @@ public class Symbol : INotifyPropertyChanged {
                     break;
             }
         });
-        service.REngine?.getPriceIncrInfo(Exchange, Name, ctx);
+        service.REngineOperations?.REngine.getPriceIncrInfo(Exchange, Name, ctx);
         return tcs.Task;
     }
 
     public Task<RefDataInfo> GetRefDataAsync(IRithmicService service) {
         var ctx = new ContextOnce();
         var tcs = new TaskCompletionSource<RefDataInfo>();
-        service.RCallbacks.RefDataDispatcher.RegisterHandler(ctx, (_, info) => {
+        service.RCallbacksFacade.RefDataDispatcher.RegisterHandler(ctx, (_, info) => {
             switch (info.RpCode) {
                 case 0:
                     PointValue = info.SinglePointValue;
@@ -129,7 +129,7 @@ public class Symbol : INotifyPropertyChanged {
                     break;
             }
         });
-        service.REngine?.getRefData(Exchange, Name, ctx);
+        service.REngineOperations?.REngine.getRefData(Exchange, Name, ctx);
         return tcs.Task;
     }
 
