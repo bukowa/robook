@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Rithmic.Core;
 
@@ -6,16 +8,48 @@ namespace Rithmic.Core;
 /// Rithmic Auth.
 /// </summary>
 public class RithmicAuth : IRithmicAuth {
-    public required ILParams LParams { get; set; }
-    public required CParams  CParams { get; set; }
+    public required ILParams LParams { get; init; }
+    public required CParams  CParams { get; init; }
 }
 
-public class RithmicService : IRithmicService {
-    public IREngineOperations? REngineOperations      { get; set; }
-    public IRCallbacksFacade   RCallbacksFacade   { get; set; }
-    public IAdmCallbacksFacade AdmCallbacksFacade { get; set; }
+public sealed class RithmicService : IRithmicService {
 
     public RithmicService() {
+    }
+
+    private IREngineOperations? _rEngineOperations;
+
+    public IREngineOperations? REngineOperations {
+        get => _rEngineOperations;
+        set => SetField(ref _rEngineOperations, value);
+    }
+
+    private IRCallbacksFacade _rCallbacksFacade;
+
+    public IRCallbacksFacade RCallbacksFacade {
+        get => _rCallbacksFacade;
+        set => SetField(ref _rCallbacksFacade, value);
+    }
+
+    private IAdmCallbacksFacade _admCallbacksFacade;
+
+    public IAdmCallbacksFacade AdmCallbacksFacade {
+        get => _admCallbacksFacade;
+        set => SetField(ref _admCallbacksFacade, value);
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null) {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }
 
@@ -35,14 +69,15 @@ public class RithmicClient
     /// </summary>
     public RithmicClient() {
         RithmicService = new TRithmicService {
-            RCallbacksFacade = new TRCallbacksFacade(), AdmCallbacksFacade = new TAdmCallbacksFacade(),
+            RCallbacksFacade   = new TRCallbacksFacade(),
+            AdmCallbacksFacade = new TAdmCallbacksFacade(),
         };
     }
 
     /// <summary>
     /// Rithmic Auth.
     /// </summary>
-    public IRithmicAuth RithmicAuth { get; private set; }
+    public IRithmicAuth? RithmicAuth { get; private set; }
 
     /// <summary>
     /// Rithmic Service.
@@ -122,11 +157,9 @@ public class RithmicClient
             // ignored
         }
 
-        RithmicService.REngineOperations      = null;
+        RithmicService.REngineOperations  = null;
         RithmicService.AdmCallbacksFacade = new TAdmCallbacksFacade();
     }
-
-    private object _lock = new();
 
     private void Login(IRithmicAuth auth) {
         RithmicAuth = auth;
@@ -206,6 +239,8 @@ public class RithmicClient
             throw;
         }
     }
+
+    private object _lock = new();
 
     [SuppressMessage("ReSharper", "SuggestVarOrType_BuiltInTypes")]
     [SuppressMessage("ReSharper", "SuggestVarOrType_Elsewhere")]

@@ -1,6 +1,7 @@
-﻿namespace Rithmic.Core;
+﻿using System.ComponentModel;
+namespace Rithmic.Core;
 
-public interface IRithmicService {
+public interface IRithmicService: INotifyPropertyChanged {
 
     /// <summary>
     /// Wrapper around <see cref="rapi.RCallbacks"/> for easier event handling.
