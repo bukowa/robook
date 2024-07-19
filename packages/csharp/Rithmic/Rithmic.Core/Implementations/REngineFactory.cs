@@ -9,7 +9,7 @@ public class RengineOperationsFactory : IREngineOperationsFactory
     /// Creates an instance of <see cref="IREngineOperations"/>.
     /// </summary>
     public static IREngineOperations Create(
-        rapi.REngine                  rEngine,
+        rapi.REngine?                  rEngine,
         ICancelAllOrders?             cancelAllOrders             = null,
         ICancelOrder?                 cancelOrder                 = null,
         ICancelOrderList?             cancelOrderList             = null,

@@ -16,7 +16,7 @@ public interface IRithmicService: INotifyPropertyChanged {
     /// <summary>
     /// Main entrypoint for the Rithmic API.
     /// </summary>
-    IREngineOperations? REngineOperations { get; set; }
+    IREngineOperations REngineOperations { get; set; }
 }
 
 public interface IRithmicAuth {

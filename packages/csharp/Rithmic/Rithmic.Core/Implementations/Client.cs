@@ -17,9 +17,9 @@ public sealed class RithmicService : IRithmicService {
     public RithmicService() {
     }
 
-    private IREngineOperations? _rEngineOperations;
+    private IREngineOperations _rEngineOperations;
 
-    public IREngineOperations? REngineOperations {
+    public IREngineOperations REngineOperations {
         get => _rEngineOperations;
         set => SetField(ref _rEngineOperations, value);
     }
@@ -63,7 +63,8 @@ public class RithmicClient
     where TRCallbacksFacade : IRCallbacksFacade, new()
     where TAdmCallbacksFacade : IAdmCallbacksFacade, new()
     where TRithmicService : IRithmicService, new()
-    where TREngineOperationsFactory : IREngineOperationsFactory {
+    where TREngineOperationsFactory : IREngineOperationsFactory, new() {
+
     /// <summary>
     /// Creates a new instance of the Client class.
     /// </summary>
@@ -71,6 +72,7 @@ public class RithmicClient
         RithmicService = new TRithmicService {
             RCallbacksFacade   = new TRCallbacksFacade(),
             AdmCallbacksFacade = new TAdmCallbacksFacade(),
+            REngineOperations  = TREngineOperationsFactory.Create(null),
         };
     }
 
@@ -143,7 +145,7 @@ public class RithmicClient
     // ReSharper disable once MemberCanBePrivate.Global
     public void ResetClientState() {
         try {
-            RithmicService.REngineOperations?.REngine.logout();
+            RithmicService.REngineOperations.REngine?.logout();
         }
         catch (Exception) {
             // ignored
@@ -151,14 +153,14 @@ public class RithmicClient
 
         RithmicService.RCallbacksFacade = new TRCallbacksFacade();
         try {
-            RithmicService.REngineOperations?.REngine.shutdown();
+            RithmicService.REngineOperations.REngine?.shutdown();
         }
         catch (Exception) {
             // ignored
         }
 
-        RithmicService.REngineOperations  = null;
-        RithmicService.AdmCallbacksFacade = new TAdmCallbacksFacade();
+        RithmicService.REngineOperations.REngine = null;
+        RithmicService.AdmCallbacksFacade        = new TAdmCallbacksFacade();
     }
 
     private void Login(IRithmicAuth auth) {
@@ -206,7 +208,7 @@ public class RithmicClient
                 }
             );
 
-            RithmicService.REngineOperations = TREngineOperationsFactory.Create(rEngine);
+            RithmicService.REngineOperations.REngine = rEngine;
 
             if (lParams.PlugInMode) {
                 if (lParams is { MarketDataConnection: not null, HistoricalDataConnection: not null }) {

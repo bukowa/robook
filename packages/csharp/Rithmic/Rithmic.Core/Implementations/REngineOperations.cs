@@ -3,28 +3,103 @@ using com.omnesys.rapi;
 namespace Rithmic.Core;
 
 public class REngineOperations : IREngineOperations {
-    /// <summary>
-    /// Function providing an instance of <see cref="REngine"/>.
-    /// </summary>
-    private IREngineProvider.REngineProvider _rEngineProvider;
+
+    private REngine? _rEngine;
 
     /// <summary>
-    /// Returns an instance of <see cref="REngine"/>.
+    /// The Rithmic Engine.
     /// </summary>
-    public REngine REngine {
-        get => _rEngineProvider();
-        init => _rEngineProvider = () => value;
-    }
-
-    /// <summary>
-    /// Registers an instance of <see cref="IREngineProvider.REngineProvider"/>.
-    /// </summary>
-    public void RegisterREngineProvider(IREngineProvider.REngineProvider rEngineProvider) {
-        _rEngineProvider = rEngineProvider;
+    public REngine? REngine {
+        get => _rEngine;
+        set {
+            _rEngine                             = value;
+            _cancelAllOrders.REngine             = value;
+            _cancelOrder.REngine                 = value;
+            _cancelOrderList.REngine             = value;
+            _cancelQuoteList.REngine             = value;
+            _changePassword.REngine              = value;
+            _createUserDefinedSpread.REngine     = value;
+            _exitPosition.REngine                = value;
+            _getAccounts.REngine                 = value;
+            _getAuxRefData.REngine               = value;
+            _getEasyToBorrowList.REngine         = value;
+            _getEnvironment.REngine              = value;
+            _getEquityOptionStrategyList.REngine = value;
+            _getInstrumentByUnderlying.REngine   = value;
+            _getOptionList.REngine               = value;
+            _getOrderContext.REngine             = value;
+            _getPendingInputSize.REngine         = value;
+            _getPriceIncrInfo.REngine            = value;
+            _getProductRmsInfo.REngine           = value;
+            _getRefData.REngine                  = value;
+            _getStrategyInfo.REngine             = value;
+            _getStrategyList.REngine             = value;
+            _getUserProfile.REngine              = value;
+            _getVolumeAtPrice.REngine            = value;
+            _isThereAnAggregator.REngine         = value;
+            _linkOrders.REngine                  = value;
+            _listAgreements.REngine              = value;
+            _listAssignedUsers.REngine           = value;
+            _listBinaryContracts.REngine         = value;
+            _listEnvironments.REngine            = value;
+            _listExchanges.REngine               = value;
+            _listIbs.REngine                     = value;
+            _listOrderHistoryDates.REngine       = value;
+            _listTradeRoutes.REngine             = value;
+            _login.REngine                       = value;
+            _loginRepository.REngine             = value;
+            _logout.REngine                      = value;
+            _logoutRepository.REngine            = value;
+            _modifyBracketTier.REngine           = value;
+            _modifyOrder.REngine                 = value;
+            _modifyOrderRefData.REngine          = value;
+            _rebuildBook.REngine                 = value;
+            _rebuildDboBook.REngine              = value;
+            _replayAllOrders.REngine             = value;
+            _replayBars.REngine                  = value;
+            _replayBrackets.REngine              = value;
+            _replayExecutions.REngine            = value;
+            _replayHistoricalOrders.REngine      = value;
+            _replayOpenOrders.REngine            = value;
+            _replayPnl.REngine                   = value;
+            _replayQuotes.REngine                = value;
+            _replaySingleHistoricalOrder.REngine = value;
+            _replaySingleOrder.REngine           = value;
+            _replayTrades.REngine                = value;
+            _searchInstrument.REngine            = value;
+            _sendBracketOrder.REngine            = value;
+            _sendOcaList.REngine                 = value;
+            _sendOrder.REngine                   = value;
+            _setEnvironmentVariable.REngine      = value;
+            _setOrderContext.REngine             = value;
+            _shutdown.REngine                    = value;
+            _submitQuoteList.REngine             = value;
+            _subscribe.REngine                   = value;
+            _subscribeAutoLiquidate.REngine      = value;
+            _subscribeBar.REngine                = value;
+            _subscribeBracket.REngine            = value;
+            _subscribeByUnderlying.REngine       = value;
+            _subscribeDbo.REngine                = value;
+            _subscribeEasyToBorrow.REngine       = value;
+            _subscribeOrder.REngine              = value;
+            _subscribePnl.REngine                = value;
+            _subscribeTradeRoute.REngine         = value;
+            _unsetEnvironmentVariable.REngine    = value;
+            _unsubscribe.REngine                 = value;
+            _unsubscribeAutoLiquidate.REngine    = value;
+            _unsubscribeBar.REngine              = value;
+            _unsubscribeBracket.REngine          = value;
+            _unsubscribeByUnderlying.REngine     = value;
+            _unsubscribeDbo.REngine              = value;
+            _unsubscribeEasyToBorrow.REngine     = value;
+            _unsubscribeOrder.REngine            = value;
+            _unsubscribePnl.REngine              = value;
+            _unsubscribeTradeRoute.REngine       = value;
+        }
     }
 
     public REngineOperations(
-        REngine                       rEngine,
+        REngine?                       rEngine,
         ICancelAllOrders?             cancelAllOrders             = null,
         ICancelOrder?                 cancelOrder                 = null,
         ICancelOrderList?             cancelOrderList             = null,
@@ -192,7 +267,6 @@ public class REngineOperations : IREngineOperations {
         _unsubscribePnl              = unsubscribePnl ?? new UnsubscribePnl(rEngine);
         _unsubscribeTradeRoute       = unsubscribeTradeRoute ?? new UnsubscribeTradeRoute(rEngine);
     }
-
 
     private readonly ICancelAllOrders             _cancelAllOrders;
     private readonly ICancelOrder                 _cancelOrder;
@@ -380,10 +454,10 @@ public class REngineOperations : IREngineOperations {
     ) =>
         _getOptionList.getOptionList(sExchange, sProduct, sExpirationCCYYMM, oContext);
 
-    public object getOrderContext(string sOrderNum) =>
+    public object? getOrderContext(string sOrderNum) =>
         _getOrderContext.getOrderContext(sOrderNum);
 
-    public long getPendingInputSize(ConnectionId eConnId) =>
+    public long? getPendingInputSize(ConnectionId eConnId) =>
         _getPendingInputSize.getPendingInputSize(eConnId);
 
     public void getPriceIncrInfo(
@@ -824,29 +898,14 @@ public abstract class REngineProvider : IREngineProvider {
     /// <summary>
     /// Constructor.
     /// </summary>
-    public REngineProvider(REngine rEngine) {
+    protected REngineProvider(REngine rEngine) {
         REngine = rEngine;
     }
 
     /// <summary>
-    /// Function providing an instance of <see cref="REngine"/>.
+    /// Rithmic Engine.
     /// </summary>
-    private IREngineProvider.REngineProvider _rEngineProvider;
-
-    /// <summary>
-    /// Returns an instance of <see cref="REngine"/>.
-    /// </summary>
-    public REngine REngine {
-        get => _rEngineProvider();
-        init => _rEngineProvider = () => value;
-    }
-
-    /// <summary>
-    /// Registers an instance of <see cref="IREngineProvider.REngineProvider"/>.
-    /// </summary>
-    public void RegisterREngineProvider(IREngineProvider.REngineProvider rEngineProvider) {
-        _rEngineProvider = rEngineProvider;
-    }
+    public REngine? REngine { get; set; }
 
 }
 
@@ -879,7 +938,7 @@ public class CancelOrder(REngine engine)
         string      sUserMsg,
         object      oContext
     ) {
-        REngine.cancelOrder
+        REngine?.cancelOrder
         (
             oAccount,
             sOrderNum,
@@ -903,7 +962,7 @@ public class CancelOrderList(REngine engine)
         ReadOnlyCollection<string>      oUserMsgList,
         ReadOnlyCollection<object>      oContextList
     ) {
-        REngine.cancelOrderList
+        REngine?.cancelOrderList
         (
             oAccountList,
             oOrderNumList,
@@ -920,7 +979,7 @@ public class CancelQuoteList(REngine engine)
       ICancelQuoteList {
 
     public void cancelQuoteList(ReadOnlyCollection<QuoteCancelParams> oList) {
-        REngine.cancelQuoteList(oList);
+        REngine?.cancelQuoteList(oList);
     }
 }
 
@@ -932,7 +991,7 @@ public class ChangePassword(REngine engine)
         string sOldPassword,
         string sNewPassword
     ) {
-        REngine.changePassword
+        REngine?.changePassword
         (
             sOldPassword,
             sNewPassword
@@ -954,7 +1013,7 @@ public class CreateUserDefinedSpread(REngine engine)
         ReadOnlyCollection<int>    oLegRatios,
         object                     oContext
     ) {
-        REngine.createUserDefinedSpread
+        REngine?.createUserDefinedSpread
         (
             oAccount,
             sExchange,
@@ -980,7 +1039,7 @@ public class ExitPosition(REngine engine)
         string      sTradingAlgorithm,
         object      oContext
     ) {
-        REngine.exitPosition
+        REngine?.exitPosition
         (
             oAccount,
             sExchange,
@@ -997,7 +1056,7 @@ public class GetAccounts(REngine engine)
       IGetAccounts {
 
     public void getAccounts(string sStatus) {
-        REngine.getAccounts(sStatus);
+        REngine?.getAccounts(sStatus);
     }
 }
 
@@ -1010,7 +1069,7 @@ public class GetAuxRefData(REngine engine)
         string sSymbol,
         object oContext
     ) {
-        REngine.getAuxRefData
+        REngine?.getAuxRefData
         (
             sExchange,
             sSymbol,
@@ -1024,7 +1083,7 @@ public class GetEasyToBorrowList(REngine engine)
       IGetEasyToBorrowList {
 
     public void getEasyToBorrowList(object oContext) {
-        REngine.getEasyToBorrowList(oContext);
+        REngine?.getEasyToBorrowList(oContext);
     }
 }
 
@@ -1036,7 +1095,7 @@ public class GetEnvironment(REngine engine)
         string sKey,
         object oContext
     ) {
-        REngine.getEnvironment
+        REngine?.getEnvironment
         (
             sKey,
             oContext
@@ -1055,7 +1114,7 @@ public class GetEquityOptionStrategyList(REngine engine)
         string sExpiration,
         object oContext
     ) {
-        REngine.getEquityOptionStrategyList
+        REngine?.getEquityOptionStrategyList
         (
             sExchange,
             sUnderlying,
@@ -1076,7 +1135,7 @@ public class GetInstrumentByUnderlying(REngine engine)
         string sExpiration,
         object oContext
     ) {
-        REngine.getInstrumentByUnderlying
+        REngine?.getInstrumentByUnderlying
         (
             sUnderlying,
             sExchange,
@@ -1096,7 +1155,7 @@ public class GetOptionList(REngine engine)
         string sExpirationCCYYMM,
         object oContext
     ) {
-        REngine.getOptionList
+        REngine?.getOptionList
         (
             sExchange,
             sProduct,
@@ -1110,8 +1169,8 @@ public class GetOrderContext(REngine engine)
     : REngineProvider(engine),
       IGetOrderContext {
 
-    public object getOrderContext(string sOrderNum) {
-        return REngine.getOrderContext(sOrderNum);
+    public object? getOrderContext(string sOrderNum) {
+        return REngine?.getOrderContext(sOrderNum);
     }
 }
 
@@ -1119,8 +1178,8 @@ public class GetPendingInputSize(REngine engine)
     : REngineProvider(engine),
       IGetPendingInputSize {
 
-    public long getPendingInputSize(ConnectionId eConnId) {
-        return REngine.getPendingInputSize(eConnId);
+    public long? getPendingInputSize(ConnectionId eConnId) {
+        return REngine?.getPendingInputSize(eConnId);
     }
 }
 
@@ -1133,7 +1192,7 @@ public class GetPriceIncrInfo(REngine engine)
         string sSymbol,
         object oContext
     ) {
-        REngine.getPriceIncrInfo
+        REngine?.getPriceIncrInfo
         (
             sExchange,
             sSymbol,
@@ -1150,7 +1209,7 @@ public class GetProductRmsInfo(REngine engine)
         AccountInfo oAccount,
         object      oContext
     ) {
-        REngine.getProductRmsInfo
+        REngine?.getProductRmsInfo
         (
             oAccount,
             oContext
@@ -1167,7 +1226,7 @@ public class GetRefData(REngine engine)
         string sSymbol,
         object oContext
     ) {
-        REngine.getRefData
+        REngine?.getRefData
         (
             sExchange,
             sSymbol,
@@ -1185,7 +1244,7 @@ public class GetStrategyInfo(REngine engine)
         string sSymbol,
         object oContext
     ) {
-        REngine.getStrategyInfo
+        REngine?.getStrategyInfo
         (
             sExchange,
             sSymbol,
@@ -1205,7 +1264,7 @@ public class GetStrategyList(REngine engine)
         string sExpirationCCYYMM,
         object oContext
     ) {
-        REngine.getStrategyList
+        REngine?.getStrategyList
         (
             sExchange,
             sProduct,
@@ -1224,7 +1283,7 @@ public class GetUserProfile(REngine engine)
         ConnectionId eConnId,
         object       oContext
     ) {
-        REngine.getUserProfile
+        REngine?.getUserProfile
         (
             eConnId,
             oContext
@@ -1241,7 +1300,7 @@ public class GetVolumeAtPrice(REngine engine)
         string sSymbol,
         object oContext
     ) {
-        REngine.getVolumeAtPrice
+        REngine?.getVolumeAtPrice
         (
             sExchange,
             sSymbol,
@@ -1255,7 +1314,7 @@ public class IsThereAnAggregator(REngine engine)
       IIsThereAnAggregator {
 
     public void isThereAnAggregator() {
-        REngine.isThereAnAggregator();
+        REngine?.isThereAnAggregator();
     }
 }
 
@@ -1267,7 +1326,7 @@ public class LinkOrders(REngine engine)
         ReadOnlyCollection<AccountInfo> oAccountList,
         ReadOnlyCollection<string>      oOrderNumList
     ) {
-        REngine.linkOrders
+        REngine?.linkOrders
         (
             oAccountList,
             oOrderNumList
@@ -1283,7 +1342,7 @@ public class ListAgreements(REngine engine)
         bool   bAccepted,
         object oContext
     ) {
-        REngine.listAgreements
+        REngine?.listAgreements
         (
             bAccepted,
             oContext
@@ -1299,7 +1358,7 @@ public class ListAssignedUsers(REngine engine)
         AccountInfo oAccount,
         object      oContext
     ) {
-        REngine.listAssignedUsers
+        REngine?.listAssignedUsers
         (
             oAccount,
             oContext
@@ -1316,7 +1375,7 @@ public class ListBinaryContracts(REngine engine)
         string sProductCode,
         object oContext
     ) {
-        REngine.listBinaryContracts
+        REngine?.listBinaryContracts
         (
             sExchange,
             sProductCode,
@@ -1330,7 +1389,7 @@ public class ListEnvironments(REngine engine)
       IListEnvironments {
 
     public void listEnvironments(object oContext) {
-        REngine.listEnvironments(oContext);
+        REngine?.listEnvironments(oContext);
     }
 }
 
@@ -1339,7 +1398,7 @@ public class ListExchanges(REngine engine)
       IListExchanges {
 
     public void listExchanges(object oContext) {
-        REngine.listExchanges(oContext);
+        REngine?.listExchanges(oContext);
     }
 }
 
@@ -1348,7 +1407,7 @@ public class ListIbs(REngine engine)
       IListIbs {
 
     public void listIbs(object oContext) {
-        REngine.listIbs(oContext);
+        REngine?.listIbs(oContext);
     }
 }
 
@@ -1357,7 +1416,7 @@ public class ListOrderHistoryDates(REngine engine)
       IListOrderHistoryDates {
 
     public void listOrderHistoryDates(object oContext) {
-        REngine.listOrderHistoryDates(oContext);
+        REngine?.listOrderHistoryDates(oContext);
     }
 }
 
@@ -1366,7 +1425,7 @@ public class ListTradeRoutes(REngine engine)
       IListTradeRoutes {
 
     public void listTradeRoutes(object oContext) {
-        REngine.listTradeRoutes(oContext);
+        REngine?.listTradeRoutes(oContext);
     }
 }
 
@@ -1390,7 +1449,7 @@ public class Login(REngine engine)
         string           sIhPassword,
         string           sIhCnnctPt
     ) {
-        REngine.login
+        REngine?.login
         (
             oCallbacksFacade,
             sMdEnvKey,
@@ -1421,7 +1480,7 @@ public class LoginRepository(REngine engine)
         string           sPassword,
         string           sCnnctPt
     ) {
-        REngine.loginRepository
+        REngine?.loginRepository
         (
             oCallbacksFacade,
             sEnvKey,
@@ -1437,7 +1496,7 @@ public class Logout(REngine engine)
       ILogout {
 
     public void logout() {
-        REngine.logout();
+        REngine?.logout();
     }
 }
 
@@ -1446,7 +1505,7 @@ public class LogoutRepository(REngine engine)
       ILogoutRepository {
 
     public void logoutRepository() {
-        REngine.logoutRepository();
+        REngine?.logoutRepository();
     }
 }
 
@@ -1462,7 +1521,7 @@ public class ModifyBracketTier(REngine engine)
         int         iNewTickOffset,
         object      oContext
     ) {
-        REngine.modifyBracketTier
+        REngine?.modifyBracketTier
         (
             oAccount,
             sOrderNum,
@@ -1479,23 +1538,23 @@ public class ModifyOrder(REngine engine)
       IModifyOrder {
 
     public void modifyOrder(ModifyLimitOrderParams oParamsIn) {
-        REngine.modifyOrder(oParamsIn);
+        REngine?.modifyOrder(oParamsIn);
     }
 
     public void modifyOrder(ModifyOrderParams oParams) {
-        REngine.modifyOrder(oParams);
+        REngine?.modifyOrder(oParams);
     }
 
     public void modifyOrder(ModifyStopLimitOrderParams oParamsIn) {
-        REngine.modifyOrder(oParamsIn);
+        REngine?.modifyOrder(oParamsIn);
     }
 
     public void modifyOrder(ModifyStopMarketOrderParams oParamsIn) {
-        REngine.modifyOrder(oParamsIn);
+        REngine?.modifyOrder(oParamsIn);
     }
 
     public void modifyOrderList(ReadOnlyCollection<ModifyOrderParams> oList) {
-        REngine.modifyOrderList(oList);
+        REngine?.modifyOrderList(oList);
     }
 }
 
@@ -1509,7 +1568,7 @@ public class ModifyOrderRefData(REngine engine)
         string      sUserMsg,
         string      sUserTag
     ) {
-        REngine.modifyOrderRefData
+        REngine?.modifyOrderRefData
         (
             oAccount,
             sOrderNum,
@@ -1528,7 +1587,7 @@ public class RebuildBook(REngine engine)
         string sSymbol,
         object oContext
     ) {
-        REngine.rebuildBook
+        REngine?.rebuildBook
         (
             sExchange,
             sSymbol,
@@ -1547,7 +1606,7 @@ public class RebuildDboBook(REngine engine)
         double dPrice,
         object oContext
     ) {
-        REngine.rebuildDboBook
+        REngine?.rebuildDboBook
         (
             sExchange,
             sSymbol,
@@ -1567,7 +1626,7 @@ public class ReplayAllOrders(REngine engine)
         int         iEndSsboe,
         object      oContext
     ) {
-        REngine.replayAllOrders
+        REngine?.replayAllOrders
         (
             oAccount,
             iStartSsboe,
@@ -1582,7 +1641,7 @@ public class ReplayBars(REngine engine)
       IReplayBars {
 
     public void replayBars(ReplayBarParams oParams) {
-        REngine.replayBars(oParams);
+        REngine?.replayBars(oParams);
     }
 }
 
@@ -1594,7 +1653,7 @@ public class ReplayBrackets(REngine engine)
         AccountInfo oAccount,
         object      oContext
     ) {
-        REngine.replayBrackets
+        REngine?.replayBrackets
         (
             oAccount,
             oContext
@@ -1612,7 +1671,7 @@ public class ReplayExecutions(REngine engine)
         int         iEndSsboe,
         object      oContext
     ) {
-        REngine.replayExecutions
+        REngine?.replayExecutions
         (
             oAccount,
             iStartSsboe,
@@ -1631,7 +1690,7 @@ public class ReplayHistoricalOrders(REngine engine)
         string      sDate,
         object      oContext
     ) {
-        REngine.replayHistoricalOrders
+        REngine?.replayHistoricalOrders
         (
             oAccount,
             sDate,
@@ -1648,7 +1707,7 @@ public class ReplayOpenOrders(REngine engine)
         AccountInfo oAccount,
         object      oContext
     ) {
-        REngine.replayOpenOrders
+        REngine?.replayOpenOrders
         (
             oAccount,
             oContext
@@ -1664,7 +1723,7 @@ public class ReplayPnl(REngine engine)
         AccountInfo oAccount,
         object      oContext
     ) {
-        REngine.replayPnl
+        REngine?.replayPnl
         (
             oAccount,
             oContext
@@ -1680,7 +1739,7 @@ public class ReplayQuotes(REngine engine)
         AccountInfo oAccount,
         object      oContext
     ) {
-        REngine.replayQuotes
+        REngine?.replayQuotes
         (
             oAccount,
             oContext
@@ -1698,7 +1757,7 @@ public class ReplaySingleHistoricalOrder(REngine engine)
         string      sDate,
         object      oContext
     ) {
-        REngine.replaySingleHistoricalOrder
+        REngine?.replaySingleHistoricalOrder
         (
             oAccount,
             sOrderNum,
@@ -1717,7 +1776,7 @@ public class ReplaySingleOrder(REngine engine)
         string      sOrderNum,
         object      oContext
     ) {
-        REngine.replaySingleOrder
+        REngine?.replaySingleOrder
         (
             oAccount,
             sOrderNum,
@@ -1737,7 +1796,7 @@ public class ReplayTrades(REngine engine)
         int    iEndSsboe,
         object oContext
     ) {
-        REngine.replayTrades
+        REngine?.replayTrades
         (
             sExchange,
             sSymbol,
@@ -1757,7 +1816,7 @@ public class SearchInstrument(REngine engine)
         ReadOnlyCollection<SearchTerm> oTerms,
         object                         oContext
     ) {
-        REngine.searchInstrument
+        REngine?.searchInstrument
         (
             sExchange,
             oTerms,
@@ -1774,7 +1833,7 @@ public class SendBracketOrder(REngine engine)
         OrderParams   oEntry,
         BracketParams oBracketParams
     ) {
-        REngine.sendBracketOrder
+        REngine?.sendBracketOrder
         (
             oEntry,
             oBracketParams
@@ -1790,7 +1849,7 @@ public class SendBracketOrder(REngine engine)
         IList<BracketTier> oTargets,
         IList<BracketTier> oStops
     ) {
-        REngine.sendBracketOrder
+        REngine?.sendBracketOrder
         (
             oEntry,
             sBracketType,
@@ -1811,7 +1870,7 @@ public class SendOcaList(REngine engine)
         string                          sOcaType,
         ReadOnlyCollection<OrderParams> oList
     ) {
-        REngine.sendOcaList
+        REngine?.sendOcaList
         (
             sOcaType,
             oList
@@ -1824,23 +1883,23 @@ public class SendOrder(REngine engine)
       ISendOrder {
 
     public void sendOrder(LimitOrderParams oParamsIn) {
-        REngine.sendOrder(oParamsIn);
+        REngine?.sendOrder(oParamsIn);
     }
 
     public void sendOrder(MarketOrderParams oParamsIn) {
-        REngine.sendOrder(oParamsIn);
+        REngine?.sendOrder(oParamsIn);
     }
 
     public void sendOrder(StopLimitOrderParams oParamsIn) {
-        REngine.sendOrder(oParamsIn);
+        REngine?.sendOrder(oParamsIn);
     }
 
     public void sendOrder(StopMarketOrderParams oParamsIn) {
-        REngine.sendOrder(oParamsIn);
+        REngine?.sendOrder(oParamsIn);
     }
 
     public void sendOrderList(ReadOnlyCollection<OrderParams> oList) {
-        REngine.sendOrderList(oList);
+        REngine?.sendOrderList(oList);
     }
 }
 
@@ -1853,7 +1912,7 @@ public class SetEnvironmentVariable(REngine engine)
         string sVariable,
         string sValue
     ) {
-        REngine.setEnvironmentVariable
+        REngine?.setEnvironmentVariable
         (
             sKey,
             sVariable,
@@ -1870,7 +1929,7 @@ public class SetOrderContext(REngine engine)
         string sOrderNum,
         object oContext
     ) {
-        REngine.setOrderContext
+        REngine?.setOrderContext
         (
             sOrderNum,
             oContext
@@ -1883,7 +1942,7 @@ public class Shutdown(REngine engine)
       IShutdown {
 
     public void shutdown() {
-        REngine.shutdown();
+        REngine?.shutdown();
     }
 }
 
@@ -1892,7 +1951,7 @@ public class SubmitQuoteList(REngine engine)
       ISubmitQuoteList {
 
     public void submitQuoteList(ReadOnlyCollection<QuoteParams> oList) {
-        REngine.submitQuoteList(oList);
+        REngine?.submitQuoteList(oList);
     }
 }
 
@@ -1906,7 +1965,7 @@ public class Subscribe(REngine engine)
         SubscriptionFlags eFlags,
         object            oContext
     ) {
-        REngine.subscribe
+        REngine?.subscribe
         (
             sExchange,
             sSymbol,
@@ -1921,7 +1980,7 @@ public class SubscribeAutoLiquidate(REngine engine)
       ISubscribeAutoLiquidate {
 
     public void subscribeAutoLiquidate(AccountInfo oAccount) {
-        REngine.subscribeAutoLiquidate(oAccount);
+        REngine?.subscribeAutoLiquidate(oAccount);
     }
 }
 
@@ -1930,7 +1989,7 @@ public class SubscribeBar(REngine engine)
       ISubscribeBar {
 
     public void subscribeBar(BarParams oParams) {
-        REngine.subscribeBar(oParams);
+        REngine?.subscribeBar(oParams);
     }
 }
 
@@ -1939,7 +1998,7 @@ public class SubscribeBracket(REngine engine)
       ISubscribeBracket {
 
     public void subscribeBracket(AccountInfo oAccount) {
-        REngine.subscribeBracket(oAccount);
+        REngine?.subscribeBracket(oAccount);
     }
 }
 
@@ -1954,7 +2013,7 @@ public class SubscribeByUnderlying(REngine engine)
         SubscriptionFlags eFlags,
         object            oContext
     ) {
-        REngine.subscribeByUnderlying
+        REngine?.subscribeByUnderlying
         (
             sUnderlying,
             sExchange,
@@ -1975,7 +2034,7 @@ public class SubscribeDbo(REngine engine)
         double dPrice,
         object oContext
     ) {
-        REngine.subscribeDbo
+        REngine?.subscribeDbo
         (
             sExchange,
             sSymbol,
@@ -1990,7 +2049,7 @@ public class SubscribeEasyToBorrow(REngine engine)
       ISubscribeEasyToBorrow {
 
     public void subscribeEasyToBorrow(object oContext) {
-        REngine.subscribeEasyToBorrow(oContext);
+        REngine?.subscribeEasyToBorrow(oContext);
     }
 }
 
@@ -1999,7 +2058,7 @@ public class SubscribeOrder(REngine engine)
       ISubscribeOrder {
 
     public void subscribeOrder(AccountInfo oAccount) {
-        REngine.subscribeOrder(oAccount);
+        REngine?.subscribeOrder(oAccount);
     }
 }
 
@@ -2008,7 +2067,7 @@ public class SubscribePnl(REngine engine)
       ISubscribePnl {
 
     public void subscribePnl(AccountInfo oAccount) {
-        REngine.subscribePnl(oAccount);
+        REngine?.subscribePnl(oAccount);
     }
 }
 
@@ -2021,7 +2080,7 @@ public class SubscribeTradeRoute(REngine engine)
         string sIbId,
         object oContext
     ) {
-        REngine.subscribeTradeRoute
+        REngine?.subscribeTradeRoute
         (
             sFcmId,
             sIbId,
@@ -2038,7 +2097,7 @@ public class UnsetEnvironmentVariable(REngine engine)
         string sKey,
         string sVariable
     ) {
-        REngine.unsetEnvironmentVariable
+        REngine?.unsetEnvironmentVariable
         (
             sKey,
             sVariable
@@ -2054,7 +2113,7 @@ public class Unsubscribe(REngine engine)
         string sExchange,
         string sSymbol
     ) {
-        REngine.unsubscribe
+        REngine?.unsubscribe
         (
             sExchange,
             sSymbol
@@ -2067,7 +2126,7 @@ public class UnsubscribeAutoLiquidate(REngine engine)
       IUnsubscribeAutoLiquidate {
 
     public void unsubscribeAutoLiquidate(AccountInfo oAccount) {
-        REngine.unsubscribeAutoLiquidate(oAccount);
+        REngine?.unsubscribeAutoLiquidate(oAccount);
     }
 }
 
@@ -2076,7 +2135,7 @@ public class UnsubscribeBar(REngine engine)
       IUnsubscribeBar {
 
     public void unsubscribeBar(BarParams oParams) {
-        REngine.unsubscribeBar(oParams);
+        REngine?.unsubscribeBar(oParams);
     }
 }
 
@@ -2085,7 +2144,7 @@ public class UnsubscribeBracket(REngine engine)
       IUnsubscribeBracket {
 
     public void unsubscribeBracket(AccountInfo oAccount) {
-        REngine.unsubscribeBracket(oAccount);
+        REngine?.unsubscribeBracket(oAccount);
     }
 }
 
@@ -2098,7 +2157,7 @@ public class UnsubscribeByUnderlying(REngine engine)
         string sExchange,
         string sExpiration
     ) {
-        REngine.unsubscribeByUnderlying
+        REngine?.unsubscribeByUnderlying
         (
             sUnderlying,
             sExchange,
@@ -2117,7 +2176,7 @@ public class UnsubscribeDbo(REngine engine)
         double dPrice,
         object oContext
     ) {
-        REngine.unsubscribeDbo
+        REngine?.unsubscribeDbo
         (
             sExchange,
             sSymbol,
@@ -2132,7 +2191,7 @@ public class UnsubscribeEasyToBorrow(REngine engine)
       IUnsubscribeEasyToBorrow {
 
     public void unsubscribeEasyToBorrow() {
-        REngine.unsubscribeEasyToBorrow();
+        REngine?.unsubscribeEasyToBorrow();
     }
 }
 
@@ -2141,7 +2200,7 @@ public class UnsubscribeOrder(REngine engine)
       IUnsubscribeOrder {
 
     public void unsubscribeOrder(AccountInfo oAccount) {
-        REngine.unsubscribeOrder(oAccount);
+        REngine?.unsubscribeOrder(oAccount);
     }
 }
 
@@ -2150,7 +2209,7 @@ public class UnsubscribePnl(REngine engine)
       IUnsubscribePnl {
 
     public void unsubscribePnl(AccountInfo oAccount) {
-        REngine.unsubscribePnl(oAccount);
+        REngine?.unsubscribePnl(oAccount);
     }
 }
 
@@ -2162,7 +2221,7 @@ public class UnsubscribeTradeRoute(REngine engine)
         string sFcmId,
         string sIbId
     ) {
-        REngine.unsubscribeTradeRoute
+        REngine?.unsubscribeTradeRoute
         (
             sFcmId,
             sIbId

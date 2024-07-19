@@ -9,7 +9,7 @@ public interface IREngineOperationsFactory
     /// Method to create an instance of IREngineOperations.
     /// </summary>
     abstract static IREngineOperations Create(
-        rapi.REngine                  rEngine,
+        rapi.REngine?                  rEngine,
         ICancelAllOrders?             cancelAllOrders             = null,
         ICancelOrder?                 cancelOrder                 = null,
         ICancelOrderList?             cancelOrderList             = null,

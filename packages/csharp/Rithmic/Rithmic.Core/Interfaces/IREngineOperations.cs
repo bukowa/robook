@@ -10,23 +10,11 @@ using rapi;
 /// Interface for providing a Rithmic Engine.
 /// </summary>
 [SuppressMessage("ReSharper", "RedundantNameQualifier")]
-public interface IREngineProvider
-{
+public interface IREngineProvider {
     /// <summary>
-    /// Base delegate for providing a Rithmic Engine.
+    /// Gets or sets the Rithmic Engine.
     /// </summary>
-    delegate rapi.REngine REngineProvider();
-
-    /// <summary>
-    /// Returns the Rithmic Engine.
-    /// </summary>
-    rapi.REngine REngine { get; }
-
-    /// <summary>
-    /// Register a function that provides a Rithmic Engine.
-    /// </summary>
-    /// <param name="rEngineProvider"> The function that provides a Rithmic Engine. </param>
-    void RegisterREngineProvider(REngineProvider rEngineProvider);
+    rapi.REngine? REngine { get; set; }
 }
 
 /// <summary>
@@ -118,8 +106,7 @@ public interface IREngineOperations :
     IUnsubscribePnl,
     IUnsubscribeTradeRoute;
 
-public interface ICancelAllOrders : IREngineProvider
-{
+public interface ICancelAllOrders : IREngineProvider {
     void cancelAllOrders(
         AccountInfo oAccount,
         string      sEntryType,
@@ -127,8 +114,7 @@ public interface ICancelAllOrders : IREngineProvider
     );
 }
 
-public interface ICancelOrder : IREngineProvider
-{
+public interface ICancelOrder : IREngineProvider {
     void cancelOrder(
         AccountInfo oAccount,
         string      sOrderNum,
@@ -139,8 +125,7 @@ public interface ICancelOrder : IREngineProvider
     );
 }
 
-public interface ICancelOrderList : IREngineProvider
-{
+public interface ICancelOrderList : IREngineProvider {
     void cancelOrderList(
         ReadOnlyCollection<AccountInfo> oAccountList,
         ReadOnlyCollection<string>      oOrderNumList,
@@ -151,21 +136,18 @@ public interface ICancelOrderList : IREngineProvider
     );
 }
 
-public interface ICancelQuoteList : IREngineProvider
-{
+public interface ICancelQuoteList : IREngineProvider {
     void cancelQuoteList(ReadOnlyCollection<QuoteCancelParams> oList);
 }
 
-public interface IChangePassword : IREngineProvider
-{
+public interface IChangePassword : IREngineProvider {
     void changePassword(
         string sOldPassword,
         string sNewPassword
     );
 }
 
-public interface ICreateUserDefinedSpread : IREngineProvider
-{
+public interface ICreateUserDefinedSpread : IREngineProvider {
     void createUserDefinedSpread(
         AccountInfo                oAccount,
         string                     sExchange,
@@ -178,8 +160,7 @@ public interface ICreateUserDefinedSpread : IREngineProvider
     );
 }
 
-public interface IExitPosition : IREngineProvider
-{
+public interface IExitPosition : IREngineProvider {
     void exitPosition(
         AccountInfo oAccount,
         string      sExchange,
@@ -190,13 +171,11 @@ public interface IExitPosition : IREngineProvider
     );
 }
 
-public interface IGetAccounts : IREngineProvider
-{
+public interface IGetAccounts : IREngineProvider {
     void getAccounts(string sStatus);
 }
 
-public interface IGetAuxRefData : IREngineProvider
-{
+public interface IGetAuxRefData : IREngineProvider {
     void getAuxRefData(
         string sExchange,
         string sSymbol,
@@ -204,21 +183,18 @@ public interface IGetAuxRefData : IREngineProvider
     );
 }
 
-public interface IGetEasyToBorrowList : IREngineProvider
-{
+public interface IGetEasyToBorrowList : IREngineProvider {
     void getEasyToBorrowList(object oContext);
 }
 
-public interface IGetEnvironment : IREngineProvider
-{
+public interface IGetEnvironment : IREngineProvider {
     void getEnvironment(
         string sKey,
         object oContext
     );
 }
 
-public interface IGetEquityOptionStrategyList : IREngineProvider
-{
+public interface IGetEquityOptionStrategyList : IREngineProvider {
     void getEquityOptionStrategyList(
         string sExchange,
         string sUnderlying,
@@ -228,8 +204,7 @@ public interface IGetEquityOptionStrategyList : IREngineProvider
     );
 }
 
-public interface IGetInstrumentByUnderlying : IREngineProvider
-{
+public interface IGetInstrumentByUnderlying : IREngineProvider {
     void getInstrumentByUnderlying(
         string sUnderlying,
         string sExchange,
@@ -238,8 +213,7 @@ public interface IGetInstrumentByUnderlying : IREngineProvider
     );
 }
 
-public interface IGetOptionList : IREngineProvider
-{
+public interface IGetOptionList : IREngineProvider {
     void getOptionList(
         string sExchange,
         string sProduct,
@@ -248,18 +222,15 @@ public interface IGetOptionList : IREngineProvider
     );
 }
 
-public interface IGetOrderContext : IREngineProvider
-{
-    object getOrderContext(string sOrderNum);
+public interface IGetOrderContext : IREngineProvider {
+    object? getOrderContext(string sOrderNum);
 }
 
-public interface IGetPendingInputSize : IREngineProvider
-{
-    long getPendingInputSize(ConnectionId eConnId);
+public interface IGetPendingInputSize : IREngineProvider {
+    long? getPendingInputSize(ConnectionId eConnId);
 }
 
-public interface IGetPriceIncrInfo : IREngineProvider
-{
+public interface IGetPriceIncrInfo : IREngineProvider {
     void getPriceIncrInfo(
         string sExchange,
         string sSymbol,
@@ -267,16 +238,14 @@ public interface IGetPriceIncrInfo : IREngineProvider
     );
 }
 
-public interface IGetProductRmsInfo : IREngineProvider
-{
+public interface IGetProductRmsInfo : IREngineProvider {
     void getProductRmsInfo(
         AccountInfo oAccount,
         object      oContext
     );
 }
 
-public interface IGetRefData : IREngineProvider
-{
+public interface IGetRefData : IREngineProvider {
     void getRefData(
         string sExchange,
         string sSymbol,
@@ -284,8 +253,7 @@ public interface IGetRefData : IREngineProvider
     );
 }
 
-public interface IGetStrategyInfo : IREngineProvider
-{
+public interface IGetStrategyInfo : IREngineProvider {
     void getStrategyInfo(
         string sExchange,
         string sSymbol,
@@ -293,8 +261,7 @@ public interface IGetStrategyInfo : IREngineProvider
     );
 }
 
-public interface IGetStrategyList : IREngineProvider
-{
+public interface IGetStrategyList : IREngineProvider {
     void getStrategyList(
         string sExchange,
         string sProduct,
@@ -304,16 +271,14 @@ public interface IGetStrategyList : IREngineProvider
     );
 }
 
-public interface IGetUserProfile : IREngineProvider
-{
+public interface IGetUserProfile : IREngineProvider {
     void getUserProfile(
         ConnectionId eConnId,
         object       oContext
     );
 }
 
-public interface IGetVolumeAtPrice : IREngineProvider
-{
+public interface IGetVolumeAtPrice : IREngineProvider {
     void getVolumeAtPrice(
         string sExchange,
         string sSymbol,
@@ -321,37 +286,32 @@ public interface IGetVolumeAtPrice : IREngineProvider
     );
 }
 
-public interface IIsThereAnAggregator : IREngineProvider
-{
+public interface IIsThereAnAggregator : IREngineProvider {
     void isThereAnAggregator();
 }
 
-public interface ILinkOrders : IREngineProvider
-{
+public interface ILinkOrders : IREngineProvider {
     void linkOrders(
         ReadOnlyCollection<AccountInfo> oAccountList,
         ReadOnlyCollection<string>      oOrderNumList
     );
 }
 
-public interface IListAgreements : IREngineProvider
-{
+public interface IListAgreements : IREngineProvider {
     void listAgreements(
         bool   bAccepted,
         object oContext
     );
 }
 
-public interface IListAssignedUsers : IREngineProvider
-{
+public interface IListAssignedUsers : IREngineProvider {
     void listAssignedUsers(
         AccountInfo oAccount,
         object      oContext
     );
 }
 
-public interface IListBinaryContracts : IREngineProvider
-{
+public interface IListBinaryContracts : IREngineProvider {
     void listBinaryContracts(
         string sExchange,
         string sProductCode,
@@ -359,33 +319,27 @@ public interface IListBinaryContracts : IREngineProvider
     );
 }
 
-public interface IListEnvironments : IREngineProvider
-{
+public interface IListEnvironments : IREngineProvider {
     void listEnvironments(object oContext);
 }
 
-public interface IListExchanges : IREngineProvider
-{
+public interface IListExchanges : IREngineProvider {
     void listExchanges(object oContext);
 }
 
-public interface IListIbs : IREngineProvider
-{
+public interface IListIbs : IREngineProvider {
     void listIbs(object oContext);
 }
 
-public interface IListOrderHistoryDates : IREngineProvider
-{
+public interface IListOrderHistoryDates : IREngineProvider {
     void listOrderHistoryDates(object oContext);
 }
 
-public interface IListTradeRoutes : IREngineProvider
-{
+public interface IListTradeRoutes : IREngineProvider {
     void listTradeRoutes(object oContext);
 }
 
-public interface ILogin : IREngineProvider
-{
+public interface ILogin : IREngineProvider {
     void login(
         RCallbacksFacade oCallbacksFacade,
         string           sMdEnvKey,
@@ -404,8 +358,7 @@ public interface ILogin : IREngineProvider
     );
 }
 
-public interface ILoginRepository : IREngineProvider
-{
+public interface ILoginRepository : IREngineProvider {
     void loginRepository(
         RCallbacksFacade oCallbacksFacade,
         string           sEnvKey,
@@ -415,18 +368,15 @@ public interface ILoginRepository : IREngineProvider
     );
 }
 
-public interface ILogout : IREngineProvider
-{
+public interface ILogout : IREngineProvider {
     void logout();
 }
 
-public interface ILogoutRepository : IREngineProvider
-{
+public interface ILogoutRepository : IREngineProvider {
     void logoutRepository();
 }
 
-public interface IModifyBracketTier : IREngineProvider
-{
+public interface IModifyBracketTier : IREngineProvider {
     void modifyBracketTier(
         AccountInfo oAccount,
         string      sOrderNum,
@@ -437,8 +387,7 @@ public interface IModifyBracketTier : IREngineProvider
     );
 }
 
-public interface IModifyOrder : IREngineProvider
-{
+public interface IModifyOrder : IREngineProvider {
     void modifyOrder(ModifyLimitOrderParams                    oParamsIn);
     void modifyOrder(ModifyOrderParams                         oParams);
     void modifyOrder(ModifyStopLimitOrderParams                oParamsIn);
@@ -446,8 +395,7 @@ public interface IModifyOrder : IREngineProvider
     void modifyOrderList(ReadOnlyCollection<ModifyOrderParams> oList);
 }
 
-public interface IModifyOrderRefData : IREngineProvider
-{
+public interface IModifyOrderRefData : IREngineProvider {
     void modifyOrderRefData(
         AccountInfo oAccount,
         string      sOrderNum,
@@ -456,8 +404,7 @@ public interface IModifyOrderRefData : IREngineProvider
     );
 }
 
-public interface IRebuildBook : IREngineProvider
-{
+public interface IRebuildBook : IREngineProvider {
     void rebuildBook(
         string sExchange,
         string sSymbol,
@@ -465,8 +412,7 @@ public interface IRebuildBook : IREngineProvider
     );
 }
 
-public interface IRebuildDboBook : IREngineProvider
-{
+public interface IRebuildDboBook : IREngineProvider {
     void rebuildDboBook(
         string sExchange,
         string sSymbol,
@@ -475,8 +421,7 @@ public interface IRebuildDboBook : IREngineProvider
     );
 }
 
-public interface IReplayAllOrders : IREngineProvider
-{
+public interface IReplayAllOrders : IREngineProvider {
     void replayAllOrders(
         AccountInfo oAccount,
         int         iStartSsboe,
@@ -485,21 +430,18 @@ public interface IReplayAllOrders : IREngineProvider
     );
 }
 
-public interface IReplayBars : IREngineProvider
-{
+public interface IReplayBars : IREngineProvider {
     void replayBars(ReplayBarParams oParams);
 }
 
-public interface IReplayBrackets : IREngineProvider
-{
+public interface IReplayBrackets : IREngineProvider {
     void replayBrackets(
         AccountInfo oAccount,
         object      oContext
     );
 }
 
-public interface IReplayExecutions : IREngineProvider
-{
+public interface IReplayExecutions : IREngineProvider {
     void replayExecutions(
         AccountInfo oAccount,
         int         iStartSsboe,
@@ -508,8 +450,7 @@ public interface IReplayExecutions : IREngineProvider
     );
 }
 
-public interface IReplayHistoricalOrders : IREngineProvider
-{
+public interface IReplayHistoricalOrders : IREngineProvider {
     void replayHistoricalOrders(
         AccountInfo oAccount,
         string      sDate,
@@ -517,32 +458,28 @@ public interface IReplayHistoricalOrders : IREngineProvider
     );
 }
 
-public interface IReplayOpenOrders : IREngineProvider
-{
+public interface IReplayOpenOrders : IREngineProvider {
     void replayOpenOrders(
         AccountInfo oAccount,
         object      oContext
     );
 }
 
-public interface IReplayPnl : IREngineProvider
-{
+public interface IReplayPnl : IREngineProvider {
     void replayPnl(
         AccountInfo oAccount,
         object      oContext
     );
 }
 
-public interface IReplayQuotes : IREngineProvider
-{
+public interface IReplayQuotes : IREngineProvider {
     void replayQuotes(
         AccountInfo oAccount,
         object      oContext
     );
 }
 
-public interface IReplaySingleHistoricalOrder : IREngineProvider
-{
+public interface IReplaySingleHistoricalOrder : IREngineProvider {
     void replaySingleHistoricalOrder(
         AccountInfo oAccount,
         string      sOrderNum,
@@ -551,8 +488,7 @@ public interface IReplaySingleHistoricalOrder : IREngineProvider
     );
 }
 
-public interface IReplaySingleOrder : IREngineProvider
-{
+public interface IReplaySingleOrder : IREngineProvider {
     void replaySingleOrder(
         AccountInfo oAccount,
         string      sOrderNum,
@@ -560,8 +496,7 @@ public interface IReplaySingleOrder : IREngineProvider
     );
 }
 
-public interface IReplayTrades : IREngineProvider
-{
+public interface IReplayTrades : IREngineProvider {
     void replayTrades(
         string sExchange,
         string sSymbol,
@@ -571,8 +506,7 @@ public interface IReplayTrades : IREngineProvider
     );
 }
 
-public interface ISearchInstrument : IREngineProvider
-{
+public interface ISearchInstrument : IREngineProvider {
     void searchInstrument(
         string                         sExchange,
         ReadOnlyCollection<SearchTerm> oTerms,
@@ -580,8 +514,7 @@ public interface ISearchInstrument : IREngineProvider
     );
 }
 
-public interface ISendBracketOrder : IREngineProvider
-{
+public interface ISendBracketOrder : IREngineProvider {
     void sendBracketOrder(
         OrderParams   oEntry,
         BracketParams oBracketParams
@@ -598,16 +531,14 @@ public interface ISendBracketOrder : IREngineProvider
     );
 }
 
-public interface ISendOcaList : IREngineProvider
-{
+public interface ISendOcaList : IREngineProvider {
     void sendOcaList(
         string                          sOcaType,
         ReadOnlyCollection<OrderParams> oList
     );
 }
 
-public interface ISendOrder : IREngineProvider
-{
+public interface ISendOrder : IREngineProvider {
     void sendOrder(LimitOrderParams                    oParamsIn);
     void sendOrder(MarketOrderParams                   oParamsIn);
     void sendOrder(StopLimitOrderParams                oParamsIn);
@@ -615,8 +546,7 @@ public interface ISendOrder : IREngineProvider
     void sendOrderList(ReadOnlyCollection<OrderParams> oList);
 }
 
-public interface ISetEnvironmentVariable : IREngineProvider
-{
+public interface ISetEnvironmentVariable : IREngineProvider {
     void setEnvironmentVariable(
         string sKey,
         string sVariable,
@@ -624,26 +554,22 @@ public interface ISetEnvironmentVariable : IREngineProvider
     );
 }
 
-public interface ISetOrderContext : IREngineProvider
-{
+public interface ISetOrderContext : IREngineProvider {
     void setOrderContext(
         string sOrderNum,
         object oContext
     );
 }
 
-public interface IShutdown : IREngineProvider
-{
+public interface IShutdown : IREngineProvider {
     void shutdown();
 }
 
-public interface ISubmitQuoteList : IREngineProvider
-{
+public interface ISubmitQuoteList : IREngineProvider {
     void submitQuoteList(ReadOnlyCollection<QuoteParams> oList);
 }
 
-public interface ISubscribe : IREngineProvider
-{
+public interface ISubscribe : IREngineProvider {
     void subscribe(
         string            sExchange,
         string            sSymbol,
@@ -652,23 +578,19 @@ public interface ISubscribe : IREngineProvider
     );
 }
 
-public interface ISubscribeAutoLiquidate : IREngineProvider
-{
+public interface ISubscribeAutoLiquidate : IREngineProvider {
     void subscribeAutoLiquidate(AccountInfo oAccount);
 }
 
-public interface ISubscribeBar : IREngineProvider
-{
+public interface ISubscribeBar : IREngineProvider {
     void subscribeBar(BarParams oParams);
 }
 
-public interface ISubscribeBracket : IREngineProvider
-{
+public interface ISubscribeBracket : IREngineProvider {
     void subscribeBracket(AccountInfo oAccount);
 }
 
-public interface ISubscribeByUnderlying : IREngineProvider
-{
+public interface ISubscribeByUnderlying : IREngineProvider {
     void subscribeByUnderlying(
         string            sUnderlying,
         string            sExchange,
@@ -678,8 +600,7 @@ public interface ISubscribeByUnderlying : IREngineProvider
     );
 }
 
-public interface ISubscribeDbo : IREngineProvider
-{
+public interface ISubscribeDbo : IREngineProvider {
     void subscribeDbo(
         string sExchange,
         string sSymbol,
@@ -688,23 +609,19 @@ public interface ISubscribeDbo : IREngineProvider
     );
 }
 
-public interface ISubscribeEasyToBorrow : IREngineProvider
-{
+public interface ISubscribeEasyToBorrow : IREngineProvider {
     void subscribeEasyToBorrow(object oContext);
 }
 
-public interface ISubscribeOrder : IREngineProvider
-{
+public interface ISubscribeOrder : IREngineProvider {
     void subscribeOrder(AccountInfo oAccount);
 }
 
-public interface ISubscribePnl : IREngineProvider
-{
+public interface ISubscribePnl : IREngineProvider {
     void subscribePnl(AccountInfo oAccount);
 }
 
-public interface ISubscribeTradeRoute : IREngineProvider
-{
+public interface ISubscribeTradeRoute : IREngineProvider {
     void subscribeTradeRoute(
         string sFcmId,
         string sIbId,
@@ -712,39 +629,33 @@ public interface ISubscribeTradeRoute : IREngineProvider
     );
 }
 
-public interface IUnsetEnvironmentVariable : IREngineProvider
-{
+public interface IUnsetEnvironmentVariable : IREngineProvider {
     void unsetEnvironmentVariable(
         string sKey,
         string sVariable
     );
 }
 
-public interface IUnsubscribe : IREngineProvider
-{
+public interface IUnsubscribe : IREngineProvider {
     void unsubscribe(
         string sExchange,
         string sSymbol
     );
 }
 
-public interface IUnsubscribeAutoLiquidate : IREngineProvider
-{
+public interface IUnsubscribeAutoLiquidate : IREngineProvider {
     void unsubscribeAutoLiquidate(AccountInfo oAccount);
 }
 
-public interface IUnsubscribeBar : IREngineProvider
-{
+public interface IUnsubscribeBar : IREngineProvider {
     void unsubscribeBar(BarParams oParams);
 }
 
-public interface IUnsubscribeBracket : IREngineProvider
-{
+public interface IUnsubscribeBracket : IREngineProvider {
     void unsubscribeBracket(AccountInfo oAccount);
 }
 
-public interface IUnsubscribeByUnderlying : IREngineProvider
-{
+public interface IUnsubscribeByUnderlying : IREngineProvider {
     void unsubscribeByUnderlying(
         string sUnderlying,
         string sExchange,
@@ -752,8 +663,7 @@ public interface IUnsubscribeByUnderlying : IREngineProvider
     );
 }
 
-public interface IUnsubscribeDbo : IREngineProvider
-{
+public interface IUnsubscribeDbo : IREngineProvider {
     void unsubscribeDbo(
         string sExchange,
         string sSymbol,
@@ -762,23 +672,19 @@ public interface IUnsubscribeDbo : IREngineProvider
     );
 }
 
-public interface IUnsubscribeEasyToBorrow : IREngineProvider
-{
+public interface IUnsubscribeEasyToBorrow : IREngineProvider {
     void unsubscribeEasyToBorrow();
 }
 
-public interface IUnsubscribeOrder : IREngineProvider
-{
+public interface IUnsubscribeOrder : IREngineProvider {
     void unsubscribeOrder(AccountInfo oAccount);
 }
 
-public interface IUnsubscribePnl : IREngineProvider
-{
+public interface IUnsubscribePnl : IREngineProvider {
     void unsubscribePnl(AccountInfo oAccount);
 }
 
-public interface IUnsubscribeTradeRoute : IREngineProvider
-{
+public interface IUnsubscribeTradeRoute : IREngineProvider {
     void unsubscribeTradeRoute(
         string sFcmId,
         string sIbId
