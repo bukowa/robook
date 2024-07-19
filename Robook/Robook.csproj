@@ -56,9 +56,6 @@
         <Reference Include="rapiplus">
             <HintPath>..\Library\rapiplus.dll</HintPath>
         </Reference>
-        <Reference Include="Robook">
-          <HintPath>..\Playground\bin\Debug\net8.0-windows\Robook.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
     <ItemGroup>
