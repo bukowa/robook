@@ -111,7 +111,7 @@ public class Symbol : INotifyPropertyChanged {
                     break;
             }
         });
-        service.REngineOperations?.REngine.getPriceIncrInfo(Exchange, Name, ctx);
+        service.REngineOperations.REngine?.getPriceIncrInfo(Exchange, Name, ctx);
         return tcs.Task;
     }
 
@@ -129,7 +129,7 @@ public class Symbol : INotifyPropertyChanged {
                     break;
             }
         });
-        service.REngineOperations?.REngine.getRefData(Exchange, Name, ctx);
+        service.REngineOperations.REngine?.getRefData(Exchange, Name, ctx);
         return tcs.Task;
     }
 

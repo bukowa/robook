@@ -99,7 +99,7 @@ public class REngineOperations : IREngineOperations {
     }
 
     public REngineOperations(
-        REngine?                       rEngine,
+        REngine?                      rEngine,
         ICancelAllOrders?             cancelAllOrders             = null,
         ICancelOrder?                 cancelOrder                 = null,
         ICancelOrderList?             cancelOrderList             = null,
@@ -183,7 +183,6 @@ public class REngineOperations : IREngineOperations {
         IUnsubscribePnl?              unsubscribePnl              = null,
         IUnsubscribeTradeRoute?       unsubscribeTradeRoute       = null
     ) {
-        REngine                      = rEngine;
         _cancelAllOrders             = cancelAllOrders ?? new CancelAllOrders(rEngine);
         _cancelOrder                 = cancelOrder ?? new CancelOrder(rEngine);
         _cancelOrderList             = cancelOrderList ?? new CancelOrderList(rEngine);
@@ -266,6 +265,7 @@ public class REngineOperations : IREngineOperations {
         _unsubscribeOrder            = unsubscribeOrder ?? new UnsubscribeOrder(rEngine);
         _unsubscribePnl              = unsubscribePnl ?? new UnsubscribePnl(rEngine);
         _unsubscribeTradeRoute       = unsubscribeTradeRoute ?? new UnsubscribeTradeRoute(rEngine);
+        REngine                      = rEngine;
     }
 
     private readonly ICancelAllOrders             _cancelAllOrders;

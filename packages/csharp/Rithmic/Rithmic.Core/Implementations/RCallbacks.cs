@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using static Rithmic.Core.LoggingService;
 using com.omnesys.rapi;
 
 namespace Rithmic.Core;
 
 // ReSharper disable once RedundantNameQualifier
+[SuppressMessage("ReSharper", "RedundantNameQualifier")]
 public class RCallbacksFacade : rapi.RCallbacks, IRCallbacksFacade
 {
 
