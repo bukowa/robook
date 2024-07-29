@@ -31,7 +31,7 @@ public class PriceColumn : AbstractOrderBookColumn {
     //     // RecalculateProperties(orderBook);
     // }
 
-    public override void RecalculateProperties(OrderBook orderBook) {
+    public override void RecalculateProperties(IOrderBook orderBook) {
         // todo: Get info about last price and update properties
         // var lastPrice = orderBook.GetLastPrice();
         // var lastPriceIndex = orderBook.GetLastPriceIndex();
@@ -51,7 +51,7 @@ public class PriceColumn : AbstractOrderBookColumn {
         // }
     }
 
-    public override void OnColumnChanged(DataColumnChangeEventArgs e, OrderBook orderBook) {
+    public override void OnColumnChanged(DataColumnChangeEventArgs e, IOrderBook orderBook) {
     }
 
     # region "Events"

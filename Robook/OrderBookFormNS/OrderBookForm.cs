@@ -8,7 +8,7 @@ using Robook.SymbolNS;
 namespace Robook.OrderBookFormNS;
 
 public partial class OrderBookForm : BaseForm {
-    public OrderBook                OrderBook;
+    public IOrderBook               OrderBook;
     public ConcurrentQueue<object>  ConcurrentQueue;
     public OrderBookProcessor       OrderBookProcessor;
     public DataGridView             OrderBookDataGridView;
@@ -29,7 +29,8 @@ public partial class OrderBookForm : BaseForm {
 
     private async void button1_Click(object sender, EventArgs e) {
         // check account
-        if (accountsSelectControl1.SelectedAccount.Client?.MarketDataConnection?.LastConnectionAlert?.AlertInfo.AlertType !=
+        if (accountsSelectControl1.SelectedAccount.Client?.MarketDataConnection?.LastConnectionAlert?.AlertInfo
+                                  .AlertType !=
             AlertType.LoginComplete) {
             MessageBox.Show("Please login first");
             return;
@@ -52,7 +53,7 @@ public partial class OrderBookForm : BaseForm {
         }
 
         // create order book
-        OrderBook                = new OrderBook((decimal)_symbol.TickSize, (decimal)midPrice, 1000);
+        OrderBook                = new OrderBookSimple((decimal)_symbol.TickSize, (decimal)midPrice, 1000);
         OrderBookDataGridView    = new DataGridView();
         ConcurrentQueue          = new ConcurrentQueue<object>();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
@@ -101,12 +102,12 @@ public partial class OrderBookForm : BaseForm {
         var c = new OrderBookTouchedTradeColumn(
             "TouchedBuy",
             new[] {
-                OrderBookColumnDataType.TradeBuy, 
+                OrderBookColumnDataType.TradeBuy,
                 OrderBookColumnDataType.Bid,
                 OrderBookColumnDataType.Ask
             }, typeof(long)
         );
-        
+
         c.SetUp(OrderBook);
         OrderBook.AddColumn(c);
         OrderBookDataGridControl.AddColumn(new HistogramColumn() {

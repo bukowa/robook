@@ -53,25 +53,44 @@ public class ExcOrderBookUnhandledColumnType : Exception {
         => $"Unhandled column type: {Type}";
 }
 
+public interface IOrderBook {
+    DataTable                 OBDT          { get; }
+    OrderBookColumnCollection OBCC          { get; }
+    Dictionary<decimal, int>  PriceIndexMap { get; }
+    object this[int     i, string c] { get; set; }
+    object this[double  i, string c] { get; set; }
+    object this[decimal i, string c] { get; set; }
+
+    decimal[] Prices { get; }
+
+    int GetIndexOfPrice(decimal price);
+    int GetIndexOfPrice(double  price);
+
+    void AddColumn(IOrderBookColumn    column);
+    void RemoveColumn(IOrderBookColumn column);
+
+    public IEnumerable<T?> GetColumnValues<T>(string columnName) where T : struct;
+}
+
 /// <summary>
 ///     <see cref="OrderBook"/> represents the order book of a single <see cref="Symbol"/>.
 ///     This is a wrapper around the <see cref="DataTable"/> and <see cref="DataColumnCollection"/>.
 /// </summary>
-public class OrderBook {
+public class OrderBookSimple : IOrderBook {
     public readonly int     Levels;
     public readonly decimal TickSize;
     public readonly decimal MidPrice;
 
-    public readonly DataTable                 OBDT = new();
-    public readonly OrderBookColumnCollection OBCC = new();
-    
+    public DataTable                 OBDT { get; } = new();
+    public OrderBookColumnCollection OBCC { get; } = new();
+
     public DataRow this[int     i] => OBDT.Rows[i];
     public DataRow this[decimal p] => OBDT.Rows[GetIndexOfPrice(p)];
     public DataRow this[double  p] => OBDT.Rows[GetIndexOfPrice(p)];
-    
-    public readonly decimal[] Prices;
 
-    public readonly Dictionary<decimal, int> PriceIndexMap = new();
+    public decimal[] Prices { get; }
+
+    public Dictionary<decimal, int> PriceIndexMap { get; } = new();
 
     /// <summary>
     ///     Returns or sets the value of the cell at the specified index and column.
@@ -109,7 +128,7 @@ public class OrderBook {
     /// <param name="tickSize">Tick size</param>
     /// <param name="midPrice">Middle price at which the order book is centered</param>
     /// <param name="levels">Number of levels on each side of the middle price</param>
-    public OrderBook(
+    public OrderBookSimple(
         decimal tickSize,
         decimal midPrice,
         int     levels
@@ -134,7 +153,7 @@ public class OrderBook {
     /// <param name="levels">Number of levels on each side of the middle price</param>
     /// <returns>Array of prices</returns>
     /// <exception cref="ExcOrderBookInvalidTickSize"></exception>
-    public static decimal[] NewPriceLevels(
+    private static decimal[] NewPriceLevels(
         decimal tickSize,
         decimal midPrice,
         int     levels
@@ -186,6 +205,7 @@ public class OrderBook {
     public void RemoveColumn(
         IOrderBookColumn column
     ) {
+        OBCC.Remove(column);
         OBDT.Columns.Remove(column.Name);
     }
 

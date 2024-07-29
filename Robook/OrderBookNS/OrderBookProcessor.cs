@@ -17,7 +17,7 @@ public class OrderBookProcessor {
     /// <summary>
     ///     <see cref="OrderBook"/> instance passed to the <see cref="IOrderBookColumn{T}"/>s.
     /// </summary>
-    public readonly OrderBook _ob;
+    public readonly IOrderBook _ob;
 
     /// <summary>
     ///     Queue that holds the objects to be processed by the <see cref="IOrderBookColumn{T}"/>s.
@@ -39,7 +39,7 @@ public class OrderBookProcessor {
     /// </summary>
     /// <exception cref="ArgumentNullException"></exception>
     public OrderBookProcessor(
-        OrderBook               orderBook,
+        IOrderBook               orderBook,
         ConcurrentQueue<object> objectQueue
     ) {
         _ob = orderBook ?? throw new ArgumentNullException(nameof(orderBook));

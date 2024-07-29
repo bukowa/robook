@@ -8,9 +8,9 @@ public class BigTradesColumn : AbstractOrderBookColumn {
         CellTemplate = new BigTradesCell();
     }
 
-    public override void OnColumnChanged(DataColumnChangeEventArgs e, OrderBook orderBook) {
+    public override void OnColumnChanged(DataColumnChangeEventArgs e, IOrderBook orderBook) {
     }
 
-    public override void RecalculateProperties(OrderBook orderBook) {
+    public override void RecalculateProperties(IOrderBook orderBook) {
     }
 }

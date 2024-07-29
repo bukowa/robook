@@ -7,9 +7,9 @@ public class PriceCell : AbstractOrderBookCell {
     public override void SubscribeToColumnPropertyChangedEvents() {
     }
 
-    public override void OnCellValueChanged(DataColumnChangeEventArgs e, OrderBook orderBook) {
+    public override void OnCellValueChanged(DataColumnChangeEventArgs e, IOrderBook orderBook) {
     }
 
-    public override void RecalculateProperties(OrderBook orderBook) {
+    public override void RecalculateProperties(IOrderBook orderBook) {
     }
 }

@@ -10,7 +10,7 @@ public abstract class BuySellVolumeColumnBase : HistogramColumn {
     protected BuySellVolumeColumnBase() : base() {
     }
 
-    public override void RecalculateMaxValueProperty(OrderBook orderBook) {
+    public override void RecalculateMaxValueProperty(IOrderBook orderBook) {
         // Calculate MaxValue based on trade volume
         if (CalculateBasedOnTradeVolume) {
             if (!orderBook.OBDT.Columns.Contains(_volumeColumnName)) {

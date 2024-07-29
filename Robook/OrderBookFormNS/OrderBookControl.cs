@@ -13,12 +13,12 @@ namespace Robook.OrderBookFormNS;
 ///     a <see cref="DataGridView"/> control that displays an <see cref="OrderBookNS.OrderBook"/>.
 /// </summary>
 public class OrderBookDataGridControl {
-    public OrderBook          OrderBook;
+    public IOrderBook          OrderBook;
     public DataGridView       DataGridView;
     public OrderBookProcessor OrderBookProcessor;
 
     public OrderBookDataGridControl(
-        OrderBook          orderBook,
+        IOrderBook          orderBook,
         DataGridView       dataGridView,
         OrderBookProcessor orderBookProcessor
     ) {

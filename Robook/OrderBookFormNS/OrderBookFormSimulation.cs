@@ -6,7 +6,7 @@ using HorizontalAlignment = Robook.Helpers.HorizontalAlignment;
 namespace Robook.OrderBookFormNS;
 
 public partial class OrderBookFormSimulation : Form {
-    public OrderBook                OrderBook;
+    public IOrderBook                OrderBook;
     public ConcurrentQueue<object>  ConcurrentQueue;
     public OrderBookProcessor       OrderBookProcessor;
     public DataGridView             OrderBookDataGridView;
@@ -16,7 +16,7 @@ public partial class OrderBookFormSimulation : Form {
     public OrderBookFormSimulation() {
         InitializeComponent();
 
-        OrderBook                = new OrderBook(0.25m, 100m, 100);
+        OrderBook                = new OrderBookSimple(0.25m, 100m, 100);
         ConcurrentQueue          = new ConcurrentQueue<object>();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
         OrderBookDataGridView    = new DataGridView();

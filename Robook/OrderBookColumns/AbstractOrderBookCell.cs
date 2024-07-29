@@ -20,20 +20,20 @@ public abstract class AbstractOrderBookCell : DataGridViewTextBoxCell {
     public abstract void SubscribeToColumnPropertyChangedEvents();
 
     /// <summary>
-    /// <para>Occurs after a value has been changed for the <see cref="OrderBook.OBDT"/> cell,
+    /// <para>Occurs after a value has been changed for the <see cref="IOrderBook.OBDT"/> cell,
     /// bound to the specified <see cref="OrderBookDataGridControl.DataGridView"/> cell.</para>
     /// <para>Calls <see cref="RecalculateProperties"/> to update visual properties based on the new value.</para>
     /// </summary>
     /// <param name="e">Event arguments providing information about the cell change.</param>
     /// <param name="orderBook">The <see cref="OrderBook"/> associated with the <see cref="OrderBookDataGridControl.DataGridView"/>.</param>
-    public abstract void OnCellValueChanged(DataColumnChangeEventArgs e, OrderBook orderBook);
+    public abstract void OnCellValueChanged(DataColumnChangeEventArgs e, IOrderBook orderBook);
 
     /// <summary>
     /// <para>Recalculates properties associated with the cell, which typically influence its visual representation.</para>
     /// <para>The recalculation is triggered when the cell value changes through <see cref="OnCellValueChanged"/>.</para>
     /// </summary>
-    /// <param name="orderBook">The <see cref="OrderBook"/> associated with the <see cref="OrderBookDataGridControl.DataGridView"/>.</param>
-    public abstract void RecalculateProperties(OrderBook orderBook);
+    /// <param name="orderBook">The <see cref="IOrderBook"/> associated with the <see cref="OrderBookDataGridControl.DataGridView"/>.</param>
+    public abstract void RecalculateProperties(IOrderBook orderBook);
 
     /// <summary>
     /// Draws the specified text within a DataGridView cell, considering the cell's content alignment.

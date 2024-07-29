@@ -5,7 +5,7 @@ using com.omnesys.rapi;
 namespace Robook.OrderBookNS;
 
 public class OrderBookSimulator {
-    private OrderBook               _orderBook;
+    private IOrderBook              _orderBook;
     private ConcurrentQueue<object> _concurrentQueue;
     private OrderBookProcessor      _orderBookProcessor;
     private DataTable               _orderBookDataTable;
