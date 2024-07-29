@@ -8,7 +8,8 @@ using Connection = Robook.Data.Connection;
 namespace Robook.State;
 
 public static class Config {
-    public static readonly string StoreDirectory = @"C:\Users\buk\Documents\Robook";
+    public static readonly string StoreDirectory
+        = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Robook";
 }
 
 public static class Storage {
@@ -46,8 +47,8 @@ public class State {
     public CParamsSource CParamsSource;
 
     public void Init() {
-        AccountsStore = new AccountsStore(@"C:\Users\buk\Documents\Robook\accounts.json");
-        CParamsSource = new CParamsSource(@"C:\Users\buk\Documents\RApiConfig");
+        AccountsStore = new AccountsStore(Config.StoreDirectory + "\\accounts.json");
+        CParamsSource = new CParamsSource(Config.StoreDirectory + "\\RApiConfig");
         AccountsStore.Read();
     }
 }
