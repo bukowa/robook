@@ -30,7 +30,7 @@ public class OrderBookDataGridControl {
 
         DataGridView.RowsAdded       += DataGridView_RowsAdded;
         DataGridView.ColumnAdded     += DataGridView_ColumnAdded;
-        OrderBook.OBDT.ColumnChanged += OrderBook_OnColumnChanged;
+        OrderBook.DataTable.ColumnChanged += OrderBook_OnColumnChanged;
 
         #region "Auto generate columns in DataGridView"
 
@@ -48,7 +48,7 @@ public class OrderBookDataGridControl {
             HandleVirtualMode();
         }
         else {
-            DataGridView.DataSource = OrderBook.OBDT.AsDataView();
+            DataGridView.DataSource = OrderBook.DataTable.AsDataView();
         }
         #endregion
 
@@ -162,8 +162,8 @@ public class OrderBookDataGridControl {
         });
         // DataGridView.AutoGenerateColumns should be disabled in OrderBookDataGridControl
         // Fallback added for reliability if for some reason AutoGenerateColumns would be enabled
-        DataGridView.ColumnCount = DataGridView.AutoGenerateColumns ? OrderBook.OBDT.Columns.Count : 1;
-        DataGridView.RowCount    = OrderBook.OBDT.Rows.Count;
+        DataGridView.ColumnCount = DataGridView.AutoGenerateColumns ? OrderBook.DataTable.Columns.Count : 1;
+        DataGridView.RowCount    = OrderBook.DataTable.Rows.Count;
 
         DataGridView.CellValueNeeded += DataGridView_CellValueNeeded;
     }
@@ -171,8 +171,8 @@ public class OrderBookDataGridControl {
     private void DataGridView_CellValueNeeded(object? sender, DataGridViewCellValueEventArgs e) {
         var colName = DataGridView.Columns[e.ColumnIndex].DataPropertyName;
 
-        if (!String.IsNullOrEmpty(colName) || OrderBook.OBDT.Columns.Contains(colName)) {
-            e.Value = OrderBook.OBDT.Rows[e.RowIndex][colName];
+        if (!String.IsNullOrEmpty(colName) || OrderBook.DataTable.Columns.Contains(colName)) {
+            e.Value = OrderBook.DataTable.Rows[e.RowIndex][colName];
         }
     }
 
@@ -199,7 +199,7 @@ public class OrderBookDataGridControl {
             throw new Exception("Please provide column DataPropertyName.");
         }
 
-        if (!OrderBook.OBDT.Columns.Contains(column.DataPropertyName)) {
+        if (!OrderBook.DataTable.Columns.Contains(column.DataPropertyName)) {
             throw new Exception("DataPropertyName is invalid. Column with provided name does not exist in OrderBook.");
         }
 

@@ -20,7 +20,7 @@ public abstract class AbstractOrderBookCell : DataGridViewTextBoxCell {
     public abstract void SubscribeToColumnPropertyChangedEvents();
 
     /// <summary>
-    /// <para>Occurs after a value has been changed for the <see cref="IOrderBook.OBDT"/> cell,
+    /// <para>Occurs after a value has been changed for the <see cref="IOrderBook.DataTable"/> cell,
     /// bound to the specified <see cref="OrderBookDataGridControl.DataGridView"/> cell.</para>
     /// <para>Calls <see cref="RecalculateProperties"/> to update visual properties based on the new value.</para>
     /// </summary>

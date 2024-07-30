@@ -53,7 +53,7 @@ public partial class OrderBookForm : BaseForm {
         }
 
         // create order book
-        OrderBook                = new OrderBookSimple((decimal)_symbol.TickSize, (decimal)midPrice, 1000);
+        OrderBook                = new OrderBook((decimal)_symbol.TickSize, (decimal)midPrice, 10000);
         OrderBookDataGridView    = new DataGridView();
         ConcurrentQueue          = new ConcurrentQueue<object>();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);

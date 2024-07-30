@@ -13,7 +13,7 @@ public abstract class AbstractOrderBookColumn : DataGridViewTextBoxColumn {
     }
 
     /// <summary>
-    /// <para>Occurs after a value has been changed for the <see cref="IOrderBook.OBDT"/> column,
+    /// <para>Occurs after a value has been changed for the <see cref="IOrderBook.DataTable"/> column,
     /// bound to the specified <see cref="OrderBookDataGridControl.DataGridView"/> column.</para>
     /// <para>Calls <see cref="RecalculateProperties"/> to update visual properties based on the new values.</para>
     /// </summary>

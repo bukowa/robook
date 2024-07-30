@@ -13,7 +13,7 @@ public abstract class BuySellVolumeColumnBase : HistogramColumn {
     public override void RecalculateMaxValueProperty(IOrderBook orderBook) {
         // Calculate MaxValue based on trade volume
         if (CalculateBasedOnTradeVolume) {
-            if (!orderBook.OBDT.Columns.Contains(_volumeColumnName)) {
+            if (!orderBook.DataTable.Columns.Contains(_volumeColumnName)) {
                 throw new InvalidOperationException(
                     $"The OrderBook does not contain the specified {_volumeColumnName} column required for calculations.");
             }

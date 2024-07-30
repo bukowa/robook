@@ -111,34 +111,34 @@ public class OrderBookProcessor {
                 int i;
                 switch (o) {
                     case AskInfo x when TryGetPriceIndex(x.Price, out i):
-                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Ask]
+                        _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.Ask]
                            .ForEach(column => column.ProcessAsk(i, x, _ob));
                         break;
 
                     case BidInfo x when TryGetPriceIndex(x.Price, out i):
-                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Bid]
+                        _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.Bid]
                            .ForEach(column => column.ProcessBid(i, x, _ob));
                         break;
 
                     case TradeInfo x when TryGetPriceIndex(x.Price, out i):
-                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.Trade]
+                        _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.Trade]
                            .ForEach(column => column.ProcessTrade(i, x, _ob));
 
                         if (x.AggressorSide == "B")
-                            _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.TradeBuy]
+                            _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.TradeBuy]
                                .ForEach(column => column.ProcessTrade(i, x, _ob));
                         else
-                            _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.TradeSell]
+                            _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.TradeSell]
                                .ForEach(column => column.ProcessTrade(i, x, _ob));
                         break;
 
                     case BestBidQuoteInfo x when TryGetPriceIndex(x.BidInfo.Price, out i):
-                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.BestBid]
+                        _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.BestBid]
                            .ForEach(column => column.ProcessBestBid(i, x, _ob));
                         break;
 
                     case BestAskQuoteInfo x when TryGetPriceIndex(x.AskInfo.Price, out i):
-                        _ob.OBCC.ColumnsByDataType[OrderBookColumnDataType.BestAsk]
+                        _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.BestAsk]
                            .ForEach(column => column.ProcessBestAsk(i, x, _ob));
                         break;
                 }

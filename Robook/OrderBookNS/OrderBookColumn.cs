@@ -81,8 +81,8 @@ public class OrderBookTouchedTradeColumn : OrderBookDefaultColumn, IOrderBookCol
     }
 
     private void _setupBidsAsks(IOrderBook ob) {
-        bids = new int[ob.Prices.Length];
-        asks = new int[ob.Prices.Length];
+        bids = new int[ob.PriceArray.Length];
+        asks = new int[ob.PriceArray.Length];
     }
 
     public void SetUp(IOrderBook ob) {

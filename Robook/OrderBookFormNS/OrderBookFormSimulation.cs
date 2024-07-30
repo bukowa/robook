@@ -16,7 +16,7 @@ public partial class OrderBookFormSimulation : Form {
     public OrderBookFormSimulation() {
         InitializeComponent();
 
-        OrderBook                = new OrderBookSimple(0.25m, 100m, 100);
+        OrderBook                = new OrderBook(0.25m, 100m, 100);
         ConcurrentQueue          = new ConcurrentQueue<object>();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
         OrderBookDataGridView    = new DataGridView();
