@@ -49,8 +49,8 @@ public class OrderBookProcessor {
     /// <summary>
     ///     Starts the <see cref="ProcessQueue"/> method in a new thread.
     /// </summary>
-    public void StartAsync(int sleep = 1) {
-        Task.Run(() => ProcessQueue(_ct.Token, sleep));
+    public void StartAsync() {
+        Task.Run(() => ProcessQueue(_ct.Token));
     }
 
     /// <summary>
@@ -99,8 +99,7 @@ public class OrderBookProcessor {
     /// </summary>
     /// <param name="cancellationToken"> The cancellation token used to cancel the method. </param>
     /// <returns> A <see cref="Task"/> that will be completed when the method is cancelled. </returns>
-    private Task ProcessQueue(CancellationToken cancellationToken, int sleep = 1) {
-        
+    private Task ProcessQueue(CancellationToken cancellationToken) {
         SpinWait sw = new();
         
         while (!cancellationToken.IsCancellationRequested) {
