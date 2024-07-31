@@ -17,15 +17,12 @@ public abstract class AbstractOrderBookColumn : DataGridViewTextBoxColumn {
     /// bound to the specified <see cref="OrderBookDataGridControl.DataGridView"/> column.</para>
     /// <para>Calls <see cref="RecalculateProperties"/> to update visual properties based on the new values.</para>
     /// </summary>
-    /// <param name="e">Event arguments providing information about the cell change.</param>
-    /// <param name="orderBook">The <see cref="IOrderBook"/> associated with the <see cref="OrderBookDataGridControl.DataGridView"/>.</param>
-    public abstract void OnColumnChanged(DataColumnChangeEventArgs e, IOrderBook orderBook);
+    public abstract void OnColumnChanged(DataColumnChangeEventArgs e, DataTable dataTable);
 
     /// <summary>
     /// <para>Recalculates properties associated with the column, influencing the visual representation of its cells.</para>
     /// <para>After recalculating column properties, changes trigger events that subsequently update the cells.</para>
     /// <para>The recalculation is initiated when the column cell value changes through <see cref="OnColumnChanged"/>.</para>
     /// </summary>
-    /// <param name="orderBook">The <see cref="IOrderBook"/> associated with the <see cref="OrderBookDataGridControl.DataGridView"/>.</param>
-    public abstract void RecalculateProperties(IOrderBook orderBook);
+    public abstract void RecalculateProperties(DataTable dataTable);
 }

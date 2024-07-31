@@ -123,12 +123,12 @@ public class OrderBookDataGridControl {
                 foreach (var columnIndex in boundedColumns) {
                     var col = DataGridView.Columns[columnIndex];
                     if (col is AbstractOrderBookColumn abstractDataColumn) {
-                        abstractDataColumn.OnColumnChanged(e, OrderBook);
+                        abstractDataColumn.OnColumnChanged(e, OrderBook.DataTable);
                     }
 
                     var cell = DataGridView[columnIndex, dataSourceRowIndex];
                     if (cell is AbstractOrderBookCell abstractDataCell) {
-                        abstractDataCell.OnCellValueChanged(e, OrderBook);
+                        abstractDataCell.OnCellValueChanged(e, OrderBook.DataTable);
                     }
 
                     // Invalidate cell in Virtual Mode to trigger OnCellValueNeeded and update cell value

@@ -27,16 +27,16 @@ public class HistogramColumn : AbstractOrderBookColumn {
         MaxValue     = 0;
     }
 
-    public override void OnColumnChanged(DataColumnChangeEventArgs e, IOrderBook orderBook) {
-        RecalculateProperties(orderBook);
+    public override void OnColumnChanged(DataColumnChangeEventArgs e, DataTable dataTable) {
+        RecalculateProperties(dataTable);
     }
 
-    public override void RecalculateProperties(IOrderBook orderBook) {
-        RecalculateMaxValueProperty(orderBook);
+    public override void RecalculateProperties(DataTable dataTable) {
+        RecalculateMaxValueProperty(dataTable);
     }
 
-    public virtual void RecalculateMaxValueProperty(IOrderBook orderBook) {
-        var newMaxValue = orderBook.GetColumnValues<long>(DataPropertyName).Max() ?? 0;
+    public virtual void RecalculateMaxValueProperty(DataTable dataTable) {
+        var newMaxValue = dataTable.AsEnumerable().Select(row => row.Field<long?>(DataPropertyName)).Max() ?? 0;
         MaxValue = newMaxValue;
     }
 

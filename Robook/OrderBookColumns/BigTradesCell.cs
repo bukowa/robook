@@ -11,11 +11,11 @@ public class BigTradesCell : AbstractOrderBookCell {
     public override void SubscribeToColumnPropertyChangedEvents() {
     }
 
-    public override void OnCellValueChanged(DataColumnChangeEventArgs e, IOrderBook orderBook) {
-        RecalculateProperties(orderBook);
+    public override void OnCellValueChanged(DataColumnChangeEventArgs e, DataTable dataTable) {
+        RecalculateProperties(dataTable);
     }
 
-    public override void RecalculateProperties(IOrderBook orderBook) {
+    public override void RecalculateProperties(DataTable dataTable) {
         // var volume     = orderBook.OBDT.Rows[RowIndex]["Volume"];
         // var buyVolume  = orderBook.OBDT.Rows[RowIndex]["BuyVolume"];
         // var sellVolume = orderBook.OBDT.Rows[RowIndex]["SellVolume"];

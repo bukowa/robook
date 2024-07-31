@@ -4,10 +4,10 @@ using Robook.OrderBookNS;
 namespace Robook.OrderBookColumns;
 
 public class BidAskSizeColumns : AbstractOrderBookColumn {
-    public override void OnColumnChanged(DataColumnChangeEventArgs e, IOrderBook orderBook) {
+    public override void OnColumnChanged(DataColumnChangeEventArgs e, DataTable dataTable) {
     }
 
-    public override void RecalculateProperties(IOrderBook orderBook) {
+    public override void RecalculateProperties(DataTable dataTable) {
     }
 }
 

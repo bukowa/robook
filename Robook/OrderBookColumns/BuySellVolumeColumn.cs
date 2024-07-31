@@ -1,4 +1,5 @@
-﻿using Robook.OrderBookNS;
+﻿using System.Data;
+using Robook.OrderBookNS;
 
 namespace Robook.OrderBookColumns;
 
@@ -10,20 +11,18 @@ public abstract class BuySellVolumeColumnBase : HistogramColumn {
     protected BuySellVolumeColumnBase() : base() {
     }
 
-    public override void RecalculateMaxValueProperty(IOrderBook orderBook) {
+    public override void RecalculateMaxValueProperty(DataTable dataTable) {
         // Calculate MaxValue based on trade volume
         if (CalculateBasedOnTradeVolume) {
-            if (!orderBook.DataTable.Columns.Contains(_volumeColumnName)) {
+            if (!dataTable.Columns.Contains(_volumeColumnName)) {
                 throw new InvalidOperationException(
                     $"The OrderBook does not contain the specified {_volumeColumnName} column required for calculations.");
             }
-
-            var newMaxValue = orderBook.GetColumnValues<long>(_volumeColumnName).Max() ?? 0;
-            MaxValue = newMaxValue;
+            MaxValue = dataTable.AsEnumerable().Select(row => row.Field<long?>(_volumeColumnName)).Max() ?? 0;
         }
         // Calculate MaxValue based on the column values
         else {
-            base.RecalculateMaxValueProperty(orderBook);
+            base.RecalculateMaxValueProperty(dataTable);
         }
     }
 }

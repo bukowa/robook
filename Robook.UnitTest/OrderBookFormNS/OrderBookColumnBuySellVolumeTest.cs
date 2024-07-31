@@ -29,7 +29,7 @@ public class OrderBookColumnBuySellVolumeTest {
         orderBookColumn.ProcessTrade(ob.GetIndexOfPrice(120d), new TradeInfo() { Price = 120d, Size = 20 }, ob);
         orderBookColumn.ProcessTrade(ob.GetIndexOfPrice(130d), new TradeInfo() { Price = 130d, Size = 10 }, ob);
 
-        buyVolumeColumn.RecalculateMaxValueProperty(ob);
+        buyVolumeColumn.RecalculateMaxValueProperty(ob.DataTable);
 
         Assert.That(buyVolumeColumn.MaxValue, Is.EqualTo(100));
     }
@@ -42,7 +42,7 @@ public class OrderBookColumnBuySellVolumeTest {
             CalculateBasedOnTradeVolume = true
         };
 
-        var exc = Assert.Throws<InvalidOperationException>(() => buyVolumeColumn.RecalculateMaxValueProperty(ob));
+        var exc = Assert.Throws<InvalidOperationException>(() => buyVolumeColumn.RecalculateMaxValueProperty(ob.DataTable));
         Assert.That(
             exc.Message, Does.Contain(
                 $"The OrderBook does not contain the specified {new OrderBookDefaultColumn("1", new [] { OrderBookColumnDataType.Trade }, typeof(int)).Name} column required for calculations."

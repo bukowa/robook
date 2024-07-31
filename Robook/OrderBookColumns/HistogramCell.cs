@@ -26,10 +26,10 @@ public class HistogramCell : AbstractOrderBookCell {
         }
     }
 
-    public override void OnCellValueChanged(DataColumnChangeEventArgs e, IOrderBook orderBook) {
+    public override void OnCellValueChanged(DataColumnChangeEventArgs e, DataTable dataTable) {
     }
 
-    public override void RecalculateProperties(IOrderBook orderBook) {
+    public override void RecalculateProperties(DataTable dataTable) {
     }
 
     protected override void Paint(
