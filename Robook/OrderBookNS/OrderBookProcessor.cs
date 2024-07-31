@@ -61,20 +61,6 @@ public class OrderBookProcessor {
     }
 
     /// <summary>
-    ///    Enqueues a column to be added to the <see cref="OrderBook"/>.
-    /// </summary>
-    public void AddColumn(IOrderBookColumn column) {
-        DelayProcessingWith(() => _ob.AddColumn(column));
-    }
-
-    /// <summary>
-    ///     Enqueues a column to be deleted from the <see cref="OrderBook"/>.
-    /// </summary>
-    public void RemoveColumn(IOrderBookColumn column) {
-        DelayProcessingWith(() => _ob.RemoveColumn(column));
-    }
-
-    /// <summary>
     ///     Enqueues an action to be executed after the queue is empty.
     /// </summary>
     /// <param name="action"></param>

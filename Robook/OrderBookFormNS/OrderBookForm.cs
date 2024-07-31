@@ -34,58 +34,54 @@ public partial class OrderBookForm : BaseForm {
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
         OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook.DataTable, OrderBookDataGridView);
 
-        OrderBookDataGridControl.AddColumn(new PriceColumn() {
+        OrderBookDataGridControl.AddColumn(new PriceColumn {
             DataPropertyName = "Price",
-            Name             = "Price",
+            Name             = "Price"
         });
 
-        OrderBook.AddColumn(new OrderBookDefaultColumn("Ask", new[] { OrderBookColumnDataType.Ask }, typeof(long)));
-        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
+        OrderBook.ColumnCollection.Add(new OrderBookDefaultColumn("Ask", [OrderBookColumnDataType.Ask], typeof(long)));
+        OrderBook.DataTable.Columns.Add("Ask", typeof(long));
+        OrderBookDataGridControl.AddColumn(new HistogramColumn {
             DataPropertyName = "Ask",
-            Name             = "Ask",
+            Name             = "Ask"
         });
 
-        OrderBook.AddColumn(new OrderBookDefaultColumn("Bid", new[] { OrderBookColumnDataType.Bid }, typeof(long)));
-        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
+        OrderBook.ColumnCollection.Add(new OrderBookDefaultColumn("Bid", [OrderBookColumnDataType.Bid], typeof(long)));
+        OrderBook.DataTable.Columns.Add("Bid", typeof(long));
+        OrderBookDataGridControl.AddColumn(new HistogramColumn {
             DataPropertyName = "Bid",
-            Name             = "Bid",
+            Name             = "Bid"
         });
 
-        OrderBook.AddColumn(
-            new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
-        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
+        OrderBook.ColumnCollection.Add(
+            new OrderBookDefaultColumn("SellVolume", [OrderBookColumnDataType.TradeSell], typeof(long)));
+        OrderBook.DataTable.Columns.Add("SellVolume", typeof(long));
+        OrderBookDataGridControl.AddColumn(new HistogramColumn {
             DataPropertyName = "SellVolume",
-            Name             = "SellVolume",
+            Name             = "SellVolume"
         });
 
-        OrderBook.AddColumn(
-            new OrderBookDefaultColumn("BuyVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
-        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
+        OrderBook.ColumnCollection.Add(
+            new OrderBookDefaultColumn("BuyVolume", [OrderBookColumnDataType.TradeBuy], typeof(long)));
+        OrderBook.DataTable.Columns.Add("BuyVolume", typeof(long));
+        OrderBookDataGridControl.AddColumn(new HistogramColumn {
             DataPropertyName = "BuyVolume",
-            Name             = "BuyVolume",
+            Name             = "BuyVolume"
         });
-        //
-        // OrderBook.AddColumn(new OrderBookTouchedTradeColumn("TouchedSell",
-        //                                                     new[] {
-        //                                                         OrderBookColumnDataType.TradeSell,
-        //                                                     }, typeof(long)));
-        // OrderBookDataGridControl.AddColumn(new HistogramColumn() {
-        //     DataPropertyName = "TouchedSell",
-        //     Name             = "TouchedSell",
-        // });
 
         var c = new OrderBookTouchedTradeColumn(
             "TouchedBuy",
-            new[] {
+            [
                 OrderBookColumnDataType.TradeBuy,
                 OrderBookColumnDataType.Bid,
                 OrderBookColumnDataType.Ask
-            }, typeof(long)
+            ], typeof(long)
         );
 
         c.SetUp(OrderBook);
-        OrderBook.AddColumn(c);
-        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
+        OrderBook.ColumnCollection.Add(c);
+        OrderBook.DataTable.Columns.Add("TouchedBuy", typeof(long));
+        OrderBookDataGridControl.AddColumn(new HistogramColumn {
             DataPropertyName = "TouchedBuy",
             Name             = "TouchedBuy",
         });
@@ -174,36 +170,17 @@ public partial class OrderBookForm : BaseForm {
     private void columnsToolStripMenuItem_Click(object sender, EventArgs e) {
     }
 
-    private void toolStripSeparator1_Click(object sender, EventArgs e) {
-    }
-
-    public enum VisualMode {
-        Histogram,
-    }
-
-    public void SetVisualMode(VisualMode mode, string dataPropertyName, string Name) {
-        switch (mode) {
-            case VisualMode.Histogram:
-                OrderBookDataGridControl.AddColumn(new HistogramColumn() {
-                    DataPropertyName = dataPropertyName,
-                    Name             = Name
-                });
-                break;
-        }
-    }
-
     private async void addToolStripMenuItem_Click(object sender, EventArgs e) {
-        var c = new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(int));
-        await OrderBookProcessor.DelayProcessingWith(() => { OrderBook.AddColumn(c); });
-        OrderBookDataGridControl.AddColumn(new HistogramColumn() {
-            DataPropertyName = "Volume",
-            Name             = "Volume"
-        });
-        Invoke(() => {
-            OrderBookDataGridControl.AddColumn(new HistogramColumn() {
-                DataPropertyName = "Volume",
-                Name             = "Volume"
+        var c = new OrderBookDefaultColumn("VolumeX", [OrderBookColumnDataType.Trade], typeof(int));
+        await OrderBookProcessor.DelayProcessingWith(() => {
+            OrderBook.ColumnCollection.Add(c);
+            Invoke(() => {
+                OrderBookDataGridControl.AddColumn(new HistogramColumn {
+                    DataPropertyName = "VolumeX",
+                    Name             = "VolumeX"
+                });
             });
+            OrderBook.DataTable.Columns.Add("VolumeX", typeof(int));
         });
     }
 }

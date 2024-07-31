@@ -60,16 +60,7 @@ public interface IOrderBook {
     object this[int     index, string columnName] { get; set; }
     object this[double  price, string columnName] { get; set; }
     object this[decimal price, string columnName] { get; set; }
-
     decimal[] PriceArray { get; }
-
-    int GetIndexOfPrice(decimal price);
-    int GetIndexOfPrice(double  price);
-
-    void AddColumn(IOrderBookColumn    column);
-    void RemoveColumn(IOrderBookColumn column);
-
-    public IEnumerable<T?> GetColumnValues<T>(string columnName) where T : struct;
 }
 
 /// <summary>
@@ -78,11 +69,10 @@ public interface IOrderBook {
 /// </summary>
 // [SuppressMessage("ReSharper", "UnusedMember.Global")]
 public class OrderBook : IOrderBook {
-    
     public readonly int     Levels;
     public readonly decimal TickSize;
     public readonly decimal MidPrice;
-    
+
     /// <summary>
     /// Creates a new <see cref="IOrderBook"/> with the specified tick size, mid price and levels.
     /// </summary>
@@ -115,10 +105,10 @@ public class OrderBook : IOrderBook {
         decimal highPrice
     ) {
         TickSize = tickSize;
-        
+
         // create new price levels from low to high based on tick size
         var prices = new List<decimal>();
-        
+
         for (var i = lowPrice; i <= highPrice; i += tickSize) {
             prices.Add(i);
         }
@@ -126,7 +116,7 @@ public class OrderBook : IOrderBook {
         prices.Reverse();
         DataTable.Columns.Add("Price", typeof(decimal));
         PriceArray = prices.ToArray();
-        
+
         for (var i = 0; i < PriceArray.Length; i++) {
             PriceIndexMap[PriceArray[i]] = i;
             DataTable.Rows.Add(PriceArray[i]);
@@ -228,48 +218,12 @@ public class OrderBook : IOrderBook {
     }
 
     /// <summary>
-    ///     Returns enumerable of all values in the specified column.
-    /// </summary>
-    /// <param name="columnName">Name of the column.</param>
-    /// <typeparam name="T">Type to which the values are casted.</typeparam>
-    /// <returns>Enumerable of values.</returns>
-    public IEnumerable<T?> GetColumnValues<T>(string columnName) where T : struct {
-        return DataTable.AsEnumerable().Select(row => row.Field<T?>(columnName));
-    }
-
-    /// <summary>
-    ///     Adds a column to the order book.
-    /// </summary>
-    /// <param name="column">Column to add.</param>
-    /// <exception cref="ExcOrderBookColumnAlreadyExists"></exception>
-    /// <exception cref="ExcOrderBookUnhandledColumnType"></exception>
-    public void AddColumn(
-        IOrderBookColumn column
-    ) {
-        ColumnCollection.Add(column);
-        DataTable.Columns.Add(column.Name, column.Type);
-    }
-
-    /// <summary>
-    ///     Removes a column from the order book.
-    /// </summary>
-    /// <param name="column">Column to remove.</param>
-    /// <exception cref="ExcOrderBookUnhandledColumnType"></exception>
-    /// <exception cref="ExcOrderBookColumnNotFound"></exception>
-    public void RemoveColumn(
-        IOrderBookColumn column
-    ) {
-        ColumnCollection.Remove(column);
-        DataTable.Columns.Remove(column.Name);
-    }
-
-    /// <summary>
     ///     Returns the index of the specified price.
     /// </summary>
     /// <param name="price">Price.</param>
     /// <returns>Index of the price.</returns>
     /// <exception cref="ExcOrderBookPriceNotFound"></exception>
-    public int GetIndexOfPrice(decimal price) {
+    private int GetIndexOfPrice(decimal price) {
         if (PriceIndexMap.TryGetValue(price, out var index))
             return index;
         throw new ExcOrderBookPriceNotFound(price);
@@ -281,7 +235,7 @@ public class OrderBook : IOrderBook {
     /// <param name="price">Price.</param>
     /// <returns>Index of the price.</returns>
     /// <exception cref="ExcOrderBookPriceNotFound"></exception>
-    public int GetIndexOfPrice(double price) {
+    private int GetIndexOfPrice(double price) {
         return GetIndexOfPrice((decimal)price);
     }
 }

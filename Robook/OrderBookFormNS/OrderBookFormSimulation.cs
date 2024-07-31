@@ -6,7 +6,7 @@ using HorizontalAlignment = Robook.Helpers.HorizontalAlignment;
 namespace Robook.OrderBookFormNS;
 
 public partial class OrderBookFormSimulation : Form {
-    public IOrderBook                OrderBook;
+    public IOrderBook               OrderBook;
     public ConcurrentQueue<object>  ConcurrentQueue;
     public OrderBookProcessor       OrderBookProcessor;
     public DataGridView             OrderBookDataGridView;
@@ -30,20 +30,25 @@ public partial class OrderBookFormSimulation : Form {
         Task.Run(async () => {
             OrderBookProcessor.StartAsync();
             // Ask
-            OrderBook.AddColumn(
-                new OrderBookDefaultColumn("Ask", new[] { OrderBookColumnDataType.Ask }, typeof(decimal)));
+            OrderBook.ColumnCollection.Add(
+                new OrderBookDefaultColumn("Ask", [OrderBookColumnDataType.Ask], typeof(decimal)));
+            OrderBook.DataTable.Columns.Add("Ask", typeof(decimal));
             // Bid
-            OrderBook.AddColumn(
-                new OrderBookDefaultColumn("Bid", new[] { OrderBookColumnDataType.Bid }, typeof(decimal)));
+            OrderBook.ColumnCollection.Add(
+                new OrderBookDefaultColumn("Bid", [OrderBookColumnDataType.Bid], typeof(decimal)));
+            OrderBook.DataTable.Columns.Add("Bid", typeof(decimal));
             // Volume
-            OrderBook.AddColumn(
-                new OrderBookDefaultColumn("Volume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
+            OrderBook.ColumnCollection.Add(
+                new OrderBookDefaultColumn("Volume", [OrderBookColumnDataType.Trade], typeof(long)));
+            OrderBook.DataTable.Columns.Add("Volume", typeof(long));
             // BuyVolume
-            OrderBook.AddColumn(
-                new OrderBookDefaultColumn("BuyVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
+            OrderBook.ColumnCollection.Add(
+                new OrderBookDefaultColumn("BuyVolume", [OrderBookColumnDataType.Trade], typeof(long)));
+            OrderBook.DataTable.Columns.Add("BuyVolume", typeof(long));
             // SellVolume
-            OrderBook.AddColumn(
-                new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(long)));
+            OrderBook.ColumnCollection.Add(
+                new OrderBookDefaultColumn("SellVolume", [OrderBookColumnDataType.Trade], typeof(long)));
+            OrderBook.DataTable.Columns.Add("SellVolume", typeof(long));
         });
 
         var buyVolumeColumn = new BuyVolumeColumn() {
