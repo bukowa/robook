@@ -27,37 +27,13 @@ public partial class OrderBookForm : BaseForm {
     private Client _client;
     private Symbol _symbol;
 
-    private async void button1_Click(object sender, EventArgs e) {
-        // check account
-        if (accountsSelectControl1.SelectedAccount.Client?.MarketDataConnection?.LastConnectionAlert?.AlertInfo
-                                  .AlertType !=
-            AlertType.LoginComplete) {
-            MessageBox.Show("Please login first");
-            return;
-        }
+    private void createOrderBook(double lowPrice, double highPrice) {
+        OrderBook = new OrderBook((decimal)_symbol.TickSize, (decimal)lowPrice, (decimal)highPrice);
 
-        _client = accountsSelectControl1.SelectedAccount.Client;
-
-        // if valid get symbol
-        _symbol = symbolTextBoxControl1.GetSymbol(_client);
-        var midPrice = 0.0;
-        try {
-            await _symbol.GetPriceIncrInfoAsync();
-            await _symbol.GetRefDataAsync();
-            var ob = await _symbol.RebuildBookAsync();
-            midPrice = ob.Asks.First().Price;
-        }
-        catch (Exception exception) {
-            MessageBox.Show(exception.Message);
-            return;
-        }
-
-        // create order book
-        OrderBook                = new OrderBook((decimal)_symbol.TickSize, (decimal)midPrice, 10000);
         OrderBookDataGridView    = new DataGridView();
-        ConcurrentQueue          = new ConcurrentQueue<object>();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
         OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook, OrderBookDataGridView, OrderBookProcessor);
+
 
         OrderBookDataGridControl.AddColumn(new PriceColumn() {
             DataPropertyName = "Price",
@@ -119,11 +95,38 @@ public partial class OrderBookForm : BaseForm {
             panelOrderBook.Controls.Add(OrderBookDataGridView);
             OrderBookDataGridView.Dock = DockStyle.Fill;
         });
-        OrderBookProcessor.StartAsync();
-
         // todo orderbook needs to hold bid/ask data in separate container
         // and if the bid/ask columns are added to the orderbook,
         // it needs to be passed as history to the columns
+    }
+
+    private async void button1_Click(object sender, EventArgs e) {
+        // check account
+        if (accountsSelectControl1.SelectedAccount.Client?.MarketDataConnection?.LastConnectionAlert?.AlertInfo
+                                  .AlertType !=
+            AlertType.LoginComplete) {
+            MessageBox.Show("Please login first");
+            return;
+        }
+
+        _client = accountsSelectControl1.SelectedAccount.Client;
+
+        // if valid get symbol
+        _symbol = symbolTextBoxControl1.GetSymbol(_client);
+        var midPrice = 0.0;
+        try {
+            await _symbol.GetPriceIncrInfoAsync();
+            await _symbol.GetRefDataAsync();
+            var ob = await _symbol.RebuildBookAsync();
+            midPrice = ob.Asks.First().Price;
+        }
+        catch (Exception exception) {
+            MessageBox.Show(exception.Message);
+            return;
+        }
+
+
+        ConcurrentQueue = new ConcurrentQueue<object>();
 
         var ctx = new Context();
         _client.RHandler.LimitOrderBookClb.Subscribe(ctx, (_, info) => {
@@ -147,8 +150,30 @@ public partial class OrderBookForm : BaseForm {
         });
         _client.RHandler.HighBidPriceClb.Subscribe(ctx, (_, info) => { ConcurrentQueue.Enqueue(info); });
         _client.RHandler.LowAskPriceClb.Subscribe(ctx, (_,  info) => { ConcurrentQueue.Enqueue(info); });
+
+        var lowPriceTask  = new TaskCompletionSource<double>();
+        var highPriceTask = new TaskCompletionSource<double>();
+        
+        _client.RHandler.HighPriceLimitClb.Subscribe(ctx, (_, info) => {
+            highPriceTask.SetResult(info.Price);
+        });
+        _client.RHandler.LowPriceLimitClb.Subscribe(ctx, (_, info) => {
+            lowPriceTask.SetResult(info.Price);
+        });
+
         // _client.Engine.replayTrades(_symbol.Exchange, _symbol.Name, 0, 0, ctx);
         _client.Engine.subscribe(_symbol.Exchange, _symbol.Name, SubscriptionFlags.All, ctx);
+
+        await Task.Run(() => {
+            var completed = Task.WaitAll([lowPriceTask.Task, highPriceTask.Task], 5000);
+            if (!completed) {
+                MessageBox.Show("Failed to get price limits");
+                return;
+            }
+            
+            createOrderBook(lowPriceTask.Task.Result, highPriceTask.Task.Result);
+            OrderBookProcessor.StartAsync();
+        });
     }
 
     private void columnsToolStripMenuItem_Click(object sender, EventArgs e) {

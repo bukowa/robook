@@ -42,8 +42,8 @@ public class OrderBookProcessor {
         IOrderBook               orderBook,
         ConcurrentQueue<object> objectQueue
     ) {
-        _ob = orderBook ?? throw new ArgumentNullException(nameof(orderBook));
-        _qu = objectQueue ?? throw new ArgumentNullException(nameof(objectQueue));
+        _ob = orderBook;
+        _qu = objectQueue;
     }
 
     /// <summary>

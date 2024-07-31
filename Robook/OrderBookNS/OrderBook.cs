@@ -107,6 +107,33 @@ public class OrderBook : IOrderBook {
     }
 
     /// <summary>
+    /// Creates a new <see cref="IOrderBook"/> with the specified tick size, mid price and levels.
+    /// </summary>
+    public OrderBook(
+        decimal tickSize,
+        decimal lowPrice,
+        decimal highPrice
+    ) {
+        TickSize = tickSize;
+        
+        // create new price levels from low to high based on tick size
+        var prices = new List<decimal>();
+        
+        for (var i = lowPrice; i <= highPrice; i += tickSize) {
+            prices.Add(i);
+        }
+
+        prices.Reverse();
+        DataTable.Columns.Add("Price", typeof(decimal));
+        PriceArray = prices.ToArray();
+        
+        for (var i = 0; i < PriceArray.Length; i++) {
+            PriceIndexMap[PriceArray[i]] = i;
+            DataTable.Rows.Add(PriceArray[i]);
+        }
+    }
+
+    /// <summary>
     /// This table holds the displayed order book data (in the actual form).
     /// </summary>
     public DataTable DataTable { get; } = new();

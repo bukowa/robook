@@ -22,6 +22,6 @@ public partial class SymbolTextBoxControl : UserControl {
     public SymbolTextBoxControl() {
         InitializeComponent();
         textBox1.Dock = DockStyle.Fill;
-        textBox1.Text = "NQM4.CME";
+        textBox1.Text = "NQU4.CME";
     }
 }
