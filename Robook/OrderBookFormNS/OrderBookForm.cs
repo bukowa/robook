@@ -32,9 +32,8 @@ public partial class OrderBookForm : BaseForm {
 
         OrderBookDataGridView    = new DataGridView();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
-        OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook, OrderBookDataGridView, OrderBookProcessor);
-
-
+        OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook.DataTable, OrderBookDataGridView, OrderBookProcessor);
+        
         OrderBookDataGridControl.AddColumn(new PriceColumn() {
             DataPropertyName = "Price",
             Name             = "Price",

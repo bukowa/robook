@@ -13,24 +13,24 @@ namespace Robook.OrderBookFormNS;
 ///     a <see cref="DataGridView"/> control that displays an <see cref="OrderBookNS.OrderBook"/>.
 /// </summary>
 public class OrderBookDataGridControl {
-    public IOrderBook          OrderBook;
+    public DataTable          DataTable;
     public DataGridView       DataGridView;
     public OrderBookProcessor OrderBookProcessor;
 
     public OrderBookDataGridControl(
-        IOrderBook          orderBook,
+        DataTable          dataTable,
         DataGridView       dataGridView,
         OrderBookProcessor orderBookProcessor
     ) {
-        OrderBook          = orderBook;
+        DataTable          = dataTable;
         DataGridView       = dataGridView;
         OrderBookProcessor = orderBookProcessor;
 
         SetDataGridViewDoubleBuffered(true);
 
-        DataGridView.RowsAdded       += DataGridView_RowsAdded;
-        DataGridView.ColumnAdded     += DataGridView_ColumnAdded;
-        OrderBook.DataTable.ColumnChanged += OrderBook_OnColumnChanged;
+        DataGridView.RowsAdded   += DataGridView_RowsAdded;
+        DataGridView.ColumnAdded += DataGridView_ColumnAdded;
+        DataTable.ColumnChanged  += OrderBook_OnColumnChanged;
 
         #region "Auto generate columns in DataGridView"
 
@@ -48,7 +48,7 @@ public class OrderBookDataGridControl {
             HandleVirtualMode();
         }
         else {
-            DataGridView.DataSource = OrderBook.DataTable.AsDataView();
+            DataGridView.DataSource = DataTable.AsDataView();
         }
         #endregion
 
@@ -123,12 +123,12 @@ public class OrderBookDataGridControl {
                 foreach (var columnIndex in boundedColumns) {
                     var col = DataGridView.Columns[columnIndex];
                     if (col is AbstractOrderBookColumn abstractDataColumn) {
-                        abstractDataColumn.OnColumnChanged(e, OrderBook.DataTable);
+                        abstractDataColumn.OnColumnChanged(e, DataTable);
                     }
 
                     var cell = DataGridView[columnIndex, dataSourceRowIndex];
                     if (cell is AbstractOrderBookCell abstractDataCell) {
-                        abstractDataCell.OnCellValueChanged(e, OrderBook.DataTable);
+                        abstractDataCell.OnCellValueChanged(e, DataTable);
                     }
 
                     // Invalidate cell in Virtual Mode to trigger OnCellValueNeeded and update cell value
@@ -162,8 +162,8 @@ public class OrderBookDataGridControl {
         });
         // DataGridView.AutoGenerateColumns should be disabled in OrderBookDataGridControl
         // Fallback added for reliability if for some reason AutoGenerateColumns would be enabled
-        DataGridView.ColumnCount = DataGridView.AutoGenerateColumns ? OrderBook.DataTable.Columns.Count : 1;
-        DataGridView.RowCount    = OrderBook.DataTable.Rows.Count;
+        DataGridView.ColumnCount = DataGridView.AutoGenerateColumns ? DataTable.Columns.Count : 1;
+        DataGridView.RowCount    = DataTable.Rows.Count;
 
         DataGridView.CellValueNeeded += DataGridView_CellValueNeeded;
     }
@@ -171,8 +171,8 @@ public class OrderBookDataGridControl {
     private void DataGridView_CellValueNeeded(object? sender, DataGridViewCellValueEventArgs e) {
         var colName = DataGridView.Columns[e.ColumnIndex].DataPropertyName;
 
-        if (!String.IsNullOrEmpty(colName) || OrderBook.DataTable.Columns.Contains(colName)) {
-            e.Value = OrderBook.DataTable.Rows[e.RowIndex][colName];
+        if (!String.IsNullOrEmpty(colName) || DataTable.Columns.Contains(colName)) {
+            e.Value = DataTable.Rows[e.RowIndex][colName];
         }
     }
 
@@ -199,7 +199,7 @@ public class OrderBookDataGridControl {
             throw new Exception("Please provide column DataPropertyName.");
         }
 
-        if (!OrderBook.DataTable.Columns.Contains(column.DataPropertyName)) {
+        if (!DataTable.Columns.Contains(column.DataPropertyName)) {
             throw new Exception("DataPropertyName is invalid. Column with provided name does not exist in OrderBook.");
         }
 
