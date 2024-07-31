@@ -56,11 +56,16 @@ public class ExcOrderBookUnhandledColumnType : Exception {
 public interface IOrderBook {
     DataTable                 DataTable        { get; }
     OrderBookColumnCollection ColumnCollection { get; }
-    Dictionary<decimal, int>  PriceIndexMap    { get; }
-    object this[int     index, string columnName] { get; set; }
-    object this[double  price, string columnName] { get; set; }
-    object this[decimal price, string columnName] { get; set; }
-    decimal[] PriceArray { get; }
+
+    decimal[]                PriceArray    { get; }
+    Dictionary<decimal, int> PriceIndexMap { get; }
+
+    object? this[int     index, string columnName] { get; set; }
+    object? this[double  price, string columnName] { get; set; }
+    object? this[decimal price, string columnName] { get; set; }
+
+    bool TryGetPriceIndex(double  price, out int index);
+    bool TryGetPriceIndex(decimal price, out int index);
 }
 
 /// <summary>
@@ -135,23 +140,8 @@ public class OrderBook : IOrderBook {
     public OrderBookColumnCollection ColumnCollection { get; } = new();
 
     /// <summary>
-    /// Returns the row at the specified index.
+    /// Maps the price to the index in the <see cref="DataTable"/>.
     /// </summary>
-    /// <param name="index"></param>
-    public DataRow this[int index] => DataTable.Rows[index];
-
-    /// <summary>
-    /// Returns the row at the specified price.
-    /// </summary>
-    /// <param name="price"></param>
-    public DataRow this[double price] => DataTable.Rows[GetIndexOfPrice(price)];
-
-    /// <summary>
-    /// Returns the row at the specified price.
-    /// </summary>
-    /// <param name="price"></param>
-    public DataRow this[decimal price] => DataTable.Rows[GetIndexOfPrice(price)];
-
     public Dictionary<decimal, int> PriceIndexMap { get; } = new();
 
     /// <summary>
@@ -159,7 +149,7 @@ public class OrderBook : IOrderBook {
     /// </summary>
     /// <param name="index"> Row index </param>
     /// <param name="columnName"> Column name </param>
-    public object this[int index, string columnName] {
+    public object? this[int index, string columnName] {
         get => DataTable.Rows[index][columnName];
         set => DataTable.Rows[index][columnName] = value;
     }
@@ -169,9 +159,15 @@ public class OrderBook : IOrderBook {
     /// </summary>
     /// <param name="price"> Price </param>
     /// <param name="columnName"> Column name </param>
-    public object this[double price, string columnName] {
-        get => DataTable.Rows[GetIndexOfPrice(price)][columnName];
-        set => DataTable.Rows[GetIndexOfPrice(price)][columnName] = value;
+    public object? this[double price, string columnName] {
+        // get => DataTable.Rows[GetIndexOfPrice(price)][columnName];
+        // set => DataTable.Rows[GetIndexOfPrice(price)][columnName] = value;
+        get => TryGetPriceIndex(price, out var index) ? DataTable.Rows[index][columnName] : null;
+        set {
+            if (TryGetPriceIndex(price, out var index)) {
+                DataTable.Rows[index][columnName] = value;
+            }
+        }
     }
 
     /// <summary>
@@ -179,9 +175,13 @@ public class OrderBook : IOrderBook {
     /// </summary>
     /// <param name="price"> Price </param>
     /// <param name="columnName"> Column name </param>
-    public object this[decimal price, string columnName] {
-        get => DataTable.Rows[GetIndexOfPrice(price)][columnName];
-        set => DataTable.Rows[GetIndexOfPrice(price)][columnName] = value;
+    public object? this[decimal price, string columnName] {
+        get => TryGetPriceIndex(price, out var index) ? DataTable.Rows[index][columnName] : null;
+        set {
+            if (TryGetPriceIndex(price, out var index)) {
+                DataTable.Rows[index][columnName] = value;
+            }
+        }
     }
 
     /// <summary>
@@ -217,25 +217,11 @@ public class OrderBook : IOrderBook {
         return priceIndexSequence;
     }
 
-    /// <summary>
-    ///     Returns the index of the specified price.
-    /// </summary>
-    /// <param name="price">Price.</param>
-    /// <returns>Index of the price.</returns>
-    /// <exception cref="ExcOrderBookPriceNotFound"></exception>
-    private int GetIndexOfPrice(decimal price) {
-        if (PriceIndexMap.TryGetValue(price, out var index))
-            return index;
-        throw new ExcOrderBookPriceNotFound(price);
+    public bool TryGetPriceIndex(double price, out int index) {
+        return PriceIndexMap.TryGetValue((decimal)price, out index);
     }
 
-    /// <summary>
-    ///     Returns the index of the specified price.
-    /// </summary>
-    /// <param name="price">Price.</param>
-    /// <returns>Index of the price.</returns>
-    /// <exception cref="ExcOrderBookPriceNotFound"></exception>
-    private int GetIndexOfPrice(double price) {
-        return GetIndexOfPrice((decimal)price);
+    public bool TryGetPriceIndex(decimal price, out int index) {
+        return PriceIndexMap.TryGetValue(price, out index);
     }
 }

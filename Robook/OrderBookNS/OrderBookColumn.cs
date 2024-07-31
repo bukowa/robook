@@ -7,12 +7,12 @@ public interface IOrderBookColumn {
     string                    Name      { get; set; }
     public Type               Type      { get; }
     OrderBookColumnDataType[] DataTypes { get; }
-    void                      SetUp(IOrderBook    ob);
-    void                      ProcessBid(int     i, BidInfo          v, IOrderBook ob);
-    void                      ProcessAsk(int     i, AskInfo          v, IOrderBook ob);
-    void                      ProcessTrade(int   i, TradeInfo        v, IOrderBook ob);
-    void                      ProcessBestBid(int i, BestBidQuoteInfo v, IOrderBook ob);
-    void                      ProcessBestAsk(int i, BestAskQuoteInfo v, IOrderBook ob);
+    void                      SetUp(IOrderBook                ob);
+    void                      ProcessBid(BidInfo              v, IOrderBook ob);
+    void                      ProcessAsk(AskInfo              v, IOrderBook ob);
+    void                      ProcessTrade(TradeInfo          v, IOrderBook ob);
+    void                      ProcessBestBid(BestBidQuoteInfo v, IOrderBook ob);
+    void                      ProcessBestAsk(BestAskQuoteInfo v, IOrderBook ob);
 }
 
 public class OrderBookDefaultColumn : IOrderBookColumn {
@@ -29,23 +29,29 @@ public class OrderBookDefaultColumn : IOrderBookColumn {
     public void SetUp(IOrderBook ob) {
     }
 
-    public void ProcessBid(int i, BidInfo v, IOrderBook ob) {
-        ob[i, Name] = (v.Size == 0) ? DBNull.Value : (long)v.Size;
+    public void ProcessBid(BidInfo v, IOrderBook ob) {
+        if (ob.TryGetPriceIndex(v.Price, out var i)) {
+            ob[i, Name] = (v.Size == 0) ? DBNull.Value : (long)v.Size;
+        }
     }
 
-    public void ProcessAsk(int i, AskInfo v, IOrderBook ob) {
-        ob[i, Name] = (v.Size == 0) ? DBNull.Value : (long)v.Size;
+    public void ProcessAsk(AskInfo v, IOrderBook ob) {
+        if (ob.TryGetPriceIndex(v.Price, out var i)) {
+            ob[i, Name] = (v.Size == 0) ? DBNull.Value : (long)v.Size;
+        }
     }
 
-    public void ProcessTrade(int i, TradeInfo v, IOrderBook ob) {
-        ob[i, Name] = (ob[i, Name] as long? ?? 0) + v.Size;
+    public void ProcessTrade(TradeInfo v, IOrderBook ob) {
+        if (ob.TryGetPriceIndex(v.Price, out var i)) {
+            ob[i, Name] = (ob[i, Name] as long? ?? 0) + v.Size;
+        }
     }
 
-    public void ProcessBestBid(int i, BestBidQuoteInfo v, IOrderBook ob) {
+    public void ProcessBestBid(BestBidQuoteInfo v, IOrderBook ob) {
         throw new NotImplementedException();
     }
 
-    public void ProcessBestAsk(int i, BestAskQuoteInfo v, IOrderBook ob) {
+    public void ProcessBestAsk(BestAskQuoteInfo v, IOrderBook ob) {
         throw new NotImplementedException();
     }
 }
@@ -54,7 +60,7 @@ public class OrderBookTouchedTradeColumn : OrderBookDefaultColumn, IOrderBookCol
     public OrderBookTouchedTradeColumn(string name, OrderBookColumnDataType[] dataTypes, Type type) : base(
         name, dataTypes, type) {
     }
-    
+
     private int[] bids;
     private int[] asks;
 
@@ -77,6 +83,7 @@ public class OrderBookTouchedTradeColumn : OrderBookDefaultColumn, IOrderBookCol
                 }
             }
         }
+
         return (a, b);
     }
 
@@ -89,27 +96,39 @@ public class OrderBookTouchedTradeColumn : OrderBookDefaultColumn, IOrderBookCol
         _setupBidsAsks(ob);
     }
 
-    public void ProcessTrade(int i, TradeInfo v, IOrderBook ob) {
+    public void ProcessTrade(TradeInfo v, IOrderBook ob) {
         if (v.CallbackType == CallbackType.History) {
             return;
         }
-        ob[i, Name] = (ob[i, Name] as long? ?? 0) + v.Size;
+        
+        if (ob.TryGetPriceIndex(v.Price, out var i)) {
+            ob[i, Name] = (ob[i, Name] as long? ?? 0) + v.Size;
+        }
     }
 
-    public void ProcessBid(int i, BidInfo v, IOrderBook ob) {
+    public void ProcessBid(BidInfo v, IOrderBook ob) {
+        
+        if (!ob.TryGetPriceIndex(v.Price, out var i)) {
+            return;
+        }
+        
         bids[i] = (int)v.Size;
         var x = BestBidAsk();
-        
+
         if (x.bidIndex != bestBidIndex) {
             if (x.bidIndex < bestBidIndex) {
                 ob[x.bidIndex, Name] = 0;
             }
         }
+
         bestAskIndex = x.askIndex;
         bestBidIndex = x.bidIndex;
     }
 
-    public void ProcessAsk(int i, AskInfo v, IOrderBook ob) {
+    public void ProcessAsk(AskInfo v, IOrderBook ob) {
+        if (!ob.TryGetPriceIndex(v.Price, out var i)) {
+            return;
+        }
         asks[i] = (int)v.Size;
         var x = BestBidAsk();
         // if (x.askIndex != bestAskIndex) {

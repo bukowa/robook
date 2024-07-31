@@ -15,17 +15,17 @@ namespace Robook.OrderBookNS;
 /// </summary>
 public class OrderBookProcessor {
     /// <summary>
-    ///     <see cref="OrderBook"/> instance passed to the <see cref="IOrderBookColumn{T}"/>s.
+    /// Collection of columns to process.
     /// </summary>
     public readonly IOrderBook _ob;
 
     /// <summary>
-    ///     Queue that holds the objects to be processed by the <see cref="IOrderBookColumn{T}"/>s.
+    /// Queue that holds the objects to be processed.
     /// </summary>
     public readonly ConcurrentQueue<object> _qu;
 
     /// <summary>
-    ///     Cancellation token source used to cancel the <see cref="ProcessQueue"/> method.
+    /// Token used to cancel the processing of the queue.
     /// </summary>
     private readonly CancellationTokenSource _ct = new();
 
@@ -39,7 +39,7 @@ public class OrderBookProcessor {
     /// </summary>
     /// <exception cref="ArgumentNullException"></exception>
     public OrderBookProcessor(
-        IOrderBook               orderBook,
+        IOrderBook              orderBook,
         ConcurrentQueue<object> objectQueue
     ) {
         _ob = orderBook;
@@ -81,13 +81,13 @@ public class OrderBookProcessor {
     }
 
     /// <summary>
-    ///     Processes the queue and dequeues the objects to be processed by the <see cref="IOrderBookColumn{T}"/>s.
+    /// Processes the queue and passes the objects to the <see cref="OrderBookColumnCollection"/>.
     /// </summary>
     /// <param name="cancellationToken"> The cancellation token used to cancel the method. </param>
     /// <returns> A <see cref="Task"/> that will be completed when the method is cancelled. </returns>
     private Task ProcessQueue(CancellationToken cancellationToken) {
         SpinWait sw = new();
-        
+
         while (!cancellationToken.IsCancellationRequested) {
             while (_dq.TryDequeue(out var delayTask)) {
                 delayTask();
@@ -96,50 +96,43 @@ public class OrderBookProcessor {
             while (_qu.TryDequeue(out var o)) {
                 int i;
                 switch (o) {
-                    case AskInfo x when TryGetPriceIndex(x.Price, out i):
+                    case AskInfo x:
                         _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.Ask]
-                           .ForEach(column => column.ProcessAsk(i, x, _ob));
+                           .ForEach(column => column.ProcessAsk(x, _ob));
                         break;
 
-                    case BidInfo x when TryGetPriceIndex(x.Price, out i):
+                    case BidInfo x:
                         _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.Bid]
-                           .ForEach(column => column.ProcessBid(i, x, _ob));
+                           .ForEach(column => column.ProcessBid(x, _ob));
                         break;
 
-                    case TradeInfo x when TryGetPriceIndex(x.Price, out i):
+                    case TradeInfo x:
                         _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.Trade]
-                           .ForEach(column => column.ProcessTrade(i, x, _ob));
+                           .ForEach(column => column.ProcessTrade(x, _ob));
 
                         if (x.AggressorSide == "B")
                             _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.TradeBuy]
-                               .ForEach(column => column.ProcessTrade(i, x, _ob));
+                               .ForEach(column => column.ProcessTrade(x, _ob));
                         else
                             _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.TradeSell]
-                               .ForEach(column => column.ProcessTrade(i, x, _ob));
+                               .ForEach(column => column.ProcessTrade(x, _ob));
                         break;
 
-                    case BestBidQuoteInfo x when TryGetPriceIndex(x.BidInfo.Price, out i):
+                    case BestBidQuoteInfo x:
                         _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.BestBid]
-                           .ForEach(column => column.ProcessBestBid(i, x, _ob));
+                           .ForEach(column => column.ProcessBestBid(x, _ob));
                         break;
 
-                    case BestAskQuoteInfo x when TryGetPriceIndex(x.AskInfo.Price, out i):
+                    case BestAskQuoteInfo x:
                         _ob.ColumnCollection.ColumnsByDataType[OrderBookColumnDataType.BestAsk]
-                           .ForEach(column => column.ProcessBestAsk(i, x, _ob));
+                           .ForEach(column => column.ProcessBestAsk(x, _ob));
                         break;
                 }
             }
+
             sw.SpinOnce();
         }
 
         return Task.CompletedTask;
-    }
-
-    /// <summary>
-    ///     Tries to get the index of the price in the <see cref="OrderBook.PriceIndexMap"/>.
-    /// </summary>
-    /// <returns> True if the price was found.</returns>
-    private bool TryGetPriceIndex(double price, out int index) {
-        return _ob.PriceIndexMap.TryGetValue((decimal)price, out index);
     }
 }
