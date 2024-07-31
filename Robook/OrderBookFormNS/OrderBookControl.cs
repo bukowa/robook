@@ -13,51 +13,27 @@ namespace Robook.OrderBookFormNS;
 ///     a <see cref="DataGridView"/> control that displays an <see cref="OrderBookNS.OrderBook"/>.
 /// </summary>
 public class OrderBookDataGridControl {
-    public DataTable          DataTable;
-    public DataGridView       DataGridView;
-    public OrderBookProcessor OrderBookProcessor;
+    public DataTable    DataTable;
+    public DataGridView DataGridView;
 
     public OrderBookDataGridControl(
-        DataTable          dataTable,
-        DataGridView       dataGridView,
-        OrderBookProcessor orderBookProcessor
+        DataTable    dataTable,
+        DataGridView dataGridView
     ) {
-        DataTable          = dataTable;
-        DataGridView       = dataGridView;
-        OrderBookProcessor = orderBookProcessor;
-
-        SetDataGridViewDoubleBuffered(true);
+        DataTable    = dataTable;
+        DataGridView = dataGridView;
 
         DataGridView.RowsAdded   += DataGridView_RowsAdded;
         DataGridView.ColumnAdded += DataGridView_ColumnAdded;
         DataTable.ColumnChanged  += OrderBook_OnColumnChanged;
 
-        #region "Auto generate columns in DataGridView"
-
-        // Disable AutoGenerateColumns as custom columns are used in DataGridView
-        DataGridView.AutoGenerateColumns = false;
-
-        #endregion
-
-        #region "DataGridView Virtual Mode"
-
-        // Enable virtual mode for optimal performance of the DataGridView
-        // Fallback: If virtual mode is disabled for some reason, bind DataSource to maintain reliability
-        DataGridView.VirtualMode = true;
-        if (DataGridView.VirtualMode) {
-            HandleVirtualMode();
-        }
-        else {
-            DataGridView.DataSource = DataTable.AsDataView();
-        }
-        #endregion
-
-        #region "Additional DataGridView Configuration"
-
+        DataGridView.AutoGenerateColumns     = false;
+        DataGridView.VirtualMode             = true;
         DataGridView.ReadOnly                = true;
         DataGridView.AllowUserToOrderColumns = true;
 
-        #endregion
+        SetDataGridViewDoubleBuffered(true);
+        HandleVirtualMode();
     }
 
     /// <summary>
@@ -65,8 +41,8 @@ public class OrderBookDataGridControl {
     /// by changes in their parent column properties when a new column is added to the DataGridView.
     /// </summary>
     private void DataGridView_ColumnAdded(object? sender, DataGridViewColumnEventArgs e) {
-        try {
-            if (e.Column is AbstractOrderBookColumn) {
+        switch (e.Column) {
+            case AbstractOrderBookColumn: {
                 foreach (DataGridViewRow row in DataGridView.Rows) {
                     foreach (DataGridViewCell cell in row.Cells) {
                         if (cell is AbstractOrderBookCell abstractDataCell) {
@@ -74,11 +50,9 @@ public class OrderBookDataGridControl {
                         }
                     }
                 }
+
+                break;
             }
-        }
-        catch (Exception err) {
-            Console.WriteLine(err.Message);
-            throw;
         }
     }
 
@@ -86,59 +60,45 @@ public class OrderBookDataGridControl {
     /// Event handler that subscribes cells of type <see cref="AbstractOrderBookCell"/> to events triggered
     /// by changes in their parent column properties when a new row is added to the DataGridView.
     /// </summary>
-    private void DataGridView_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e) {
-        try {
-            for (var i = e.RowIndex; i < e.RowIndex + e.RowCount; i++) {
-                foreach (DataGridViewCell cell in DataGridView.Rows[i].Cells) {
-                    if (cell is AbstractOrderBookCell abstractDataCell) {
-                        abstractDataCell.SubscribeToColumnPropertyChangedEvents();
-                    }
+    private void DataGridView_RowsAdded(object? sender, DataGridViewRowsAddedEventArgs e) {
+        for (var i = e.RowIndex; i < e.RowIndex + e.RowCount; i++) {
+            foreach (DataGridViewCell cell in DataGridView.Rows[i].Cells) {
+                if (cell is AbstractOrderBookCell abstractDataCell) {
+                    abstractDataCell.SubscribeToColumnPropertyChangedEvents();
                 }
             }
-        }
-        catch (Exception err) {
-            Console.WriteLine(err.Message);
-            throw;
         }
     }
 
     /// <summary>
-    /// <para>Event handler that notifies <see cref="AbstractOrderBookColumn"/> and <see cref="AbstractOrderBookCell"/>
-    /// instances about a change in the value of the <see cref="OrderBookNS.OrderBook.OBDT"/> column.</para>
-    /// <para>This change typically influences the visual representation of the corresponding column in the DataGridView.</para>
+    /// Event handler that notifies <see cref="AbstractOrderBookColumn"/> and <see cref="AbstractOrderBookCell"/>
+    /// instances about a change in the value of the <see cref="DataTable"/> column.
+    /// This change typically influences the visual representation of the corresponding column in the <see cref="DataGridView"/>.
     /// </summary>
     private void OrderBook_OnColumnChanged(object sender, DataColumnChangeEventArgs e) {
-        try {
-            var dataSourceColumnName = e.Column.ColumnName;
-            var dataSourceRowIndex   = e.Row.Table.Rows.IndexOf(e.Row);
+        var dataSourceColumnName = e.Column.ColumnName;
+        var dataSourceRowIndex   = e.Row.Table.Rows.IndexOf(e.Row);
 
-            // Safety check: Ensure the row index from the DataTable is within the valid range in the DataGridView
-            if (dataSourceRowIndex < 0 || dataSourceRowIndex >= DataGridView.Rows.Count) {
-                throw new IndexOutOfRangeException("Data Table row index is out of range for the Data Grid View.");
-            }
-
-            // Get all columns in the DataGridView bound to the changed OrderBook DataTable column
-            var boundedColumns = DataGridViewHelpers.GetColumnsByDataPropertyName(DataGridView, dataSourceColumnName);
-            if (boundedColumns.Count > 0) {
-                foreach (var columnIndex in boundedColumns) {
-                    var col = DataGridView.Columns[columnIndex];
-                    if (col is AbstractOrderBookColumn abstractDataColumn) {
-                        abstractDataColumn.OnColumnChanged(e, DataTable);
-                    }
-
-                    var cell = DataGridView[columnIndex, dataSourceRowIndex];
-                    if (cell is AbstractOrderBookCell abstractDataCell) {
-                        abstractDataCell.OnCellValueChanged(e, DataTable);
-                    }
-
-                    // Invalidate cell in Virtual Mode to trigger OnCellValueNeeded and update cell value
-                    if (DataGridView.VirtualMode == true) DataGridView.InvalidateCell(cell);
-                }
-            }
+        // Safety check: Ensure the row index from the DataTable is within the valid range in the DataGridView
+        if (dataSourceRowIndex < 0 || dataSourceRowIndex >= DataGridView.Rows.Count) {
+            throw new IndexOutOfRangeException("Data Table row index is out of range for the Data Grid View.");
         }
-        catch (Exception err) {
-            Console.WriteLine(err.Message);
-            throw;
+
+        // Get all columns in the DataGridView bound to the changed OrderBook DataTable column
+        var boundedColumns = DataGridViewHelpers.GetColumnsByDataPropertyName(DataGridView, dataSourceColumnName);
+        foreach (var columnIndex in boundedColumns) {
+            var col = DataGridView.Columns[columnIndex];
+            if (col is AbstractOrderBookColumn abstractDataColumn) {
+                abstractDataColumn.OnColumnChanged(e, DataTable);
+            }
+
+            var cell = DataGridView[columnIndex, dataSourceRowIndex];
+            if (cell is AbstractOrderBookCell abstractDataCell) {
+                abstractDataCell.OnCellValueChanged(e, DataTable);
+            }
+
+            // Invalidate cell in Virtual Mode to trigger OnCellValueNeeded and update cell value
+            if (DataGridView.VirtualMode) DataGridView.InvalidateCell(cell);
         }
     }
 
@@ -171,7 +131,7 @@ public class OrderBookDataGridControl {
     private void DataGridView_CellValueNeeded(object? sender, DataGridViewCellValueEventArgs e) {
         var colName = DataGridView.Columns[e.ColumnIndex].DataPropertyName;
 
-        if (!String.IsNullOrEmpty(colName) || DataTable.Columns.Contains(colName)) {
+        if (!string.IsNullOrEmpty(colName) || DataTable.Columns.Contains(colName)) {
             e.Value = DataTable.Rows[e.RowIndex][colName];
         }
     }
@@ -228,13 +188,13 @@ public class OrderBookDataGridControl {
     /// Sets the DoubleBuffered property of the DataGridView to reduce flickering during rendering.
     /// </summary>
     public void SetDataGridViewDoubleBuffered(bool value) {
-        typeof(System.Windows.Forms.DataGridView).InvokeMember(
+        typeof(DataGridView).InvokeMember(
             "DoubleBuffered",
             BindingFlags.NonPublic
             | BindingFlags.Instance
             | BindingFlags.SetProperty,
             null,
             DataGridView,
-            new object[] { value });
+            [value]);
     }
 }

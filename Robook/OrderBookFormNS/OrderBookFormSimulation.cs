@@ -20,7 +20,7 @@ public partial class OrderBookFormSimulation : Form {
         ConcurrentQueue          = new ConcurrentQueue<object>();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
         OrderBookDataGridView    = new DataGridView();
-        OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook.DataTable, OrderBookDataGridView, OrderBookProcessor);
+        OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook.DataTable, OrderBookDataGridView);
 
         OrderBookSimulator = new OrderBookSimulator(OrderBookProcessor);
 

@@ -20,7 +20,7 @@ public class OrderBookControlColumnTest {
         dgv = new DataGridView();
         ob  = new OrderBook(0.25m, 100m, 10);
         obp = new OrderBookProcessor(ob, new ConcurrentQueue<object>());
-        obc = new OrderBookDataGridControl(ob, dgv, obp);
+        obc = new OrderBookDataGridControl(ob.DataTable, dgv);
 
         ob.AddColumn(new OrderBookDefaultColumn("Volume",     new[] { OrderBookColumnDataType.Trade }, typeof(int)));
         ob.AddColumn(new OrderBookDefaultColumn("SellVolume", new[] { OrderBookColumnDataType.Trade }, typeof(int)));

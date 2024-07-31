@@ -32,8 +32,8 @@ public partial class OrderBookForm : BaseForm {
 
         OrderBookDataGridView    = new DataGridView();
         OrderBookProcessor       = new OrderBookProcessor(OrderBook, ConcurrentQueue);
-        OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook.DataTable, OrderBookDataGridView, OrderBookProcessor);
-        
+        OrderBookDataGridControl = new OrderBookDataGridControl(OrderBook.DataTable, OrderBookDataGridView);
+
         OrderBookDataGridControl.AddColumn(new PriceColumn() {
             DataPropertyName = "Price",
             Name             = "Price",
@@ -152,13 +152,9 @@ public partial class OrderBookForm : BaseForm {
 
         var lowPriceTask  = new TaskCompletionSource<double>();
         var highPriceTask = new TaskCompletionSource<double>();
-        
-        _client.RHandler.HighPriceLimitClb.Subscribe(ctx, (_, info) => {
-            highPriceTask.SetResult(info.Price);
-        });
-        _client.RHandler.LowPriceLimitClb.Subscribe(ctx, (_, info) => {
-            lowPriceTask.SetResult(info.Price);
-        });
+
+        _client.RHandler.HighPriceLimitClb.Subscribe(ctx, (_, info) => { highPriceTask.SetResult(info.Price); });
+        _client.RHandler.LowPriceLimitClb.Subscribe(ctx, (_,  info) => { lowPriceTask.SetResult(info.Price); });
 
         // _client.Engine.replayTrades(_symbol.Exchange, _symbol.Name, 0, 0, ctx);
         _client.Engine.subscribe(_symbol.Exchange, _symbol.Name, SubscriptionFlags.All, ctx);
@@ -169,7 +165,7 @@ public partial class OrderBookForm : BaseForm {
                 MessageBox.Show("Failed to get price limits");
                 return;
             }
-            
+
             createOrderBook(lowPriceTask.Task.Result, highPriceTask.Task.Result);
             OrderBookProcessor.StartAsync();
         });
