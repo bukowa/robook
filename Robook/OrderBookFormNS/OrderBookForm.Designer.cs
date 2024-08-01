@@ -117,14 +117,13 @@ partial class OrderBookForm {
         columnsToolStripMenuItem.Name = "columnsToolStripMenuItem";
         columnsToolStripMenuItem.Size = new Size(180, 22);
         columnsToolStripMenuItem.Text = "Columns";
-        columnsToolStripMenuItem.Click += columnsToolStripMenuItem_Click;
         // 
         // addToolStripMenuItem
         // 
         addToolStripMenuItem.Name = "addToolStripMenuItem";
         addToolStripMenuItem.Size = new Size(180, 22);
         addToolStripMenuItem.Text = "Add";
-        addToolStripMenuItem.Click += addToolStripMenuItem_Click;
+        // addToolStripMenuItem.Click += addToolStripMenuItem_Click;
         // 
         // toolStripMenuItem1
         // 
