@@ -13,7 +13,7 @@ apart from those areas that are already poorly executed.
 To run the project you need rapiplus.dll ([rapiplus.dll](Library%2Frapiplus.dll)) 
 and RApiConfig files ( [State.cs](Robook%2FState%2FState.cs)) which you can get by emailing Rithmic support.
 
-For discussion and questions I created a [Discord](discord.gg/GcvHmJUgAu) server.
+For discussion and questions I created a [Discord](https://discord.gg/GcvHmJUgAu) server.
 
 ![Animation.gif](Animation.gif)
 
